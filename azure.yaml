@@ -1,0 +1,11 @@
+# Azure Developer CLI: `azd up` provisions Foundry + Container Apps and deploys the app.
+name: gaffer-booth
+metadata:
+  template: gaffer-booth@0.1.0
+services:
+  web:
+    project: .
+    language: docker
+    host: containerapp
+    docker:
+      path: Dockerfile
