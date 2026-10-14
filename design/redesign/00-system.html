@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="gb.css" />
+<title>Floodlight system</title>
+<style>
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; display: flex; flex-direction: column; gap: 44px; }
+  h1 { font-size: 64px; margin: 8px 0 10px; }
+  .lede { margin: 0; color: var(--fg-2); max-width: 66ch; font-size: 15px; }
+  h2 { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+  .why { margin: 0 0 16px; color: var(--fg-3); font-size: 13px; max-width: 72ch; }
+  .ramp { display: grid; grid-template-columns: repeat(10, 1fr); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .sw { height: 92px; padding: 8px 9px; display: flex; flex-direction: column; justify-content: flex-end; font: 500 10.5px/1.4 var(--mono); }
+  .roles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .role { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--ink-1); }
+  .role .chip { height: 64px; }
+  .role div { padding: 10px 12px; font-size: 12.5px; color: var(--fg-2); }
+  .role b { display: block; color: var(--fg); font-weight: 600; font-size: 13px; }
+  .role code { font: 500 11px var(--mono); color: var(--fg-3); }
+  .type { display: grid; grid-template-columns: 180px 1fr; border-top: 1px solid var(--line); }
+  .type > * { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .type .k { font: 500 11.5px/1.5 var(--mono); color: var(--fg-3); }
+  .comps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .comp { border: 1px solid var(--line); border-radius: 12px; background: var(--ink-1); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .comp .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .chalkdemo { background: var(--grass-a); border-radius: 10px; padding: 18px; }
+  .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .rules div { border-top: 2px solid var(--fg); padding-top: 10px; font-size: 13px; color: var(--fg-2); }
+  .rules b { display: block; color: var(--fg); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<script src="gb.js"></script>
+<div class="wrap">
+  <header><span class="eyebrow">Gaffer Booth design system</span><h1 class="d">Floodlight</h1>
+    <p class="lede">Two materials. The product UI is a dark production gallery in a neutral ink with a faint pitch-green bias. Anything a TV viewer would see is a chalk-white board laid over a muted pitch. One accent, the tally red, means "on air" and nothing else. Team colours come from the match data and are the only other hues on screen.</p></header>
+
+  <section><h2>Ink ramp</h2><p class="why">One neutral family, hue about 160, chroma kept under 0.02, so greys read as considered rather than default and sit naturally next to grass.</p>
+    <div class="ramp">
+      <div class="sw" style="background:#0a0d0c;color:#6b7873">ink-0<br>#0a0d0c</div>
+      <div class="sw" style="background:#101513;color:#6b7873">ink-1<br>#101513</div>
+      <div class="sw" style="background:#161c1a;color:#6b7873">ink-2<br>#161c1a</div>
+      <div class="sw" style="background:#1d2522;color:#a3aeaa">ink-3<br>#1d2522</div>
+      <div class="sw" style="background:#27312d;color:#a3aeaa">ink-4<br>#27312d</div>
+      <div class="sw" style="background:#33403b;color:#e9eeec">line-strong<br>#33403b</div>
+      <div class="sw" style="background:#6b7873;color:#0a0d0c">fg-3<br>#6b7873</div>
+      <div class="sw" style="background:#a3aeaa;color:#0a0d0c">fg-2<br>#a3aeaa</div>
+      <div class="sw" style="background:#e9eeec;color:#0a0d0c">fg<br>#e9eeec</div>
+      <div class="sw" style="background:#f3f5f4;color:#0a0d0c">chalk<br>#f3f5f4</div>
+    </div></section>
+
+  <section><h2>Signal colours</h2><p class="why">Each hue has exactly one job. Nothing decorative is coloured.</p>
+    <div class="roles">
+      <div class="role"><div class="chip" style="background:var(--tally)"></div><div><b>Tally</b>On air, live, primary action. <code>#e5484d</code></div></div>
+      <div class="role"><div class="chip" style="background:var(--pass)"></div><div><b>Pass</b>A claim matched its evidence. <code>#4fb286</code></div></div>
+      <div class="role"><div class="chip" style="background:var(--hold)"></div><div><b>Hold</b>Fallback tier, dropped, rewriting. <code>#d4a03c</code></div></div>
+      <div class="role"><div class="chip" style="background:linear-gradient(90deg,#1e6fd9 50%,#0f9d58 50%)"></div><div><b>Team</b>From match data only, never UI chrome.</div></div>
+      <div class="role"><div class="chip" style="background:repeating-linear-gradient(90deg,#1c3529 0 24px,#1a3126 24px 48px)"></div><div><b>Pitch</b>Desaturated so graphics carry the frame. <code>#1c3529</code></div></div>
+    </div></section>
+
+  <section><h2>Type</h2><p class="why">One superfamily, Archivo, across its width axis: condensed and heavy for broadcast display, normal width for UI and reading. IBM Plex Mono for clocks, fact keys and anything the verifier touches.</p>
+    <div class="type">
+      <span class="k">Display · wdth 62 · 800<br>64 / 40 / 28</span><span class="d" style="font-size:64px">Goal · 55:43</span>
+      <span class="k">Display semi · wdth 72 · 700<br>28 / 22</span><span class="d-semi" style="font-size:28px">Westbridge take control</span>
+      <span class="k">Body · wdth 100 · 400–600<br>15 / 14 / 13</span><span style="font-size:15px;max-width:66ch">Delacroix finishes a chance worth 0.06 xG, set up by Cael Moreau. Westbridge have built 1.01 xG to Harbour City's 1.57.</span>
+      <span class="k">Eyebrow · wdth 110 · 600<br>11, +0.14em</span><span class="eyebrow" style="align-self:center">Match stats · Up next · Player ratings</span>
+      <span class="k">Mono · Plex 500<br>15 / 12 / 11</span><span class="mono" style="font-size:15px">55:43 &nbsp; stats.away.xg &nbsp; 1.01</span>
+    </div></section>
+
+  <section><h2>Components</h2><p class="why">Status is carried by form first (filled, outlined, pulsing) and by colour second.</p>
+    <div class="comps">
+      <div class="comp"><span class="eyebrow">Broadcast state</span><div class="row"><span class="tally">On air</span><span class="tally off">Paused</span><span class="tally off">Full time</span></div></div>
+      <div class="comp"><span class="eyebrow">Claim status</span><div class="row"><span class="tag pass">✓ 5 / 5</span><span class="tag fail">Rejected</span><span class="tag hold">Fallback tier</span><span class="tag idle"><span class="pulse"></span>Drafting</span></div></div>
+      <div class="comp"><span class="eyebrow">Controls</span><div class="row"><button class="btn primary">Go live</button><button class="btn">Pause <span class="kbd">Space</span></button><div class="seg"><button class="on">EN</button><button>ES</button></div></div></div>
+      <div class="comp" style="grid-column:span 2"><span class="eyebrow">Score bug and caption, on pitch</span><div class="chalkdemo" style="position:relative;height:150px"><div id="bugdemo"></div></div></div>
+      <div class="comp"><span class="eyebrow">Claim in running text</span><p style="margin:0;font-size:14px;line-height:1.7">Westbridge have <span class="claim">6</span> final-third entries, not <span class="claim bad">7</span>, in <span class="claim">five</span> minutes.</p></div>
+    </div></section>
+
+  <section><h2>Rules</h2>
+    <div class="rules">
+      <div><b>Tally is earned.</b>Red appears only when something is live or needs an action now. A screen at rest has at most one red element.</div>
+      <div><b>Chalk means on air.</b>Only viewer-facing graphics use the chalk surface. Operator UI never does, so you can always tell what the audience sees.</div>
+      <div><b>Numbers are mono or display.</b>Clocks and fact keys are mono. Big stats are condensed display. Both use tabular figures so columns line up.</div>
+    </div></section>
+</div>
+<script>
+  const b = document.getElementById("bugdemo");
+  b.innerHTML = `<div class="bug"><span class="t"><i style="--c:${S.home.color}"></i>HBC</span><span class="s">1<b>-</b>3</span><span class="t">WBR<i style="--c:${S.away.color}"></i></span><span class="c">55:43</span></div>` + caption("GOAL! Femi Delacroix scores for Westbridge Rovers.");
+  nb("00 System");
+</script>
+</body>
+</html>

@@ -1,13 +1,36 @@
-import { useEffect, useRef } from "react";
-import type { ConsoleLine, InitMsg, Moment, Segment } from "../types";
+import { useState } from "react";
+import type { ConsoleLine, InitMsg, MatchEvent, Moment, Segment } from "../types";
+import { Check, Pulse } from "./Brand";
+import { Feed, highlight } from "./Broadcast";
 
-const AGENTS: { name: ConsoleLine["agent"]; role: string; glyph: string }[] = [
-  { name: "Director", role: "decides what airs", glyph: "D" },
-  { name: "Analyst", role: "explains why", glyph: "A" },
-  { name: "Verifier", role: "checks every claim", glyph: "V" },
-  { name: "Graphics", role: "builds the overlay", glyph: "G" },
-  { name: "Commentator", role: "voices it live", glyph: "C" },
+const AGENTS: { name: ConsoleLine["agent"]; role: string }[] = [
+  { name: "Director", role: "Decides what airs" },
+  { name: "Analyst", role: "Explains why" },
+  { name: "Verifier", role: "Checks every claim" },
+  { name: "Graphics", role: "Builds the overlay" },
+  { name: "Commentator", role: "Voices it live" },
 ];
+
+const STATUS: Record<string, { label: string; cls: string }> = {
+  air: { label: "On air", cls: "fail" },
+  approved: { label: "Pass", cls: "pass" },
+  ok: { label: "Done", cls: "pass" },
+  draft: { label: "Drafted", cls: "idle" },
+  rejected: { label: "Rejected", cls: "fail" },
+  fallback: { label: "Template", cls: "hold" },
+  hold: { label: "Holding", cls: "hold" },
+  drop: { label: "Dropped", cls: "hold" },
+};
+
+function Tag({ status }: { status: string }) {
+  const s = STATUS[status] ?? { label: status, cls: "idle" };
+  return (
+    <span className={`tag ${s.cls}`}>
+      {s.cls === "pass" && <Check />}
+      {s.label}
+    </span>
+  );
+}
 
 interface Props {
   init: InitMsg;
@@ -15,109 +38,170 @@ interface Props {
   moments: Moment[];
   queueIds: number[];
   segments: Segment[];
+  events: MatchEvent[];
+  paused: boolean;
 }
 
-export function ControlRoom({ init, lines, moments, queueIds, segments }: Props) {
-  const scroller = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
-  }, [lines.length]);
+type Tab = "rundown" | "feed" | "detected";
 
-  const waiting = new Set(queueIds);
-  const queue = moments.filter((m) => waiting.has(m.id)).slice(-6);
+/** The crew rail: agent status, then the rundown grouped by moment, newest first. */
+export function ControlRoom({ init, lines, moments, queueIds, segments, events, paused }: Props) {
+  const [tab, setTab] = useState<Tab>("rundown");
+  const [open, setOpen] = useState<number | null>(null);
+
   const lastByAgent = new Map<string, ConsoleLine>();
   for (const l of lines) lastByAgent.set(l.agent, l);
-  const verified = segments.reduce((n, s) => n + s.verification.checked.length, 0);
-  const rejected = lines.filter((l) => l.agent === "Verifier" && l.status === "rejected").length;
+  const waiting = new Set(queueIds);
+  const queue = moments.filter((m) => waiting.has(m.id));
+  const byMoment = new Map<number, ConsoleLine[]>();
+  for (const l of lines) {
+    if (l.moment_id === null) continue;
+    const list = byMoment.get(l.moment_id) ?? [];
+    list.push(l);
+    byMoment.set(l.moment_id, list);
+  }
+  const momentById = new Map(moments.map((m) => [m.id, m]));
+  const segByMoment = new Map(segments.map((s) => [s.moment.id, s]));
+  const rundown = [...byMoment.keys()].reverse().slice(0, 12);
+  const current = open ?? rundown[0] ?? null;
+  const offline = init.mode === "offline";
 
   return (
-    <aside className="control">
-      <header className="cr-head">
-        <h3>Control room</h3>
-        <span className={`mode ${init.mode === "offline" ? "off" : "on"}`}>
-          {init.mode === "offline" ? "fallback tier" : init.mode}
-        </span>
-      </header>
-
-      <div className="crew">
-        {AGENTS.map((a) => {
+    <aside className="rail">
+      <div className="rail-h">
+        <h3>Crew</h3>
+        <span className={`tag ${offline ? "hold" : "idle"}`}>{offline ? "Template tier" : init.mode}</span>
+      </div>
+      <div className="crewlist">
+        {AGENTS.map((a, i) => {
           const l = lastByAgent.get(a.name);
+          const busy = !paused && l?.status === "draft" && a.name === "Analyst";
           return (
-            <div key={a.name} className={`agent ag-${a.name.toLowerCase()} st-${l?.status ?? "idle"}`}>
-              <span className="glyph">{a.glyph}</span>
+            <div key={a.name} className={`agent${l?.status === "air" ? " live" : ""}`}>
+              <span className="n">0{i + 1}</span>
               <div>
-                <strong>{a.name}</strong>
-                <small>{l ? `${l.status} · ${l.ms}ms` : a.role}</small>
+                <b>{a.name}</b>
+                <small>{l ? `${l.text.slice(0, 48)}${l.text.length > 48 ? "…" : ""}` : a.role}</small>
               </div>
+              {paused ? (
+                <span className="tag idle">Paused</span>
+              ) : l ? (
+                busy ? (
+                  <span className="tag idle">
+                    <Pulse />
+                    {l.ms} ms
+                  </span>
+                ) : (
+                  <Tag status={l.status} />
+                )
+              ) : (
+                <span className="tag idle">Ready</span>
+              )}
             </div>
           );
         })}
       </div>
-
-      <div className="cr-metrics">
-        <div>
-          <b>{segments.length}</b>
-          <span>{segments.length === 1 ? "segment" : "segments"} aired</span>
-        </div>
-        <div>
-          <b>{verified}</b>
-          <span>facts verified</span>
-        </div>
-        <div>
-          <b>{rejected}</b>
-          <span>drafts rejected</span>
-        </div>
+      <div className="tabs" role="tablist">
+        <button type="button" role="tab" aria-selected={tab === "rundown"} className={tab === "rundown" ? "on" : ""} onClick={() => setTab("rundown")}>
+          Rundown<em>{byMoment.size}</em>
+        </button>
+        <button type="button" role="tab" aria-selected={tab === "feed"} className={tab === "feed" ? "on" : ""} onClick={() => setTab("feed")}>
+          Match feed
+        </button>
+        <button type="button" role="tab" aria-selected={tab === "detected"} className={tab === "detected" ? "on" : ""} onClick={() => setTab("detected")}>
+          Detected<em>{queue.length}</em>
+        </button>
       </div>
-
-      <div className="queue">
-        <span className="q-label">Detected</span>
-        {queue.length === 0 && <span className="q-empty">watching the feed…</span>}
-        {queue.map((m) => (
-          <span key={m.id} className="q-chip" style={{ borderColor: init.lineups[m.team].color }}>
-            {m.clock} {m.headline}
+      <div className="log">
+        {tab === "feed" && <Feed events={events} init={init} />}
+        {tab === "detected" &&
+          (queue.length === 0 ? (
+            <p className="empty">Watching the feed. Detected moments wait here until the Director takes them.</p>
+          ) : (
+            queue
+              .slice()
+              .reverse()
+              .map((m) => (
+                <div key={m.id} className="mo">
+                  <div className="h">
+                    <span className="mono">{m.clock}</span>
+                    <b>{m.headline}</b>
+                    <span className="mono faint">p {m.priority.toFixed(2)}</span>
+                  </div>
+                </div>
+              ))
+          ))}
+        {tab === "rundown" &&
+          (rundown.length === 0 ? (
+            <p className="empty">The rundown fills as the Director takes moments to air.</p>
+          ) : (
+            rundown.map((id) => {
+              const ls = byMoment.get(id) ?? [];
+              const m = momentById.get(id);
+              const seg = segByMoment.get(id);
+              const last = ls[ls.length - 1];
+              const director = ls.find((l) => l.agent === "Director");
+              const head = m?.headline ?? director?.text ?? "Moment";
+              const isOpen = id === current;
+              return (
+                <div key={id} className={`mo${isOpen ? " cur" : ""}`}>
+                  <button type="button" className="h" onClick={() => setOpen(isOpen ? -1 : id)} aria-expanded={isOpen}>
+                    <span className="mono">{m?.clock ?? last?.clock}</span>
+                    <b>{head}</b>
+                    {seg ? (
+                      <span className={`tag ${seg.verification.ok ? "pass" : "fail"}`}>
+                        {seg.verification.ok && <Check />}
+                        {seg.verification.checked.length} / {seg.verification.checked.length + seg.verification.violations.length}
+                      </span>
+                    ) : (
+                      last && <Tag status={last.status} />
+                    )}
+                  </button>
+                  {!isOpen && seg && (
+                    <p className="sub">
+                      {seg.slot.replace("_", " ")} · {seg.verification.checked.length > 0 ? "verified" : "no numeric claims"}
+                    </p>
+                  )}
+                  {isOpen && (
+                    <div className="steps">
+                      {ls.map((l) => (
+                        <div key={l.seq} className={`step st-${l.status}`}>
+                          <span>{l.agent}</span>
+                          <div>
+                            <p>{l.checked && l.checked.length > 0 ? highlight(l.text, l.checked.map((c) => c[0])) : l.text}</p>
+                            {l.checked && l.checked.length > 0 && (
+                              <div className="keys">
+                                {l.checked.slice(0, 8).map(([, key], i) => (
+                                  <code key={i}>{key}</code>
+                                ))}
+                              </div>
+                            )}
+                            <span className="meta">
+                              {STATUS[l.status]?.label ?? l.status} · {l.mode} · {l.ms} ms
+                              {l.attempt ? ` · attempt ${l.attempt}` : ""}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          ))}
+      </div>
+      <div className="next">
+        <span className="eyebrow">Up next</span>
+        {queue[0] ? (
+          <span className="q">
+            <i style={{ background: init.lineups[queue[0].team].color }} />
+            <span className="mono faint">{queue[0].clock}</span>
+            {queue[0].headline}
           </span>
-        ))}
-      </div>
-
-      <div className="log" ref={scroller}>
-        {lines.map((l) => (
-          <div key={l.seq} className={`line ag-${l.agent.toLowerCase()} st-${l.status}`}>
-            <span className="l-clock">{l.clock}</span>
-            <span className="l-agent">{l.agent}</span>
-            <span className="l-status">{label(l.status)}</span>
-            <span className="l-text">
-              {l.text}
-              {l.checked && l.checked.length > 0 && (
-                <span className="l-claims">
-                  {l.checked.slice(0, 6).map(([tok, key], i) => (
-                    <code key={i} title={key}>
-                      {tok}
-                    </code>
-                  ))}
-                </span>
-              )}
-            </span>
-            <span className="l-meta">
-              {l.mode} · {l.ms}ms
-            </span>
-          </div>
-        ))}
+        ) : (
+          <span className="faint">Nothing queued</span>
+        )}
       </div>
     </aside>
-  );
-}
-
-function label(s: string): string {
-  return (
-    {
-      air: "ON AIR",
-      hold: "HOLD",
-      drop: "DROP",
-      draft: "DRAFT",
-      approved: "✓ PASS",
-      rejected: "✗ REJECT",
-      fallback: "FALLBACK",
-      ok: "READY",
-    }[s] ?? s.toUpperCase()
   );
 }

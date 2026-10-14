@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="gb.css" />
+<title>Full time</title>
+<style>
+  body { min-height: 100vh; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 440px; min-height: calc(100vh - 52px); }
+  .left { padding: 32px 40px; display: flex; flex-direction: column; gap: 26px; min-width: 0; }
+  .ft { display: flex; align-items: center; gap: 28px; }
+  .ft .team { display: flex; flex-direction: column; gap: 6px; }
+  .ft .team.r { text-align: right; align-items: flex-end; }
+  .ft .team .d { font-size: 34px; }
+  .ft .team small { color: var(--fg-3); font-size: 12.5px; }
+  .ft .team i { display: block; width: 36px; height: 4px; border-radius: 1px; }
+  .ft .score { font-size: 112px; line-height: .85; }
+  .ft .score b { color: var(--fg-3); font-weight: 800; padding: 0 6px; }
+  .headline { font-size: 40px; margin: 0; max-width: 760px; }
+  .report { font-size: 16px; line-height: 1.65; color: var(--fg); max-width: 66ch; margin: 0; }
+  .meta { display: flex; gap: 10px; align-items: center; }
+  .tl { position: relative; height: 54px; margin-top: 4px; }
+  .tl .axis { position: absolute; left: 0; right: 0; top: 26px; height: 1px; background: var(--line-strong); }
+  .tl .ht { position: absolute; left: 50%; top: 18px; height: 16px; width: 1px; background: var(--fg-3); }
+  .tl .g { position: absolute; top: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11.5px; white-space: nowrap; }
+  .tl .g i { width: 12px; height: 12px; flex: none; border-radius: 50%; border: 2px solid var(--ink-0); margin-top: 16px; }
+  .tl .g span { color: var(--fg-2); }
+  .cmp { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: 12px; background: var(--ink-1); }
+  .cmp div { padding: 12px 14px; }
+  .cmp div + div { border-left: 1px solid var(--line); }
+  .cmp b { display: block; font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 800; font-size: 26px; margin-top: 6px; }
+  .cmp b em { font-style: normal; color: var(--fg-3); font-size: 18px; padding: 0 4px; }
+  .side { border-left: 1px solid var(--line); background: var(--ink-1); display: flex; flex-direction: column; }
+  .sec { padding: 18px 20px; }
+  .sec + .sec { border-top: 1px solid var(--line); }
+  .sec .hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td { padding: 7px 0; border-top: 1px solid var(--line); }
+  td.r { white-space: nowrap; padding-left: 12px; text-align: right; font: 500 12px var(--mono); color: var(--fg-2); }
+  td .c { display: inline-block; width: 6px; height: 14px; border-radius: 1px; margin-right: 10px; vertical-align: -2px; }
+  td.rt { width: 110px; }
+  .rb { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+  .rb i { display: block; height: 4px; border-radius: 2px; background: var(--fg-2); }
+  .rb b { font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 800; font-size: 17px; width: 28px; text-align: right; }
+  tr.pom .rb i { background: var(--fg); }
+  tr.pom td:first-child::after { content: "POTM"; margin-left: 8px; font: 500 10.5px var(--mono); color: var(--fg-3); }
+  .post { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; background: var(--ink-2); }
+  .post + .post { margin-top: 8px; }
+  .post p { margin: 0; font-size: 13.5px; line-height: 1.5; }
+  .post .row { display: flex; justify-content: space-between; align-items: center; }
+  .post .row .mono { font-size: 11px; color: var(--fg-3); }
+</style>
+</head>
+<body>
+<header class="top"><script src="gb.js"></script><script>document.currentScript.insertAdjacentHTML("beforebegin", wordmark())</script><span class="sep"></span><span class="fixture">Harbour City v Westbridge Rovers</span><span class="tally off">Full time</span>
+  <div class="right"><div class="seg"><button class="on">EN</button><button>ES</button></div><button class="btn">Watch again</button><button class="btn primary">New match</button></div></header>
+<div class="grid">
+  <section class="left">
+    <div class="ft">
+      <div class="team"><i style="background:#1e6fd9"></i><span class="d">Harbour City</span><small>Penn 23'</small></div>
+      <span class="d score">1<b>–</b>3</span>
+      <div class="team r"><i style="background:#0f9d58"></i><span class="d">Westbridge Rovers</span><small>Lomax 31', Okonkwo 49', Delacroix 55'</small></div>
+    </div>
+    <div class="tl"><span class="axis"></span><span class="ht"></span>
+      <span class="g" style="left:25.5%"><i style="background:#1e6fd9"></i><span>23' Penn</span></span>
+      <span class="g" style="left:34.4%"><i style="background:#0f9d58"></i><span>31' Lomax</span></span>
+      <span class="g" style="left:54.4%"><i style="background:#0f9d58"></i><span>49' Okonkwo</span></span>
+      <span class="g" style="left:61.9%"><i style="background:#0f9d58"></i><span>55' Delacroix</span></span>
+    </div>
+    <div><span class="eyebrow">Match report</span></div>
+    <h1 class="d headline">Westbridge win it on the counter</h1>
+    <p class="report">Harbour City had more of the ball and the better chances, finishing with <span class="claim">2.04</span> xG to <span class="claim">1.38</span>, but Westbridge Rovers were clinical. <span class="claim">Teo Lomax</span> cancelled out <span class="claim">Arlo Penn</span>'s opener before the break. <span class="claim">Rafe Okonkwo</span> put Westbridge ahead early in the second half, and <span class="claim">Femi Delacroix</span> turned a <span class="claim">0.06</span> xG chance into the goal that settled it at <span class="claim">55:43</span>. Harbour City changed shape at the hour, but their pressing dropped off and the chances dried up.</p>
+    <div class="meta"><span class="tag pass">✓ 10 of 10 facts verified</span><span class="mono faint" style="font-size:11px">Recap writer · Foundry · 2.4 s</span></div>
+    <div class="cmp"><div><span class="eyebrow">xG</span><b>2.04<em>·</em>1.38</b></div><div><span class="eyebrow">Shots</span><b>14<em>·</em>21</b></div><div><span class="eyebrow">Possession</span><b>52%<em>·</em>48%</b></div><div><span class="eyebrow">Pass accuracy</span><b>78%<em>·</em>75%</b></div></div>
+  </section>
+  <aside class="side">
+    <div class="sec"><div class="hd"><span class="eyebrow">Player ratings</span><span class="mono faint" style="font-size:11px">computed in code</span></div>
+      <table>
+        <tr class="pom"><td><span class="c" style="background:#0f9d58"></span>Femi Delacroix</td><td class="r">1 G · 0.48 xG</td><td class="rt"><div class="rb"><i style="width:62px"></i><b>8.6</b></div></td></tr>
+        <tr><td><span class="c" style="background:#0f9d58"></span>Cael Moreau</td><td class="r">2 A</td><td class="rt"><div class="rb"><i style="width:58px"></i><b>8.2</b></div></td></tr>
+        <tr><td><span class="c" style="background:#1e6fd9"></span>Arlo Penn</td><td class="r">1 G · 3 KP</td><td class="rt"><div class="rb"><i style="width:55px"></i><b>7.9</b></div></td></tr>
+        <tr><td><span class="c" style="background:#0f9d58"></span>Teo Lomax</td><td class="r">1 G · 0.31 xG</td><td class="rt"><div class="rb"><i style="width:51px"></i><b>7.6</b></div></td></tr>
+        <tr><td><span class="c" style="background:#1e6fd9"></span>Zeki Yilmaz</td><td class="r">4 KP</td><td class="rt"><div class="rb"><i style="width:44px"></i><b>7.1</b></div></td></tr>
+        <tr><td><span class="c" style="background:#0f9d58"></span>Rafe Okonkwo</td><td class="r">1 G · 6 T</td><td class="rt"><div class="rb"><i style="width:41px"></i><b>6.9</b></div></td></tr>
+        <tr><td><span class="c" style="background:#1e6fd9"></span>Jonah Sallis</td><td class="r">0.62 xG</td><td class="rt"><div class="rb"><i style="width:36px"></i><b>6.5</b></div></td></tr>
+      </table></div>
+    <div class="sec"><div class="hd"><span class="eyebrow">Social posts</span><span class="mono faint" style="font-size:11px">3 ready</span></div>
+      <div class="post"><p>FT: Harbour City 1-3 Westbridge Rovers. Three Westbridge goals in 25 minutes turned it around.</p><div class="row"><span class="tag pass">✓ verified</span><button class="btn">Copy</button></div></div>
+      <div class="post"><p>Harbour City won the xG battle 2.04 to 1.38. Westbridge won the one that counts.</p><div class="row"><span class="tag pass">✓ verified</span><button class="btn">Copy</button></div></div>
+      <div class="post"><p>Player of the match: Femi Delacroix (8.6).</p><div class="row"><span class="tag pass">✓ verified</span><button class="btn">Copy</button></div></div>
+    </div>
+  </aside>
+</div>
+<script>nb("10 Full time")</script>
+</body>
+</html>

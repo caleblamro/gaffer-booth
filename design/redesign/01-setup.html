@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="gb.css" />
+<title>Setup</title>
+<style>
+  body { min-height: 100vh; display: flex; flex-direction: column; }
+  .wrap { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 400px; min-height: 0; }
+  .main { padding: 40px 48px; display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+  .intro h1 { margin: 10px 0 10px; font-size: 64px; }
+  .intro p { margin: 0; max-width: 560px; color: var(--fg-2); font-size: 16px; }
+  .list { border-top: 1px solid var(--line); }
+  .fx { display: grid; grid-template-columns: 40px minmax(0, 1fr) 210px 22px; align-items: center; gap: 16px; padding: 16px 12px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .fx:hover { background: var(--ink-1); }
+  .fx.on { background: var(--ink-2); box-shadow: inset 2px 0 0 var(--fg); }
+  .fx .no { font: 500 12px var(--mono); color: var(--fg-3); }
+  .teams { display: flex; align-items: center; gap: 14px; font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 800; font-size: 26px; text-transform: uppercase; letter-spacing: .01em; }
+  .teams i { display: inline-block; width: 6px; height: 22px; border-radius: 1px; vertical-align: -3px; margin-right: 10px; }
+  .teams .v { font: 500 12px var(--mono); color: var(--fg-3); }
+  .story b { display: block; font-size: 13px; font-weight: 600; }
+  .story span { font-size: 12.5px; color: var(--fg-3); }
+  .radio { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line-strong); }
+  .fx.on .radio { border: 5px solid var(--fg); }
+  .side { border-left: 1px solid var(--line); background: var(--ink-1); padding: 40px 28px; display: flex; flex-direction: column; gap: 24px; }
+  .field { display: flex; flex-direction: column; gap: 10px; }
+  .field .seg { display: flex; }
+  .field .seg button { flex: 1; }
+  .hint { font-size: 12px; color: var(--fg-3); }
+  .crewmini { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 10px; }
+  .crewmini div { display: grid; grid-template-columns: 26px 1fr; gap: 6px; padding: 8px 12px; font-size: 12.5px; color: var(--fg-2); }
+  .crewmini div + div { border-top: 1px solid var(--line); }
+  .crewmini b { color: var(--fg); font-weight: 600; margin-right: 6px; }
+  .crewmini .mono { font-size: 11px; color: var(--fg-3); }
+  .go { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .go .btn.primary { justify-content: center; padding: 15px; font-size: 15px; letter-spacing: .02em; }
+  .go p { margin: 0; font-size: 12px; color: var(--fg-3); text-align: center; }
+</style>
+</head>
+<body>
+<header class="top"><script src="gb.js"></script><script>document.currentScript.insertAdjacentHTML("beforebegin", wordmark())</script><div class="right"><span class="mono faint" style="font-size:12px">Microsoft Foundry · connected</span></div></header>
+<div class="wrap">
+  <section class="main">
+    <div class="intro"><span class="eyebrow">Choose a match</span><h1 class="d">Pick the story.<br />The crew calls it.</h1>
+      <p>Five agents watch a live feed, decide what matters, prove every number against the data and put it on air as graphics and commentary.</p></div>
+    <div class="list">
+      <div class="fx"><span class="no">01</span><span class="teams"><span><i style="background:#1e6fd9"></i>Harbour City</span><span class="v">v</span><span><i style="background:#d92b3a"></i>Kingsmoor Athletic</span></span><span class="story"><b>Open game</b><span>End to end, chances both ways.</span></span><span class="radio"></span></div>
+      <div class="fx on"><span class="no">02</span><span class="teams"><span><i style="background:#1e6fd9"></i>Harbour City</span><span class="v">v</span><span><i style="background:#0f9d58"></i>Westbridge Rovers</span></span><span class="story"><b>Comeback</b><span>Westbridge race ahead. Harbour City change shape at the hour.</span></span><span class="radio"></span></div>
+      <div class="fx"><span class="no">03</span><span class="teams"><span><i style="background:#222831;box-shadow:inset 0 0 0 1px #f5c518"></i>Ravenshollow</span><span class="v">v</span><span><i style="background:#d92b3a"></i>Kingsmoor Athletic</span></span><span class="story"><b>Red card</b><span>A first-half dismissal changes everything.</span></span><span class="radio"></span></div>
+      <div class="fx"><span class="no">04</span><span class="teams"><span><i style="background:#0f9d58"></i>Westbridge Rovers</span><span class="v">v</span><span><i style="background:#222831;box-shadow:inset 0 0 0 1px #f5c518"></i>Ravenshollow</span></span><span class="story"><b>Pressing collapse</b><span>Ravenshollow press high until their legs go.</span></span><span class="radio"></span></div>
+    </div>
+  </section>
+  <aside class="side">
+    <div class="field"><span class="eyebrow">Match speed</span><div class="seg"><button>10×</button><button class="on">20×</button><button>40×</button><button>80×</button></div><span class="hint">90 minutes in about 4 min 30 s.</span></div>
+    <div class="field"><span class="eyebrow">Join from</span><div class="seg"><button class="on">Kick-off</button><button>30'</button><button>55'</button><button>70'</button></div></div>
+    <div class="field"><span class="eyebrow">Commentary, up to 3</span><div class="seg"><button class="on">English</button><button class="on">Español</button><button>Français</button><button>Português</button></div></div>
+    <div class="field"><span class="eyebrow">On the crew</span>
+      <div class="crewmini">
+        <div><span class="mono">01</span><span><b>Director</b>decides what airs</span></div>
+        <div><span class="mono">02</span><span><b>Analyst</b>explains why</span></div>
+        <div><span class="mono">03</span><span><b>Verifier</b>checks every claim</span></div>
+        <div><span class="mono">04</span><span><b>Graphics</b>builds the overlay</span></div>
+        <div><span class="mono">05</span><span><b>Commentator</b>voices it live</span></div>
+      </div></div>
+    <div class="go"><button class="btn primary">Go live</button><p>All clubs, players and match data are synthetic.</p></div>
+  </aside>
+</div>
+<script>nb("01 Setup")</script>
+</body>
+</html>

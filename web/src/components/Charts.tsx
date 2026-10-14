@@ -1,35 +1,44 @@
 import type { InitMsg, Side, TeamStats } from "../types";
 
-export function Momentum({ series, init }: { series: [number, number][]; init: InitMsg }) {
+const TICKS = [0, 15, 30, 45, 60, 75, 90];
+
+export function Momentum({ series, init, height = 58 }: { series: [number, number][]; init: InitMsg; height?: number }) {
   const W = 600;
-  const H = 70;
+  const H = height;
   const mid = H / 2;
   const maxAbs = Math.max(4, ...series.map(([, v]) => Math.abs(v)));
-  const x = (m: number) => (Math.min(m, 96) / 96) * W;
-  const y = (v: number) => mid - (v / maxAbs) * (mid - 4);
+  const x = (m: number) => (Math.min(m, 90) / 90) * W;
+  const y = (v: number) => mid - (v / maxAbs) * (mid - 2);
   const pts = series.map(([m, v]) => `${x(m).toFixed(1)},${y(v).toFixed(1)}`);
   const area = pts.length ? `M${x(series[0][0])},${mid} L${pts.join(" L")} L${x(series[series.length - 1][0])},${mid} Z` : "";
+  const now = series.length ? series[series.length - 1][0] : null;
   return (
-    <div className="momentum">
-      <div className="panel-label">
-        <span style={{ color: init.lineups.home.color }}>▲ {init.lineups.home.short}</span>
-        Momentum
-        <span style={{ color: init.lineups.away.color }}>{init.lineups.away.short} ▼</span>
-      </div>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+    <div className="mom">
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ height: H }} aria-label="Momentum by minute">
         <defs>
-          <clipPath id="top">
+          <clipPath id="mom-top">
             <rect width={W} height={mid} />
           </clipPath>
-          <clipPath id="bottom">
+          <clipPath id="mom-bottom">
             <rect y={mid} width={W} height={mid} />
           </clipPath>
         </defs>
-        <line x1={x(45)} x2={x(45)} y1="0" y2={H} className="ht" />
-        <path d={area} fill={init.lineups.home.color} clipPath="url(#top)" opacity="0.85" />
-        <path d={area} fill={init.lineups.away.color} clipPath="url(#bottom)" opacity="0.85" />
-        <line x1="0" x2={W} y1={mid} y2={mid} className="axis" />
+        {[15, 30, 60, 75].map((m) => (
+          <line key={m} x1={x(m)} x2={x(m)} y1="0" y2={H} stroke="var(--line)" />
+        ))}
+        <line x1={x(45)} x2={x(45)} y1="0" y2={H} stroke="var(--line-strong)" strokeDasharray="2 3" />
+        <path d={area} fill={init.lineups.home.color} clipPath="url(#mom-top)" opacity="0.9" />
+        <path d={area} fill={init.lineups.away.color} clipPath="url(#mom-bottom)" opacity="0.9" />
+        <line x1="0" x2={W} y1={mid} y2={mid} stroke="var(--fg-3)" strokeWidth="0.6" />
+        {now !== null && <line x1={x(now)} x2={x(now)} y1="2" y2={H - 2} stroke="var(--fg)" strokeWidth="1.2" />}
       </svg>
+      <div className="ticks">
+        {TICKS.map((m) => (
+          <span key={m} style={{ left: `${(m / 90) * 100}%` }}>
+            {m === 45 ? "HT" : `${m}'`}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -42,10 +51,11 @@ const ROWS: { key: keyof TeamStats; label: string; fmt?: (v: number) => string }
   { key: "pass_pct", label: "Pass accuracy", fmt: (v) => `${v}%` },
   { key: "final_third_entries", label: "Final-third entries" },
   { key: "corners", label: "Corners" },
+  { key: "fouls", label: "Fouls" },
 ];
 
 export function StatBars({ stats, init }: { stats: Record<Side, TeamStats> | null; init: InitMsg }) {
-  if (!stats) return <div className="stats empty">Stats arrive with the first touches…</div>;
+  if (!stats) return <p className="empty">Stats arrive with the first touches.</p>;
   return (
     <div className="stats">
       {ROWS.map((r) => {
@@ -54,14 +64,16 @@ export function StatBars({ stats, init }: { stats: Record<Side, TeamStats> | nul
         const tot = h + a || 1;
         const f = r.fmt ?? ((v: number) => String(v));
         return (
-          <div className="stat" key={r.key}>
-            <span className="v">{f(h)}</span>
-            <div className="bar">
-              <i style={{ width: `${(h / tot) * 100}%`, background: init.lineups.home.color }} />
-              <i style={{ width: `${(a / tot) * 100}%`, background: init.lineups.away.color }} />
+          <div className="st" key={r.key}>
+            <b>{f(h)}</b>
+            <div>
+              <span>{r.label}</span>
+              <i>
+                <em style={{ width: `${(h / tot) * 100}%`, background: init.lineups.home.color }} />
+                <em style={{ width: `${(a / tot) * 100}%`, background: init.lineups.away.color }} />
+              </i>
             </div>
-            <span className="v">{f(a)}</span>
-            <span className="l">{r.label}</span>
+            <b>{f(a)}</b>
           </div>
         );
       })}

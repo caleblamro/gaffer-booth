@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gaffer Booth Redesign</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="gb.css" />
+<style>
+  .wrap { max-width: 1240px; margin: 0 auto; padding-block: 40px 80px; padding-inline: 16px; display: flex; flex-direction: column; gap: 36px; }
+  h1 { font-size: clamp(40px, 7vw, 64px); margin: 8px 0 12px; text-wrap: balance; }
+  .lede { margin: 0; color: var(--fg-2); max-width: 66ch; font-size: 15px; }
+  h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr)); gap: 14px; }
+  a.card { display: flex; flex-direction: column; background: var(--ink-1); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; color: inherit; text-decoration: none; }
+  a.card:hover, a.card:focus-visible { border-color: var(--fg-3); outline: none; }
+  .frame { aspect-ratio: 1600 / 950; overflow: hidden; border-bottom: 1px solid var(--line); background: var(--ink-0); position: relative; }
+  .frame iframe { position: absolute; top: 0; left: 0; width: 1600px; height: 950px; border: 0; transform-origin: 0 0; pointer-events: none; }
+  .body { padding: 12px 14px 14px; display: grid; grid-template-columns: auto 1fr; column-gap: 10px; row-gap: 4px; align-items: baseline; }
+  .body .mono { font-size: 11px; }
+  .body b { font-weight: 600; font-size: 14px; }
+  .body p { grid-column: 2; margin: 0; font-size: 13px; color: var(--fg-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="eyebrow">Gaffer Booth · redesign</span><h1 class="d">Every screen, one system</h1>
+  <p class="lede">The operator UI is a dark production gallery. Anything a viewer would see on TV is a chalk-white board on the pitch. Red only ever means on air. Every screen tells one match: Harbour City v Westbridge Rovers. The camera views are rendered from the match's position data, because the data is synthetic and there is no real footage. Open a card to see it full size.</p></header>
+  <section><h2>System</h2><div class="cards"><a class="card" href="00-system.html" target="_blank"><div class="frame"><iframe src="00-system.html" loading="lazy" tabindex="-1" title="Floodlight"></iframe></div><div class="body"><span class="mono faint">00</span><b>Floodlight</b><p>Palette, type, components and the three rules the rest of the screens follow.</p></div></a></div></section><section><h2>Before kick-off</h2><div class="cards"><a class="card" href="01-setup.html" target="_blank"><div class="frame"><iframe src="01-setup.html" loading="lazy" tabindex="-1" title="Setup"></iframe></div><div class="body"><span class="mono faint">01</span><b>Setup</b><p>Fixture list on the left, run sheet on the right. Go live sits at the end of the run sheet.</p></div></a><a class="card" href="02-warming.html" target="_blank"><div class="frame"><iframe src="02-warming.html" loading="lazy" tabindex="-1" title="Warming up"></iframe></div><div class="body"><span class="mono faint">02</span><b>Warming up</b><p>Each agent checks in before the first whistle. The page says what happens if a model is slow.</p></div></a></div></section><section><h2>Live</h2><div class="cards"><a class="card" href="03-live-goal.html" target="_blank"><div class="frame"><iframe src="03-live-goal.html" loading="lazy" tabindex="-1" title="Goal, full screen"></iframe></div><div class="body"><span class="mono faint">03</span><b>Goal, full screen</b><p>Chalk board over a dimmed pitch. The rundown shows Director, Analyst and Verifier for this moment.</p></div></a><a class="card" href="04-live-lower.html" target="_blank"><div class="frame"><iframe src="04-live-lower.html" loading="lazy" tabindex="-1" title="Lower third"></iframe></div><div class="body"><span class="mono faint">04</span><b>Lower third</b><p>Yellow card at 48:09, aired from the template tier because the model missed the deadline.</p></div></a><a class="card" href="05-live-reject.html" target="_blank"><div class="frame"><iframe src="05-live-reject.html" loading="lazy" tabindex="-1" title="Verifier rejects"></iframe></div><div class="body"><span class="mono faint">05</span><b>Verifier rejects</b><p>The Analyst wrote 7 entries and the evidence says 6. The claim is struck out and the rewrite is in progress.</p></div></a><a class="card" href="06-live-stat.html" target="_blank"><div class="frame"><iframe src="06-live-stat.html" loading="lazy" tabindex="-1" title="Stat card"></iframe></div><div class="body"><span class="mono faint">06</span><b>Stat card</b><p>Five-minute window card, right side.</p></div></a><a class="card" href="07-live-player.html" target="_blank"><div class="frame"><iframe src="07-live-player.html" loading="lazy" tabindex="-1" title="Player card"></iframe></div><div class="body"><span class="mono faint">07</span><b>Player card</b><p>Spotlight card, left side, with shirt number in team colour.</p></div></a><a class="card" href="08-live-paused.html" target="_blank"><div class="frame"><iframe src="08-live-paused.html" loading="lazy" tabindex="-1" title="Paused"></iframe></div><div class="body"><span class="mono faint">08</span><b>Paused</b><p>Slate over the picture. Clock and crew are frozen.</p></div></a></div></section><section><h2>Cameras</h2><div class="cards"><a class="card" href="11-multiview.html" target="_blank"><div class="frame"><iframe src="11-multiview.html" loading="lazy" tabindex="-1" title="Multiview"></iframe></div><div class="body"><span class="mono faint">11</span><b>Multiview</b><p>Every camera at once. Program has the red tally, preview the white outline. Number keys cut, and taking a cut puts the Director on manual.</p></div></a><a class="card" href="12-replay.html" target="_blank"><div class="frame"><iframe src="12-replay.html" loading="lazy" tabindex="-1" title="Replay, behind goal"></iframe></div><div class="body"><span class="mono faint">12</span><b>Replay, behind goal</b><p>The Director queues the behind-goal angle for the replay after a goal.</p></div></a></div></section><section><h2>Popups</h2><div class="cards"><a class="card" href="09-inspector.html" target="_blank"><div class="frame"><iframe src="09-inspector.html" loading="lazy" tabindex="-1" title="Fact inspector"></iframe></div><div class="body"><span class="mono faint">09</span><b>Fact inspector</b><p>Opens from any proof badge. Each claim, its fact key and the value it matched.</p></div></a></div></section><section><h2>After the whistle</h2><div class="cards"><a class="card" href="10-fulltime.html" target="_blank"><div class="frame"><iframe src="10-fulltime.html" loading="lazy" tabindex="-1" title="Full time"></iframe></div><div class="body"><span class="mono faint">10</span><b>Full time</b><p>Score, goal timeline, verified match report, player ratings computed in code and social posts ready to copy.</p></div></a></div></section>
+</div>
+<script>
+  const fit = () => document.querySelectorAll(".frame").forEach((f) => { const i = f.querySelector("iframe"); i.style.transform = `scale(${f.clientWidth / 1600})`; });
+  fit(); addEventListener("resize", fit);
+</script>
+</body>
+</html>

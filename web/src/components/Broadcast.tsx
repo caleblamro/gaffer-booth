@@ -1,76 +1,86 @@
-import { useEffect, useState } from "react";
-import type { InitMsg, MatchEvent, Score, Segment } from "../types";
+import { useEffect, useState, type CSSProperties } from "react";
+import type { InitMsg, MatchEvent, OverlayRow, Score, Segment } from "../types";
+import { Check } from "./Brand";
+
+const teamVar = (c: string) => ({ ["--c" as string]: c }) as CSSProperties;
 
 export function ScoreBug({ init, score }: { init: InitMsg; score: Score }) {
   const h = init.lineups.home;
   const a = init.lineups.away;
   return (
-    <div className="scorebug">
-      <span className="sb-team" style={{ ["--c" as string]: h.color }}>
+    <div className="bug">
+      <span className="t">
+        <i style={teamVar(h.color)} />
         {h.short}
       </span>
-      <span className="sb-score">
+      <span className="s">
         {score.home}
-        <i>-</i>
+        <b>-</b>
         {score.away}
       </span>
-      <span className="sb-team" style={{ ["--c" as string]: a.color }}>
+      <span className="t">
         {a.short}
+        <i style={teamVar(a.color)} />
       </span>
-      <span className="sb-clock">{score.clock}</span>
+      <span className="c">{score.clock}</span>
     </div>
   );
 }
 
-const HOLD_MS: Record<string, number> = {
-  full_screen: 6500,
-  stat_card: 8000,
-  lower_third: 6000,
-  player_card: 7500,
-};
-
-/** Shows the most recent segment's graphic for a few seconds. */
-export function useOnAir(segments: Segment[]): Segment | null {
-  const latest = segments[segments.length - 1] ?? null;
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 250);
-    return () => clearInterval(id);
-  }, []);
-  if (!latest) return null;
-  return now - latest.receivedAt < (HOLD_MS[latest.slot] ?? 6000) ? latest : null;
-}
-
-function Verified({ seg }: { seg: Segment }) {
+/** "✓ N facts verified". Clicking it opens the fact inspector for that segment. */
+export function Proof({ seg, onOpen }: { seg: Segment; onOpen?: (seg: Segment) => void }) {
   const v = seg.verification;
+  const n = v.checked.length;
   return (
-    <span className={`verified ${v.ok ? "ok" : "bad"}`} title={v.checked.map((c) => `${c[0]} ← ${c[1]}`).join("\n")}>
-      {v.ok ? "✓" : "!"} {v.checked.length} fact{v.checked.length === 1 ? "" : "s"} verified
-    </span>
+    <button type="button" className={`proof${v.ok ? "" : " bad"}`} onClick={() => onOpen?.(seg)} title="Show the evidence">
+      {v.ok && <Check />}
+      {v.ok ? `${n} fact${n === 1 ? "" : "s"} verified` : `${v.violations.length} unverified`}
+    </button>
   );
 }
 
-export function OverlayLayer({ seg }: { seg: Segment | null }) {
+function Facts({ rows, cols }: { rows: OverlayRow[]; cols: number }) {
+  return (
+    <dl className="facts" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+      {rows.map((r) => (
+        <div key={r.label}>
+          <dt>{r.label}</dt>
+          <dd>{r.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** On-air graphics: chalk boards over the program picture. */
+export function OverlayLayer({ seg, onInspect }: { seg: Segment | null; onInspect: (seg: Segment) => void }) {
   if (!seg) return null;
   const o = seg.overlay;
-  const style = { ["--team" as string]: o.color };
+  const rows = o.rows ?? [];
+
   if (o.slot === "full_screen") {
     return (
-      <div className="ov ov-full" key={o.moment_id} style={style}>
-        <div className="ov-full-card">
-          <div className="ov-kicker">
-            <span>{o.team_name}</span>
-            <span>{o.clock}</span>
+      <div className="gfx gfx-full" key={o.moment_id}>
+        <div className="board" style={teamVar(o.color)}>
+          <div className="stripe" />
+          <div className="in">
+            <div className="kick">
+              <span className="teamchip">
+                <i />
+                {o.team_name}
+              </span>
+              <span className="mono">{o.clock}</span>
+            </div>
+            <div className="d gtitle">{o.title}</div>
+            {o.player && <div className="d-semi gplayer">{o.player}</div>}
           </div>
-          <h2 className="ov-title">{o.title}</h2>
-          {o.player && <div className="ov-player">{o.player}</div>}
           {o.compare ? (
-            <table className="ov-compare">
+            <table className="compare">
               <thead>
                 <tr>
                   <th style={{ color: o.compare.home_color }}>{o.compare.home}</th>
-                  <th className="ov-cmp-score">
-                    {o.compare.score[0]} - {o.compare.score[1]}
+                  <th className="sc">
+                    {o.compare.score[0]}-{o.compare.score[1]}
                   </th>
                   <th style={{ color: o.compare.away_color }}>{o.compare.away}</th>
                 </tr>
@@ -86,49 +96,119 @@ export function OverlayLayer({ seg }: { seg: Segment | null }) {
               </tbody>
             </table>
           ) : (
-            <Rows rows={o.rows ?? []} />
+            rows.length > 0 && <Facts rows={rows} cols={Math.min(4, rows.length)} />
           )}
-          <p className="ov-insight">{seg.insight}</p>
-          <Verified seg={seg} />
+          <div className="in foot">
+            <p className="say">{seg.insight}</p>
+            <Proof seg={seg} onOpen={onInspect} />
+          </div>
         </div>
       </div>
     );
   }
+
   if (o.slot === "stat_card" || o.slot === "player_card") {
+    const player = o.slot === "player_card";
     return (
-      <div className={`ov ov-side ${o.slot === "player_card" ? "left" : "right"}`} key={o.moment_id} style={style}>
-        <div className="ov-side-head">
-          <span className="ov-chip">{o.title}</span>
-          <span className="ov-sub">{o.subtitle}</span>
+      <div className={`gfx gfx-side ${player ? "left" : "right"}`} key={o.moment_id}>
+        <div className="board" style={teamVar(o.color)}>
+          <div className="stripe" />
+          <div className="in">
+            <div className="kick">
+              <span>{o.title}</span>
+              <span className="mono">{o.clock}</span>
+            </div>
+            <div className="d-semi stitle">{player && o.player ? o.player : o.subtitle}</div>
+            {player && o.player && !o.subtitle.includes(o.player) && <span className="pos">{o.subtitle}</span>}
+          </div>
+          {rows.length > 0 && <Facts rows={rows} cols={rows.length === 3 ? 3 : 2} />}
+          <div className="in foot">
+            <p className="say">{seg.insight}</p>
+            <Proof seg={seg} onOpen={onInspect} />
+          </div>
         </div>
-        <Rows rows={o.rows ?? []} />
-        <p className="ov-insight">{seg.insight}</p>
-        <Verified seg={seg} />
       </div>
     );
   }
+
   return (
-    <div className="ov ov-lower" key={o.moment_id} style={style}>
-      <span className="ov-chip">{o.title}</span>
-      <div className="ov-lower-body">
-        <strong>{o.subtitle}</strong>
-        <span>{seg.insight}</span>
+    <div className="gfx gfx-lower" key={o.moment_id}>
+      <div className="board lt" style={teamVar(o.color)}>
+        <span className="ltc" />
+        <div className="ltk">
+          <span className="kick">
+            {o.title} · {o.clock}
+          </span>
+          <b className="d-semi">{o.subtitle}</b>
+        </div>
+        <p className="say">{seg.insight}</p>
+        <Proof seg={seg} onOpen={onInspect} />
       </div>
-      <Verified seg={seg} />
     </div>
   );
 }
 
-function Rows({ rows }: { rows: { label: string; value?: string }[] }) {
+/** Popover listing every checked claim in a segment and the fact key it matched. */
+export function FactInspector({ seg, onClose }: { seg: Segment; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  const v = seg.verification;
   return (
-    <dl className="ov-rows">
-      {rows.map((r) => (
-        <div key={r.label}>
-          <dt>{r.label}</dt>
-          <dd>{r.value}</dd>
+    <div className="pop-scrim" onClick={onClose}>
+      <div className="pop" role="dialog" aria-label="Fact inspector" onClick={(e) => e.stopPropagation()}>
+        <div className="ph">
+          <b>
+            {v.checked.length} fact{v.checked.length === 1 ? "" : "s"} checked
+          </b>
+          <span className={`tag ${v.ok ? "pass" : "fail"}`}>{v.ok ? "All verified" : "Violations"}</span>
+          <button type="button" className="btn ghost x" onClick={onClose} aria-label="Close">
+            Esc
+          </button>
         </div>
-      ))}
-    </dl>
+        <div className="sent">{highlight(seg.insight, v.checked.map((c) => c[0]))}</div>
+        <table>
+          <tbody>
+            {v.checked.map(([tok, key], i) => (
+              <tr key={i}>
+                <td>{tok}</td>
+                <td>{key}</td>
+                <td>
+                  <Check />
+                </td>
+              </tr>
+            ))}
+            {v.violations.map((msg, i) => (
+              <tr key={`v${i}`} className="bad">
+                <td colSpan={3}>{msg}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="pf">
+          {seg.moment.headline} · {seg.slot.replace("_", " ")} · aired {seg.aired_clock}. Graphics fills boards from fact keys, so
+          their values come straight from the match engine.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Underlines each verified token where it appears in the sentence. */
+export function highlight(text: string, tokens: string[]) {
+  const toks = [...new Set(tokens.filter(Boolean))].sort((a, b) => b.length - a.length);
+  if (toks.length === 0) return text;
+  const re = new RegExp(`(${toks.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "g");
+  return text.split(re).map((part, i) =>
+    toks.includes(part) ? (
+      <span key={i} className="claim">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
   );
 }
 
@@ -136,7 +216,8 @@ const VOICE_LANG: Record<string, string> = { en: "en-GB", es: "es-ES", fr: "fr-F
 
 export function Captions({ segments, lang, voice }: { segments: Segment[]; lang: string; voice: boolean }) {
   const latest = segments[segments.length - 1];
-  const text = latest ? latest.commentary[lang] ?? latest.commentary.en : "";
+  const text = latest ? (latest.commentary[lang] ?? latest.commentary.en) : "";
+  const [shownAt, setShownAt] = useState(0);
   useEffect(() => {
     if (!voice || !text || !("speechSynthesis" in window)) return;
     const u = new SpeechSynthesisUtterance(text);
@@ -146,43 +227,32 @@ export function Captions({ segments, lang, voice }: { segments: Segment[]; lang:
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
   }, [text, voice, lang]);
-  if (!latest) return null;
+  useEffect(() => {
+    if (!latest) return;
+    const id = setTimeout(() => setShownAt(latest.receivedAt), 9000);
+    return () => clearTimeout(id);
+  }, [latest]);
+  if (!latest || shownAt === latest.receivedAt) return null;
   return (
-    <div className="captions" key={latest.moment.id}>
-      <span className="cap-mic">{lang.toUpperCase()}</span>
+    <div className="caption" key={latest.moment.id}>
+      <span className="lang">{lang.toUpperCase()}</span>
       <span>{text}</span>
     </div>
   );
 }
 
-const ICON: Record<string, string> = {
-  goal: "⚽",
-  shot: "◎",
-  save: "🧤",
-  yellow_card: "🟨",
-  red_card: "🟥",
-  substitution: "⇄",
-  corner: "⚑",
-  foul: "✕",
-  offside: "⚐",
-  period_start: "▶",
-  period_end: "■",
-};
-
-const NOTABLE = new Set(Object.keys(ICON));
+const NOTABLE = new Set(["goal", "shot", "save", "yellow_card", "red_card", "substitution", "corner", "foul", "offside", "period_start", "period_end"]);
 
 export function Feed({ events, init }: { events: MatchEvent[]; init: InitMsg }) {
-  const notable = events.filter((e) => NOTABLE.has(e.type)).slice(-6).reverse();
+  const notable = events.filter((e) => NOTABLE.has(e.type)).slice(-14).reverse();
+  if (notable.length === 0) return <p className="empty">Events appear here from kick-off.</p>;
   return (
     <ul className="feed">
       {notable.map((e) => (
-        <li key={e.id}>
-          <span className="feed-clock">{e.clock}</span>
-          <span className="feed-icon">{ICON[e.type]}</span>
-          <span className="feed-team" style={{ color: init.lineups[e.team].color }}>
-            {init.lineups[e.team].short}
-          </span>
-          <span className="feed-text">{describe(e)}</span>
+        <li key={e.id} className={e.type === "goal" ? "goal" : undefined}>
+          <span className="mono">{e.clock}</span>
+          <i style={{ background: init.lineups[e.team].color }} />
+          <span>{describe(e)}</span>
         </li>
       ))}
     </ul>

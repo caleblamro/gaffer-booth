@@ -15,6 +15,8 @@ export interface BroadcastOptions {
   speed: number;
   start: number;
   langs: string[];
+  /** Replays a specific match; omitted, the engine searches for a seed that fits the scenario. */
+  seed?: number;
 }
 
 export interface BroadcastState {
@@ -59,6 +61,7 @@ function wsUrl(o: BroadcastOptions): string {
     start: String(o.start),
     langs: o.langs.join(","),
   });
+  if (o.seed !== undefined) q.set("seed", String(o.seed));
   return `${proto}://${location.host}/ws/broadcast?${q}`;
 }
 
