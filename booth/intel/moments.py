@@ -168,6 +168,10 @@ class MomentDetector:
         if abs(d) < 1.6:
             return []
         top = "home" if d > 0 else "away"
+        t, o = w[top], w[other(top)]
+        # A swing needs real threat behind it, not just territory.
+        if t["xg"] < 0.3 or t["xg"] < o["xg"] * 2 or t["shots"] < 2:
+            return []
         if top == self.last_momentum_team and m - self.last_momentum_min < 15:
             return []
         if m - self.last_momentum_min < 7:
@@ -175,7 +179,6 @@ class MomentDetector:
         self.last_momentum_team = top
         self.last_momentum_min = m
         n = self.names
-        t, o = w[top], w[other(top)]
         facts = self.base_facts() + [
             Fact("window_min", "Window (minutes)", 10),
             Fact("xg_10", f"{n[top]} xG, last 10 min", t["xg"]),
