@@ -265,6 +265,7 @@ class MomentDetector:
             Fact("dribbles_won", "Dribbles won today", ps["dribbles_won"]),
             Fact("tackles_won", "Tackles won today", ps["tackles_won"]),
             Fact("interceptions", "Interceptions today", ps["interceptions"]),
+            Fact("ball_wins", "Ball wins today", ps["tackles_won"] + ps["interceptions"]),
             Fact("saves", "Saves today", ps["saves"]),
             Fact("pass_pct", "Pass accuracy % today", ps["pass_pct"]),
             Fact("touches", "Touches today", ps["touches"]),
