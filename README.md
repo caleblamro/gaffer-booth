@@ -18,6 +18,8 @@ A TV production team turns raw match data into story: someone spots the moment, 
 | **Graphics** | Picks which facts belong on the overlay. It returns fact *keys* only, and code fills in the values, so a graphic can never show a wrong number. |
 | **Commentator** | Voices the moment in up to three languages at once, and each line is verified as well. |
 
+After the final whistle, `GET /api/recap` produces a verified match report, player ratings (computed in code) and ready-to-post social copy for studio and club media teams.
+
 Every segment on air carries a **"✓ N facts verified"** badge, and the control room shows each claim mapped to the evidence it came from.
 
 ## How it works

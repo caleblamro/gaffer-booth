@@ -19,3 +19,12 @@ def test_broadcast_streams_to_full_time():
             if m["type"] == "end":
                 break
     assert {"init", "event", "stats", "console", "segment", "end"} <= kinds
+
+
+def test_recap_is_verified_and_rates_players():
+    c = TestClient(app)
+    r = c.get("/api/recap?scenario=comeback").json()
+    assert r["verification"]["ok"], r["verification"]["violations"]
+    assert r["ratings"] and 4.0 <= r["ratings"][0]["rating"] <= 10.0
+    assert r["score"] == {"home": 4, "away": 3} or sum(r["score"].values()) > 0
+    assert len(r["social"]) >= 2

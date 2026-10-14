@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from booth.crew.crew import Crew
 from booth.crew.llm import describe_mode, make_client
+from booth.crew.recap import make_recap
 from booth.intel.moments import MomentDetector
 from booth.intel.state import MatchState
 from booth.sim.engine import CLUBS, SCENARIOS, simulate
@@ -45,6 +46,14 @@ def scenarios() -> list[dict]:
     return [{"id": s.id, "title": s.title, "blurb": s.blurb,
              "home": CLUBS[s.home]["name"], "away": CLUBS[s.away]["name"]}
             for s in SCENARIOS.values()]
+
+
+@app.get("/api/recap")
+async def recap(scenario: str = "classic", seed: int | None = None, lang: str = "en") -> dict:
+    if scenario not in SCENARIOS:
+        scenario = "classic"
+    match = await asyncio.to_thread(simulate, scenario, seed)
+    return await make_recap(match, client(), [lang])
 
 
 @app.websocket("/ws/broadcast")

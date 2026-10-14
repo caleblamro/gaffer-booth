@@ -89,9 +89,11 @@ def verify(text: str, ev: Evidence, roster: list[str]) -> VerifyResult:
         pair = {(float(a), float(b)), (float(b), float(a))}
         if sh is not None and (sh, sa) in pair:
             res.checked.append((f"{a}-{b}", "score"))
-        else:
+            scrub = re.sub(rf"\b{a}\s*[-–]\s*{b}\b", " ", scrub, count=1)
+        elif sh is not None and float(a) <= 15 and float(b) <= 15 and "shot" not in scrub.lower():
             res.violations.append(f"scoreline '{a}-{b}' not in evidence")
-        scrub = re.sub(rf"\b{a}\s*[-–]\s*{b}\b", " ", scrub, count=1)
+            scrub = re.sub(rf"\b{a}\s*[-–]\s*{b}\b", " ", scrub, count=1)
+        # Otherwise leave both numbers in place to be checked individually (e.g. "shots 25-20").
     for m in NUM_RE.finditer(scrub):
         tok = m.group(1)
         if tok in FREE_NUMBERS:
