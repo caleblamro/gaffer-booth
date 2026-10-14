@@ -33,3 +33,34 @@ def test_rejects_wrong_scoreline_and_unknown_player():
 
 def test_decimal_comma_in_other_languages():
     assert verify("Una ocasión de 0,46 xG.", ev(), ROSTER).ok
+
+
+def test_shared_surname_is_not_credited_to_the_wrong_player():
+    roster = ["Kofi Grieve", "Pele Grieve"]
+    ev = Evidence.from_facts({"player": "Kofi Grieve"})
+    assert not verify("Pele Grieve is everywhere.", ev, roster).ok
+    res = verify("Grieve is everywhere.", ev, roster)
+    assert res.ok and res.checked == [("Kofi Grieve", "player")]
+    assert verify("Kofi Grieve is everywhere.", ev, roster).checked == [("Kofi Grieve", "player")]
+
+
+def test_spotlight_template_numbers_are_all_in_evidence():
+    from booth.crew.offline import analyst_insight
+    from booth.intel.moments import MomentDetector
+    from booth.intel.state import MatchState
+    from booth.sim.engine import simulate
+
+    match = simulate("classic")
+    names = {"home": match.home.name, "away": match.away.name}
+    roster = [p.name for t in (match.home, match.away) for p in t.players + t.bench]
+    state = MatchState(names=names)
+    det = MomentDetector(state, names)
+    spots = []
+    for e in match.events:
+        state.apply(e)
+        spots += [m for m in det.feed(e) if m.kind == "spotlight"]
+    assert spots
+    for m in spots:
+        text = analyst_insight(m, names)
+        res = verify(text, Evidence.from_facts(m.fact_dict()), roster)
+        assert res.ok, (text, res.violations)

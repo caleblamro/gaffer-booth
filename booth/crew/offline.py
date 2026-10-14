@@ -63,7 +63,7 @@ def analyst_insight(m: Moment, names: dict[str, str]) -> str:
         if f.get("dribbles_won"):
             bits.append(plural(f['dribbles_won'], "dribble") + " won")
         if f.get("tackles_won") or f.get("interceptions"):
-            bits.append(plural(f['tackles_won'] + f['interceptions'], "ball win"))
+            bits.append(plural(f['ball_wins'], "ball win"))
         if f.get("saves"):
             bits.append(plural(f['saves'], "save"))
         return f"{f['player']} is everywhere: " + ", ".join(bits or [f"{f['touches']} touches"]) + "."

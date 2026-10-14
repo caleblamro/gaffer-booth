@@ -108,12 +108,26 @@ def verify(text: str, ev: Evidence, roster: list[str]) -> VerifyResult:
         else:
             res.violations.append(f"number '{tok}' not in evidence")
     allowed_names = " ".join(ev.strings.values()).lower()
+    in_evidence = {n for n in roster if n.lower() in allowed_names}
+    seen: set[str] = set()
     for name in roster:
-        surname = name.split(" ")[-1]
-        if re.search(rf"\b{re.escape(name)}\b", text) or re.search(rf"\b{re.escape(surname)}\b", text):
-            if name.lower() in allowed_names or surname.lower() in allowed_names:
+        # A full name must itself be in evidence; a surname-only mention must match a player who is.
+        if name not in seen and re.search(rf"\b{re.escape(name)}\b", text):
+            seen.add(name)
+            if name in in_evidence:
                 res.checked.append((name, "player"))
             else:
                 res.violations.append(f"player '{name}' not in evidence")
+    scrub_names = text
+    for name in seen:
+        scrub_names = re.sub(rf"\b{re.escape(name)}\b", " ", scrub_names)
+    for surname in sorted({n.split(" ")[-1] for n in roster}):
+        if not re.search(rf"\b{re.escape(surname)}\b", scrub_names):
+            continue
+        hits = [n for n in roster if n.split(" ")[-1] == surname and n in in_evidence]
+        if hits:
+            res.checked.extend((n, "player") for n in hits)
+        else:
+            res.violations.append(f"player '{surname}' not in evidence")
     res.ok = not res.violations
     return res
