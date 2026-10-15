@@ -22,6 +22,7 @@ from booth.intel.state import MatchState
 
 from . import offline
 from .graphics import build_overlay
+from .llm import run_structured
 from .verify import Evidence, VerifyResult, verify
 
 log = logging.getLogger(__name__)
@@ -161,13 +162,7 @@ class Crew:
         return json.dumps({"error": f"no player named {name}"})
 
     async def _run(self, agent: str, prompt: str, schema: type[BaseModel]):
-        a = self.agents[agent]
-        resp = await asyncio.wait_for(a.run(prompt, options={"response_format": schema}),
-                                      self.timeout)
-        if resp.value is not None:
-            return resp.value
-        txt = resp.text.strip().removeprefix("```json").removesuffix("```").strip()
-        return schema.model_validate_json(txt)
+        return await run_structured(self.agents[agent], prompt, schema, self.timeout)
 
     # --- console --------------------------------------------------------
     async def log(self, agent: str, status: str, text: str, t0: float, moment: Moment | None,
