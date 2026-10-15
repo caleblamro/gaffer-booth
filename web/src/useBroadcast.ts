@@ -138,7 +138,11 @@ function reduce(s: BroadcastState, msg: any, seq: React.MutableRefObject<number>
     case "stats":
       return { ...s, stats: msg.stats, momentum: msg.momentum, topPlayers: msg.top_players };
     case "moment":
-      return { ...s, moments: [...s.moments.slice(-30), msg.moment], queueIds: [...s.queueIds, msg.moment.id] };
+      return {
+        ...s,
+        moments: [...s.moments.slice(-30), { ...msg.moment, receivedAt: Date.now() }],
+        queueIds: [...s.queueIds, msg.moment.id],
+      };
     case "queue":
       return { ...s, queueIds: msg.ids };
     case "console":

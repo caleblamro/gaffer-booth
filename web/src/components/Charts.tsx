@@ -1,8 +1,8 @@
-import type { InitMsg, Side, TeamStats } from "../types";
+import type { Side, TeamStats } from "../types";
 
 const TICKS = [0, 15, 30, 45, 60, 75, 90];
 
-export function Momentum({ series, init, height = 58 }: { series: [number, number][]; init: InitMsg; height?: number }) {
+export function Momentum({ series, height = 58 }: { series: [number, number][]; height?: number }) {
   const W = 600;
   const H = height;
   const mid = H / 2;
@@ -24,13 +24,13 @@ export function Momentum({ series, init, height = 58 }: { series: [number, numbe
           </clipPath>
         </defs>
         {[15, 30, 60, 75].map((m) => (
-          <line key={m} x1={x(m)} x2={x(m)} y1="0" y2={H} stroke="var(--line)" />
+          <line key={m} x1={x(m)} x2={x(m)} y1="0" y2={H} stroke="var(--border)" />
         ))}
-        <line x1={x(45)} x2={x(45)} y1="0" y2={H} stroke="var(--line-strong)" strokeDasharray="2 3" />
-        <path d={area} fill={init.lineups.home.color} clipPath="url(#mom-top)" opacity="0.9" />
-        <path d={area} fill={init.lineups.away.color} clipPath="url(#mom-bottom)" opacity="0.9" />
-        <line x1="0" x2={W} y1={mid} y2={mid} stroke="var(--fg-3)" strokeWidth="0.6" />
-        {now !== null && <line x1={x(now)} x2={x(now)} y1="2" y2={H - 2} stroke="var(--fg)" strokeWidth="1.2" />}
+        <line x1={x(45)} x2={x(45)} y1="0" y2={H} stroke="var(--border-2)" strokeDasharray="2 3" />
+        <path d={area} fill="var(--accent)" clipPath="url(#mom-top)" opacity="0.85" />
+        <path d={area} fill="var(--away)" clipPath="url(#mom-bottom)" opacity="0.85" />
+        <line x1="0" x2={W} y1={mid} y2={mid} stroke="var(--faint)" strokeWidth="0.6" />
+        {now !== null && <line x1={x(now)} x2={x(now)} y1="2" y2={H - 2} stroke="var(--text)" strokeWidth="1.2" />}
       </svg>
       <div className="ticks">
         {TICKS.map((m) => (
@@ -54,7 +54,7 @@ const ROWS: { key: keyof TeamStats; label: string; fmt?: (v: number) => string }
   { key: "fouls", label: "Fouls" },
 ];
 
-export function StatBars({ stats, init }: { stats: Record<Side, TeamStats> | null; init: InitMsg }) {
+export function StatBars({ stats }: { stats: Record<Side, TeamStats> | null }) {
   if (!stats) return <p className="empty">Stats arrive with the first touches.</p>;
   return (
     <div className="stats">
@@ -69,8 +69,8 @@ export function StatBars({ stats, init }: { stats: Record<Side, TeamStats> | nul
             <div>
               <span>{r.label}</span>
               <i>
-                <em style={{ width: `${(h / tot) * 100}%`, background: init.lineups.home.color }} />
-                <em style={{ width: `${(a / tot) * 100}%`, background: init.lineups.away.color }} />
+                <em style={{ width: `${(h / tot) * 100}%`, background: "var(--accent)" }} />
+                <em style={{ width: `${(a / tot) * 100}%`, background: "var(--away)" }} />
               </i>
             </div>
             <b>{f(a)}</b>

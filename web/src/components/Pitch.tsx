@@ -1,3 +1,4 @@
+import { inkOn } from "../lib/labels";
 import type { MatchEvent, Side } from "../types";
 import { PITCH_H as H, PITCH_W as W, type Frame } from "../lib/positions";
 
@@ -53,8 +54,12 @@ export function Pitch({ frame, events, colors, speed, thumb = false }: Props) {
       {frame.dots.map((d) => (
         <g key={d.id} className="dot" style={{ transform: `translate(${d.x}px, ${d.y}px)`, transitionDuration: `${dur}s` }}>
           {d.active && <circle r="3.6" className="halo" />}
-          <circle r="1.85" fill={colors[d.side]} stroke="rgba(243,245,244,.9)" strokeWidth="0.28" />
-          {!thumb && <text y="0.62">{d.number}</text>}
+          <circle r="1.85" fill={colors[d.side]} stroke="#0b2a4a" strokeWidth="0.28" />
+          {!thumb && (
+            <text y="0.62" fill={inkOn(colors[d.side])}>
+              {d.number}
+            </text>
+          )}
         </g>
       ))}
       <g className="ball" style={{ transform: `translate(${bx}px, ${by}px)`, transitionDuration: `${dur}s` }}>
