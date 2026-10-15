@@ -19,9 +19,9 @@ export function Pitch({ frame, events, colors, speed, thumb = false }: Props) {
   const [bx, by] = frame.ball;
 
   return (
-    <svg className="pitch" viewBox={`-4 -4 ${W + 8} ${H + 8}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <svg className="pitch radar" viewBox={`-4 -4 ${W + 8} ${H + 8}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       {Array.from({ length: 12 }, (_, i) => (
-        <rect key={i} x={-4 + i * 9.42} y="-4" width="9.42" height={H + 8} fill={i % 2 ? "var(--grass-a)" : "var(--grass-b)"} />
+        <rect key={i} x={-4 + i * 9.42} y="-4" width="9.42" height={H + 8} fill={i % 2 ? "var(--navy)" : "var(--navy-2)"} />
       ))}
       <g className="lines">
         <rect width={W} height={H} />

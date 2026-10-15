@@ -34,14 +34,14 @@ function Mesh() {
       const g = c.getContext("2d");
       if (!g) return;
       g.scale(d, d);
-      g.fillStyle = "#7038ff";
+      g.fillStyle = "#a960ee";
       g.fillRect(0, 0, r.width, r.height);
       const blobs: [number, number, number, string][] = [
-        [0.05, 0.85, 0.45, "#ef008f"],
-        [0.4, 0.95, 0.4, "#ff5f6d"],
-        [0.7, 0.9, 0.45, "#ffba27"],
-        [0.95, 0.7, 0.4, "#6ec3f4"],
-        [0.55, 0.5, 0.35, "#7038ff"],
+        [0.08, 0.9, 0.42, "#ff333d"],
+        [0.35, 0.95, 0.38, "#ff8a4d"],
+        [0.62, 0.95, 0.4, "#ffcb57"],
+        [0.9, 0.85, 0.45, "#90e0ff"],
+        [0.75, 0.45, 0.4, "#a960ee"],
       ];
       for (const [x, y, rad, col] of blobs) {
         const gr = g.createRadialGradient(x * r.width, y * r.height, 0, x * r.width, y * r.height, rad * r.width);

@@ -6,15 +6,17 @@
   --surface: #ffffff;
   --border: #e3e8ee;
   --border-2: #d5dbe1;
-  --text: #1a1f36;
-  --text-2: #3c4257;
-  --muted: #697386;
+  --text: #0a2540;
+  --text-2: #425466;
+  --muted: #6b7c93;
   --faint: #a3acb9;
   --accent: #635bff;
   --accent-hover: #5851ec;
   --accent-soft: #f0efff;
-  --away: #0bb6a1;
-  --away-soft: #e0f7f3;
+  --away: #0ab4d6;
+  --away-soft: #e0f7fc;
+  --navy: #0a2540;
+  --navy-2: #0f2e50;
   --ok: #1ea672;
   --ok-bg: #d7f7c2;
   --ok-text: #05690d;
@@ -228,8 +230,13 @@ h3 {
 }
 .linkbtn {
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 12px;
+  text-decoration: none;
+  transition: color 0.12s;
+}
+.linkbtn:hover {
+  color: var(--text);
 }
 .segctl {
   display: flex;
@@ -349,9 +356,9 @@ button.pill {
   position: absolute;
   left: 0;
   right: 0;
-  top: -60%;
-  height: 95%;
-  transform: skewY(-12deg);
+  top: -340px;
+  height: 684px;
+  transform: skewY(-6deg);
   transform-origin: 0;
   overflow: hidden;
 }
@@ -370,15 +377,13 @@ button.pill {
   padding: 22px 64px;
 }
 .hero-nav {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  margin-left: auto;
   display: flex;
   gap: 28px;
-  font-weight: 500;
+  font-weight: 600;
 }
 .hero-nav a {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
 }
 .hero-nav a:hover {
   color: #fff;
@@ -389,19 +394,20 @@ button.pill {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 520px;
   gap: 64px;
-  padding: 56px 64px 48px;
+  padding: 30px 64px 48px;
   align-items: start;
 }
 .lead h1 {
-  font-size: 56px;
-  line-height: 60px;
+  font-size: 50px;
+  line-height: 54px;
   font-weight: 800;
   letter-spacing: -0.035em;
-  color: var(--text);
+  color: var(--navy);
+  mix-blend-mode: color-burn;
   max-width: 640px;
 }
 .lead p {
-  margin-top: 24px;
+  margin-top: 84px;
   font-size: 19px;
   line-height: 30px;
   color: var(--text-2);
@@ -413,7 +419,7 @@ button.pill {
   margin-top: 40px;
 }
 .proof-stats div {
-  border-left: 2px solid var(--accent);
+  border-left: 1px solid var(--accent);
   padding-left: 14px;
 }
 .proof-stats b {
@@ -607,17 +613,22 @@ button.pill {
   text-align: left;
 }
 .nav button:hover:not(:disabled):not(.on) {
-  background: #edf1f6;
+  color: var(--text);
+  background: #ebeef3;
 }
 .nav button:disabled {
   color: var(--faint);
 }
-.nav i {
+.nav svg {
   width: 16px;
-  text-align: center;
-  font-style: normal;
+  height: 16px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   color: var(--faint);
-  font-size: 12px;
 }
 .nav em {
   margin-left: auto;
@@ -627,9 +638,9 @@ button.pill {
 }
 .nav .on {
   color: var(--accent);
-  background: var(--accent-soft);
+  font-weight: 600;
 }
-.nav .on i,
+.nav .on svg,
 .nav .on em {
   color: var(--accent);
 }
@@ -866,7 +877,7 @@ h1 .sc {
   position: relative;
   flex: 1;
   min-height: 0;
-  background: var(--grass-a);
+  background: var(--navy);
   overflow: hidden;
 }
 .monitor {
@@ -901,6 +912,13 @@ svg.pitch {
 .pitch .dot text {
   font: 700 1.75px var(--sans);
   text-anchor: middle;
+}
+svg.pitch.radar {
+  background: var(--navy);
+}
+.radar .lines {
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 0.25;
 }
 .pitch .halo {
   fill: none;
