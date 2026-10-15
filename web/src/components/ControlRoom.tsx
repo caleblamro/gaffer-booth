@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import type { ConsoleLine, InitMsg, MatchEvent, Moment, Segment } from "../types";
 import { Check, Pulse } from "./Brand";
 import { Feed, highlight } from "./Broadcast";
@@ -20,6 +20,8 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   fallback: { label: "Template", cls: "hold" },
   hold: { label: "Holding", cls: "hold" },
   drop: { label: "Dropped", cls: "hold" },
+  discarded: { label: "Discarded", cls: "hold" },
+  request: { label: "Talkback", cls: "idle" },
 };
 
 function Tag({ status }: { status: string }) {
@@ -40,14 +42,27 @@ interface Props {
   segments: Segment[];
   events: MatchEvent[];
   paused: boolean;
+  live: boolean;
+  onTalkback: (text: string) => void;
 }
 
 type Tab = "rundown" | "feed" | "detected";
 
 /** The crew rail: agent status, then the rundown grouped by moment, newest first. */
-export function ControlRoom({ init, lines, moments, queueIds, segments, events, paused }: Props) {
+export function ControlRoom({ init, lines, moments, queueIds, segments, events, paused, live, onTalkback }: Props) {
   const [tab, setTab] = useState<Tab>("rundown");
   const [open, setOpen] = useState<number | null>(null);
+  const [ask, setAsk] = useState("");
+
+  const sendTalkback = (e: FormEvent) => {
+    e.preventDefault();
+    const text = ask.trim();
+    if (!text) return;
+    onTalkback(text);
+    setAsk("");
+    setTab("rundown");
+    setOpen(null);
+  };
 
   const lastByAgent = new Map<string, ConsoleLine>();
   for (const l of lines) lastByAgent.set(l.agent, l);
@@ -141,7 +156,7 @@ export function ControlRoom({ init, lines, moments, queueIds, segments, events, 
               const seg = segByMoment.get(id);
               const last = ls[ls.length - 1];
               const director = ls.find((l) => l.agent === "Director");
-              const head = m?.headline ?? director?.text ?? "Moment";
+              const head = m?.request ? `Talkback: “${m.request}”` : (m?.headline ?? director?.text ?? "Moment");
               const isOpen = id === current;
               return (
                 <div key={id} className={`mo${isOpen ? " cur" : ""}`}>
@@ -159,6 +174,7 @@ export function ControlRoom({ init, lines, moments, queueIds, segments, events, 
                   </button>
                   {!isOpen && seg && (
                     <p className="sub">
+                      {seg.breaking ? "breaking · " : ""}
                       {seg.slot.replace("_", " ")} · {seg.verification.checked.length > 0 ? "verified" : "no numeric claims"}
                     </p>
                   )}
@@ -202,6 +218,21 @@ export function ControlRoom({ init, lines, moments, queueIds, segments, events, 
           <span className="faint">Nothing queued</span>
         )}
       </div>
+      <form className="next talkback" onSubmit={sendTalkback}>
+        <span className="eyebrow">Talkback</span>
+        <input
+          type="text"
+          value={ask}
+          onChange={(e) => setAsk(e.target.value)}
+          placeholder="Ask the crew, e.g. give me a stat on a player"
+          aria-label="Talkback to the crew"
+          maxLength={200}
+          disabled={!live}
+        />
+        <button type="submit" className="btn" disabled={!live || !ask.trim()}>
+          Send
+        </button>
+      </form>
     </aside>
   );
 }

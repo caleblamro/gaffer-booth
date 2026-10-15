@@ -96,6 +96,11 @@ async def broadcast(ws: WebSocket) -> None:
                 control["paused"] = False
             elif cmd == "speed":
                 control["speed"] = max(1.0, min(120.0, float(msg.get("value", speed))))
+            elif cmd == "talkback":
+                # Producer talkback: a free-text request the crew answers on air next.
+                text = " ".join(str(msg.get("text", "")).split())[:200]
+                if text:
+                    await crew.talkback(text)
 
     crew_task = asyncio.create_task(crew.run_forever())
     recv_task = asyncio.create_task(receiver())
@@ -123,10 +128,9 @@ async def broadcast(ws: WebSocket) -> None:
                 await emit({"type": "stats", "stats": state.team_stats(),
                             "momentum": state.momentum_series[-120:],
                             "top_players": state.top_players(5)})
-        # Let the crew finish the full-time segment.
-        for _ in range(200):
-            if not crew.queue:
-                break
+        # Let the crew finish the full-time segment (including one already in production).
+        deadline = asyncio.get_running_loop().time() + max(20.0, 4 * crew.timeout)
+        while not crew.idle and asyncio.get_running_loop().time() < deadline:
             await asyncio.sleep(0.1)
         await asyncio.sleep(1.0)
         await emit({"type": "end", "score": state.scoreboard(), "stats": state.team_stats()})

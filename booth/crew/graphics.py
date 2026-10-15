@@ -23,6 +23,9 @@ def build_overlay(m: Moment, slot: str, names: dict[str, str], colors: dict[str,
     if m.player:
         # The player's name is already the headline of the graphic.
         keys = [k for k in keys if facts[k].value != m.player]
+    if m.kind == "talkback":
+        # Answers are built from whatever the stats are; empty rows make a weak graphic.
+        keys = [k for k in keys if facts[k].value != 0] or keys
     if not keys:
         keys = [k for k in DEFAULT_GRAPHIC_KEYS.get(m.kind, []) if k in facts]
     keys = keys[:4]

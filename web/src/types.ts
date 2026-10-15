@@ -75,6 +75,8 @@ export interface Moment {
   headline: string;
   facts: Fact[];
   player?: string | null;
+  /** Producer talkback text, when this moment answers a request. */
+  request?: string | null;
 }
 
 export interface OverlayRow {
@@ -115,11 +117,15 @@ export interface Segment {
   commentary: Record<string, string>;
   verification: { ok: boolean; checked: [string, string][]; violations: string[] };
   aired_clock: string;
+  /** Aired straight from the template tier because the crew was busy. */
+  breaking?: boolean;
+  talkback?: boolean;
+  request?: string;
   receivedAt: number;
 }
 
 export interface ConsoleLine {
-  agent: "Director" | "Analyst" | "Verifier" | "Graphics" | "Commentator";
+  agent: "Producer" | "Director" | "Analyst" | "Verifier" | "Graphics" | "Commentator";
   status: string;
   text: string;
   ms: number;
