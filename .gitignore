@@ -8,3 +8,4 @@ web/dist/
 .env
 .azure/
 *.tsbuildinfo
+*.egg-info/

@@ -28,3 +28,20 @@ def test_recap_is_verified_and_rates_players():
     assert r["ratings"] and 4.0 <= r["ratings"][0]["rating"] <= 10.0
     assert r["score"] == {"home": 4, "away": 3} or sum(r["score"].values()) > 0
     assert len(r["social"]) >= 2
+
+
+def test_talkback_over_the_websocket_airs_a_verified_segment():
+    c = TestClient(app)
+    seg = None
+    with c.websocket_connect("/ws/broadcast?scenario=comeback&speed=60&start=80&langs=en") as ws:
+        assert ws.receive_json()["type"] == "init"
+        ws.send_json({"cmd": "talkback", "text": "why are Harbour City losing midfield?"})
+        while True:
+            m = ws.receive_json()
+            if m["type"] == "segment" and m.get("talkback"):
+                seg = m
+            if m["type"] == "end":
+                break
+    assert seg is not None
+    assert seg["request"] == "why are Harbour City losing midfield?"
+    assert seg["verification"]["ok"]

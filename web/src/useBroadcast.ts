@@ -105,6 +105,9 @@ export function useBroadcast() {
 
   const setSpeed = useCallback((v: number) => send({ cmd: "speed", value: v }), [send]);
 
+  /** Producer talkback: a free-text request the crew answers on air next. */
+  const talkback = useCallback((text: string) => send({ cmd: "talkback", text }), [send]);
+
   const reset = useCallback(() => {
     stop();
     setState(EMPTY);
@@ -112,7 +115,7 @@ export function useBroadcast() {
 
   useEffect(() => stop, [stop]);
 
-  return { state, start, stop, togglePause, setSpeed, reset };
+  return { state, start, stop, togglePause, setSpeed, talkback, reset };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

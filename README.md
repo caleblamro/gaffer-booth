@@ -18,6 +18,8 @@ A TV production team turns raw match data into story: someone spots the moment, 
 | **Graphics** | Picks which facts belong on the overlay. It returns fact *keys* only, and code fills in the values, so a graphic can never show a wrong number. |
 | **Commentator** | Voices the moment in up to three languages at once, and each line is verified as well. |
 
+During the broadcast the producer can use **talkback**: type a question in the control room ("why are Harbour City losing midfield?", "give me a stat on Wes Varga") and the crew answers it on air next. Code builds an evidence pack for the player or team named, the Analyst answers with its tools, and the answer goes through the same verifier loop before it airs as a graphic plus commentary. With no model, the template tier answers from the same stats.
+
 After the final whistle, `GET /api/recap` produces a verified match report, player ratings (computed in code) and ready-to-post social copy for studio and club media teams.
 
 Every segment on air carries a **"✓ N facts verified"** badge, and the control room shows each claim mapped to the evidence it came from.
@@ -29,11 +31,14 @@ flowchart LR
   SIM[Synthetic match engine<br/>events at match speed] --> STATE[Live state<br/>xG, possession, PPDA, momentum]
   STATE --> DET[Moment detector<br/>goals, big chances, momentum swings,<br/>pressing collapse, player spotlight]
   DET -->|evidence packs| DIR[Director]
+  PRO[Producer talkback] -->|evidence pack| DIR
   DIR --> AN[Analyst + tools]
+  DIR --> GFX[Graphics]
   AN --> VER{Verifier}
   VER -- rejected --> AN
-  VER -- approved --> GFX[Graphics]
-  GFX --> COM[Commentator]
+  VER -- code check passed --> COM[Commentator]
+  VER -- judge approved --> UI
+  GFX --> UI
   COM --> UI[Broadcast UI<br/>overlays, captions, voice]
   DIR & AN & VER & GFX & COM -.-> CR[Control room console]
 ```
@@ -43,7 +48,7 @@ Key design choices:
 - **Code computes, models explain.** All statistics come from the live state engine. Agents receive evidence packs and may only cite numbers in them or in tool results.
 - **Explainable by construction.** The verifier maps every number in every sentence back to a named fact. You can see the mapping in the control room.
 - **Always on time.** Live TV does not wait. Each agent has a deterministic fallback tier: if a model is slow, unavailable, or fails verification twice, the template tier airs a correct segment instead. The Director drops moments the match has moved past.
-- **Real-time multi-agent orchestration.** Moments queue up while the crew is busy, and the Director prioritizes, so a goal pre-empts a substitution.
+- **Real-time multi-agent orchestration.** Moments queue up while the crew is busy, and the Director prioritizes, so a goal pre-empts a substitution. Within a segment the agents overlap: Graphics works alongside the Analyst, and the Commentator starts once the code verifier passes, while the LLM judge is still checking (its line is thrown away if the judge rejects). Goals skip the Director model, and a goal that would wait too long behind another segment airs at once from the verified template tier as a breaking segment, so it is never dropped.
 
 ## Synthetic data
 

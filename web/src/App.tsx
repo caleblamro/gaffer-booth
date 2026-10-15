@@ -13,7 +13,7 @@ import { useBroadcast, type BroadcastOptions, type BroadcastState } from "./useB
 import { useDirector, type Direction } from "./useDirector";
 
 export default function App() {
-  const { state, start, togglePause, setSpeed, reset } = useBroadcast();
+  const { state, start, togglePause, setSpeed, talkback, reset } = useBroadcast();
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [scenario, setScenario] = useState("comeback");
   const [speed, setSpeedLocal] = useState(20);
@@ -84,6 +84,7 @@ export default function App() {
       lang={lang}
       setLang={setLang}
       togglePause={togglePause}
+      onTalkback={talkback}
       onEnd={reset}
     />
   );
@@ -97,10 +98,11 @@ interface LiveProps {
   lang: string;
   setLang: (l: string) => void;
   togglePause: () => void;
+  onTalkback: (text: string) => void;
   onEnd: () => void;
 }
 
-function Live({ state, init, speed, setSpeed, lang, setLang, togglePause, onEnd }: LiveProps) {
+function Live({ state, init, speed, setSpeed, lang, setLang, togglePause, onTalkback, onEnd }: LiveProps) {
   const [voice, setVoice] = useState(false);
   const [view, setView] = useState<"program" | "multi">("program");
   const [inspect, setInspect] = useState<Segment | null>(null);
@@ -112,7 +114,7 @@ function Live({ state, init, speed, setSpeed, lang, setLang, togglePause, onEnd 
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code === "Space" && !(e.target instanceof HTMLButtonElement)) {
+      if (e.code === "Space" && !(e.target instanceof HTMLButtonElement || e.target instanceof HTMLInputElement)) {
         e.preventDefault();
         togglePause();
       }
@@ -234,6 +236,8 @@ function Live({ state, init, speed, setSpeed, lang, setLang, togglePause, onEnd 
             segments={state.segments}
             events={state.events}
             paused={state.paused}
+            live={live}
+            onTalkback={onTalkback}
           />
         </main>
       )}

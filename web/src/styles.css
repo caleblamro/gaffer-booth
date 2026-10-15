@@ -1510,6 +1510,16 @@ em.pv {
   border-radius: 2px;
   flex: none;
 }
+.talkback input {
+  flex: 1;
+  min-width: 0;
+  font: 400 12.5px/1 var(--body);
+  color: var(--fg);
+  background: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-2);
+  padding: 7px 10px;
+}
 
 /* ---------- Fact inspector ---------- */
 .pop-scrim {
