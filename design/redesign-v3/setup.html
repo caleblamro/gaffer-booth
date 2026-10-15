@@ -8,19 +8,19 @@
 <style>
 body { overflow: hidden; background: var(--surface); }
 .hero { position: relative; height: 100vh; overflow: hidden; }
-.wash { position: absolute; left: 0; right: 0; top: -60%; height: 95%; transform: skewY(-12deg); transform-origin: 0; overflow: hidden; }
+.wash { position: absolute; left: 0; right: 0; top: -38%; height: 76%; transform: skewY(-6deg); transform-origin: 0; overflow: hidden; }
 .wash canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 22px 64px; color: #fff; }
 .top .brand { padding: 0; color: #fff; }
 .top .brand .logo { background: rgba(255,255,255,.22); }
 .top nav { display: flex; gap: 28px; font-weight: 500; }
-.top nav a { color: rgba(255,255,255,.9); padding: 0; }
+.top nav a { color: #fff; padding: 0; font-weight: 600; text-decoration: none; opacity: .92; } .top nav a:hover { opacity: 1; background: none; }
 .top .btn { background: rgba(255,255,255,.22); color: #fff; box-shadow: none; }
-.body { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 520px; gap: 64px; padding: 56px 64px 0; align-items: start; }
-.lead h1 { font-size: 56px; line-height: 60px; font-weight: 800; letter-spacing: -.035em; color: var(--text); max-width: 640px; }
-.lead p { margin-top: 24px; font-size: 19px; line-height: 30px; color: var(--text-2); max-width: 540px; }
+.body { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 520px; gap: 64px; padding: 30px 64px 0; align-items: start; }
+.lead h1 { font-size: 50px; line-height: 54px; font-weight: 800; letter-spacing: -.035em; color: var(--navy); mix-blend-mode: color-burn; max-width: 640px; }
+.lead p { margin-top: 84px; font-size: 19px; line-height: 30px; color: var(--text-2); max-width: 540px; }
 .lead .stats { display: flex; gap: 40px; margin-top: 40px; }
-.lead .stats div { border-left: 2px solid var(--accent); padding-left: 14px; }
+.lead .stats div { border-left: 1px solid var(--accent); padding-left: 14px; }
 .lead .stats b { display: block; font-size: 22px; font-weight: 700; }
 .lead .stats span { color: var(--muted); font-size: 13px; }
 .form { background: var(--surface); border-radius: 12px; box-shadow: var(--shadow-2); padding: 24px; display: grid; gap: 18px; }
@@ -44,7 +44,7 @@ body { overflow: hidden; background: var(--surface); }
   <div class="wash"><canvas id="mesh"></canvas></div>
   <header class="top">
     <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M4 18 L12 4 L20 18 Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><circle cx="12" cy="14" r="2.4" fill="#fff"/></svg></span>Gaffer Booth</div>
-    <nav><a>How it works</a><a>Verification</a><a>Recap API</a><a>GitHub</a></nav>
+    <nav><a href="#">How it works</a><a href="#">Verification</a><a href="#">Recap API</a><a href="#">GitHub ›</a></nav>
   </header>
   <div class="body">
     <div class="lead">
@@ -81,8 +81,8 @@ body { overflow: hidden; background: var(--surface); }
 // Stripe-like mesh: a few soft colour blobs blended on a canvas, drawn once.
 const c = document.getElementById("mesh"), r = c.getBoundingClientRect(), d = devicePixelRatio || 1;
 c.width = r.width * d; c.height = r.height * d; const g = c.getContext("2d"); g.scale(d, d);
-g.fillStyle = "#7038ff"; g.fillRect(0, 0, r.width, r.height);
-for (const [x, y, rad, col] of [[.05,.85,.45,"#ef008f"],[.4,.95,.4,"#ff5f6d"],[.7,.9,.45,"#ffba27"],[.95,.7,.4,"#6ec3f4"],[.55,.5,.35,"#7038ff"]]) {
+g.fillStyle = "#a960ee"; g.fillRect(0, 0, r.width, r.height);
+for (const [x, y, rad, col] of [[.08,.9,.42,"#ff333d"],[.35,.95,.38,"#ff8a4d"],[.62,.95,.4,"#ffcb57"],[.9,.85,.45,"#90e0ff"],[.75,.45,.4,"#a960ee"]]) {
   const gr = g.createRadialGradient(x*r.width, y*r.height, 0, x*r.width, y*r.height, rad*r.width);
   gr.addColorStop(0, col); gr.addColorStop(1, col + "00"); g.fillStyle = gr; g.fillRect(0, 0, r.width, r.height);
 }

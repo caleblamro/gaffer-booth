@@ -11,11 +11,11 @@
   <aside class="side">
     <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M4 18 L12 4 L20 18 Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><circle cx="12" cy="14" r="2.4" fill="#fff"/></svg></span>Gaffer Booth</div>
     <nav>
-      <a class="on"><i>●</i>Live broadcast</a>
-      <a><i>≡</i>Rundown</a>
-      <a><i>✓</i>Verification log</a>
-      <a><i>◷</i>Full-time recap</a>
-      <a><i>⚙</i>Crew settings</a>
+      <a class="on" href="#"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="1.6"/><path d="M5 5a4.2 4.2 0 0 0 0 6M11 5a4.2 4.2 0 0 1 0 6M3 3a7 7 0 0 0 0 10M13 3a7 7 0 0 1 0 10"/></svg>Live broadcast</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M5.5 4h8M5.5 8h8M5.5 12h8"/><circle cx="2.5" cy="4" r=".6"/><circle cx="2.5" cy="8" r=".6"/><circle cx="2.5" cy="12" r=".6"/></svg>Rundown</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M8 1.8 13 3.6v4.1c0 3-2.1 5.4-5 6.5-2.9-1.1-5-3.5-5-6.5V3.6Z"/><path d="m5.6 8 1.7 1.7 3.2-3.4"/></svg>Verification log</a>
+      <a href="#"><svg viewBox="0 0 16 16"><rect x="2.5" y="2" width="11" height="12" rx="1.5"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg>Full-time recap</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M2.5 4.5h7M12.5 4.5h1M2.5 11.5h1M6.5 11.5h7"/><circle cx="11" cy="4.5" r="1.5"/><circle cx="5" cy="11.5" r="1.5"/></svg>Crew settings</a>
     </nav>
     <div class="side-foot">
       <div class="model"><span class="k">Model</span><span>nemotron-3.5-super-vl</span><span class="muted">OpenRouter · free tier</span></div>
@@ -116,7 +116,7 @@
 </div>
 <script src="pitch.js"></script>
 <script>
-drawPitch(document.getElementById("pitch"), { stripes: true, grassA: "#2c7a52", grassB: "#2f8358", line: "rgba(255,255,255,.8)", lw: 0.3, home: "#ffffff", away: "#0b2a4a", ball: "#ffd43b", ring: "#0b2a4a", r: 0.85 });
+drawPitch(document.getElementById("pitch"), { stripes: true, grassA: "#0a2540", grassB: "#0f2e50", line: "rgba(255,255,255,.28)", lw: 0.25, home: "#8f89ff", away: "#2fd3f0", ball: "#ffffff", ring: "#0a2540", r: 1.15 });
 const series = {
   xg: [[0,.1,.2,.3,.5,.6,.9,1.0,1.2,1.4,1.5,1.7,1.9,2.13],[0,.1,.2,.3,.4,.5,.6,.7,.8,.8,.9,1.0,1.0,1.04]],
   shots: [[0,1,2,3,4,5,6,7,8,9,10,11,12,13],[0,2,3,5,7,8,10,11,13,14,15,17,18,19]],
@@ -129,7 +129,7 @@ document.querySelectorAll("canvas[data-s]").forEach((cv) => {
   const [h, a] = series[cv.dataset.s], all = h.concat(a), mx = Math.max(...all), mn = Math.min(...all);
   const y = (v) => r.height - 4 - (v - mn) / (mx - mn || 1) * (r.height - 8), x = (i) => i / (h.length - 1) * r.width;
   g.strokeStyle = "#e3e8ee"; g.beginPath(); g.moveTo(0, r.height - .5); g.lineTo(r.width, r.height - .5); g.stroke();
-  for (const [s, c, fill] of [[a, "#0bb6a1", false], [h, "#635bff", true]]) {
+  for (const [s, c, fill] of [[a, "#0ab4d6", false], [h, "#635bff", true]]) {
     g.beginPath(); s.forEach((v, i) => i ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v)));
     g.lineWidth = 2; g.strokeStyle = c; g.stroke();
     if (fill) { g.lineTo(r.width, r.height); g.lineTo(0, r.height); g.closePath(); const gr = g.createLinearGradient(0, 0, 0, r.height); gr.addColorStop(0, "rgba(99,91,255,.18)"); gr.addColorStop(1, "rgba(99,91,255,0)"); g.fillStyle = gr; g.fill(); }

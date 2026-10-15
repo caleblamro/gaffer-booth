@@ -2,9 +2,9 @@
    one blurple accent for actions and the home side, hairline borders and soft layered shadows. */
 :root {
   --canvas: #f6f9fc; --surface: #ffffff; --border: #e3e8ee; --border-2: #d5dbe1;
-  --text: #1a1f36; --text-2: #3c4257; --muted: #697386; --faint: #a3acb9;
+  --text: #0a2540; --text-2: #425466; --muted: #6b7c93; --faint: #a3acb9; --navy: #0a2540; --navy-2: #0e2d4d;
   --accent: #635bff; --accent-hover: #5851ec; --accent-soft: #f0efff;
-  --away: #0bb6a1;
+  --away: #0ab4d6;
   --ok: #1ea672; --ok-bg: #d7f7c2; --ok-text: #05690d;
   --bad: #df1b41; --bad-bg: #ffe7f2; --bad-text: #b3093c;
   --warn-bg: #fcedb9; --warn-text: #a82c00;
@@ -24,13 +24,16 @@ button { font: inherit; }
 .shell { display: grid; grid-template-columns: 236px 1fr; height: 100vh; }
 .side { background: var(--canvas); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 18px 12px; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; padding: 0 8px 20px; }
-.logo { width: 26px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, #7a73ff, #635bff 55%, #0bb6a1); display: grid; place-items: center; }
+.logo { width: 26px; height: 26px; border-radius: 6px; background: var(--accent); display: grid; place-items: center; }
 .logo svg { width: 16px; height: 16px; }
 nav { display: grid; gap: 2px; }
-nav a { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; color: var(--text-2); font-weight: 500; cursor: pointer; }
-nav a i { width: 16px; text-align: center; font-style: normal; color: var(--faint); font-size: 12px; }
-nav a.on { color: var(--accent); background: var(--accent-soft); }
-nav a.on i { color: var(--accent); }
+nav a { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 6px; color: var(--text-2); font-weight: 500; cursor: pointer; text-decoration: none; transition: color .12s, background .12s; }
+nav a svg { width: 16px; height: 16px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; color: var(--faint); }
+nav a:hover { color: var(--text); background: #ebeef3; }
+nav a.on { color: var(--accent); font-weight: 600; }
+nav a.on svg { color: var(--accent); }
+a.link { color: var(--accent); font-weight: 500; text-decoration: none; }
+a.link:hover { color: var(--text); }
 .side-foot { margin-top: auto; display: grid; gap: 12px; padding: 0 8px; }
 .model { display: grid; gap: 2px; font-size: 13px; padding: 12px; background: var(--surface); border-radius: 8px; box-shadow: var(--shadow-1); }
 .model .k { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
@@ -72,7 +75,7 @@ h3 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacin
 .card-h { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
 
 .program { grid-row: 1; overflow: hidden; display: flex; flex-direction: column; }
-.pic { position: relative; flex: 1; min-height: 0; background: #2c7a52; overflow: hidden; }
+.pic { position: relative; flex: 1; min-height: 0; background: var(--navy); overflow: hidden; }
 .pic svg { position: absolute; inset: -4% -2%; width: 104%; height: 108%; }
 .ov-score { position: absolute; top: 16px; left: 16px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,.96); border-radius: 6px; padding: 6px 12px; box-shadow: var(--shadow-2); font-weight: 600; }
 .ov-score .h { color: var(--accent); } .ov-score .a { color: var(--away); }
@@ -88,8 +91,8 @@ h3 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacin
 .ov-stats div:last-child { border-right: 0; }
 .ov-stats b { display: block; white-space: nowrap; font-size: 18px; font-weight: 700; }
 .ov-stats span { font-size: 12px; color: var(--muted); }
-.ov-proof { margin: 0 -18px; padding: 7px 18px; background: var(--ok-bg); color: var(--ok-text); font-size: 12px; font-weight: 600; }
-.ov-cap { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; gap: 12px; align-items: center; background: rgba(26,31,54,.86); color: #fff; border-radius: 8px; padding: 10px 14px; font-size: 15px; line-height: 21px; backdrop-filter: blur(6px); }
+.ov-proof { margin: 0 -18px; padding: 8px 18px; background: #f6f9fc; border-top: 1px solid var(--border); color: var(--ok); font-size: 12px; font-weight: 600; }
+.ov-cap { position: absolute; left: 16px; right: 16px; bottom: 16px; display: flex; gap: 12px; align-items: center; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); color: #fff; border-radius: 8px; padding: 10px 14px; font-size: 15px; line-height: 21px; backdrop-filter: blur(6px); }
 .ov-cap span { font: 600 11px var(--mono); background: rgba(255,255,255,.16); border-radius: 4px; padding: 2px 6px; }
 .cams { display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-top: 1px solid var(--border); }
 .cam { font-size: 13px; font-weight: 500; color: var(--muted); padding: 4px 10px; border-radius: 6px; }
@@ -124,6 +127,7 @@ h3 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacin
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); padding: 8px 18px; border-bottom: 1px solid var(--border); }
 td { padding: 9px 18px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-tr.hl td { background: #fafbff; }
+tr.hl td { background: #f8f8ff; }
+tr.hl td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
 .r { text-align: right; }
 td b { font-weight: 600; }

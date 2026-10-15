@@ -30,12 +30,15 @@
 .stats4 span { display: block; font-size: 12px; color: var(--muted); }
 .stats4 b { font-size: 20px; font-weight: 700; }
 .stats4 em { font-style: normal; color: var(--muted); font-weight: 500; }
-.ratings td { padding: 8px 18px; }
+.ratings td { padding: 8px 14px; }
+.ratings td:first-child { padding-left: 18px; }
+.ratings td:last-child { padding-right: 18px; width: 1%; }
+.ratings td.mono { color: var(--muted); font-size: 12.5px; }
 .rbar { display: inline-block; height: 6px; border-radius: 3px; background: var(--accent); vertical-align: middle; }
 .rbar.a { background: var(--away); }
 .post { margin: 12px 18px 0; padding: 12px 14px; border-radius: 8px; box-shadow: 0 0 0 1px var(--border); font-size: 13.5px; line-height: 19px; }
 .post .pf { display: flex; justify-content: space-between; margin-top: 8px; color: var(--muted); font-size: 12px; }
-.post .pf a { color: var(--accent); font-weight: 600; }
+
 </style>
 </head>
 <body>
@@ -43,11 +46,11 @@
   <aside class="side">
     <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M4 18 L12 4 L20 18 Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><circle cx="12" cy="14" r="2.4" fill="#fff"/></svg></span>Gaffer Booth</div>
     <nav>
-      <a><i>●</i>Live broadcast</a>
-      <a><i>≡</i>Rundown</a>
-      <a><i>✓</i>Verification log</a>
-      <a class="on"><i>◷</i>Full-time recap</a>
-      <a><i>⚙</i>Crew settings</a>
+      <a href="#"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="1.6"/><path d="M5 5a4.2 4.2 0 0 0 0 6M11 5a4.2 4.2 0 0 1 0 6M3 3a7 7 0 0 0 0 10M13 3a7 7 0 0 1 0 10"/></svg>Live broadcast</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M5.5 4h8M5.5 8h8M5.5 12h8"/><circle cx="2.5" cy="4" r=".6"/><circle cx="2.5" cy="8" r=".6"/><circle cx="2.5" cy="12" r=".6"/></svg>Rundown</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M8 1.8 13 3.6v4.1c0 3-2.1 5.4-5 6.5-2.9-1.1-5-3.5-5-6.5V3.6Z"/><path d="m5.6 8 1.7 1.7 3.2-3.4"/></svg>Verification log</a>
+      <a class="on" href="#"><svg viewBox="0 0 16 16"><rect x="2.5" y="2" width="11" height="12" rx="1.5"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg>Full-time recap</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M2.5 4.5h7M12.5 4.5h1M2.5 11.5h1M6.5 11.5h7"/><circle cx="11" cy="4.5" r="1.5"/><circle cx="5" cy="11.5" r="1.5"/></svg>Crew settings</a>
     </nav>
     <div class="side-foot">
       <div class="model"><span class="k">Model</span><span>nemotron-3.5-super-vl</span><span class="muted">OpenRouter · free tier</span></div>
@@ -103,18 +106,18 @@
             <div class="card-h"><h2>Player ratings</h2><span class="muted sm">Computed in code</span></div>
             <table>
               <tbody>
-                <tr><td><b>Wes Varga</b> <span class="pill live">POTM</span></td><td class="r mono">2 G · 0.63 xG</td><td class="r"><span class="rbar" style="width:52px"></span> <b>9.1</b></td></tr>
-                <tr><td>Cruz Novak</td><td class="r mono">1 G · 0.48 xG</td><td class="r"><span class="rbar" style="width:50px"></span> <b>8.9</b></td></tr>
-                <tr><td>Kofi Grieve</td><td class="r mono">GK · 0.00</td><td class="r"><span class="rbar a" style="width:49px"></span> <b>8.8</b></td></tr>
-                <tr><td>Mats Lindqvist</td><td class="r mono">4 KP</td><td class="r"><span class="rbar" style="width:44px"></span> <b>8.2</b></td></tr>
-                <tr><td>Pele Grieve</td><td class="r mono">1 G · 0.15 xG</td><td class="r"><span class="rbar a" style="width:44px"></span> <b>8.2</b></td></tr>
+                <tr><td><b>Wes Varga</b> <span class="pill live">POTM</span></td><td class="r mono">2 G · 0.63 xG</td><td class="r"><span class="rbar" style="width:36px"></span> <b>9.1</b></td></tr>
+                <tr><td>Cruz Novak</td><td class="r mono">1 G · 0.48 xG</td><td class="r"><span class="rbar" style="width:34px"></span> <b>8.9</b></td></tr>
+                <tr><td>Kofi Grieve</td><td class="r mono">GK · 0.00</td><td class="r"><span class="rbar a" style="width:33px"></span> <b>8.8</b></td></tr>
+                <tr><td>Mats Lindqvist</td><td class="r mono">4 KP</td><td class="r"><span class="rbar" style="width:29px"></span> <b>8.2</b></td></tr>
+                <tr><td>Pele Grieve</td><td class="r mono">1 G · 0.15 xG</td><td class="r"><span class="rbar a" style="width:29px"></span> <b>8.2</b></td></tr>
               </tbody>
             </table>
           </section>
           <section class="card" style="padding-bottom:14px">
             <div class="card-h"><h2>Social posts</h2><span class="muted sm">3 ready</span></div>
-            <div class="post">Harbour City fight back from 3–1 down to beat Westbridge Rovers 4–3. Wes Varga scores twice, including the 90+4 winner.<div class="pf"><span>118 / 280 · ✓ 6 claims</span><a>Copy</a></div></div>
-            <div class="post">Player of the match: Wes Varga, 9.1. Two goals from 0.63 xG.<div class="pf"><span>61 / 280 · ✓ 4 claims</span><a>Copy</a></div></div>
+            <div class="post">Harbour City fight back from 3–1 down to beat Westbridge Rovers 4–3. Wes Varga scores twice, including the 90+4 winner.<div class="pf"><span>118 / 280 · ✓ 6 claims</span><a class="link" href="#">Copy</a></div></div>
+            <div class="post">Player of the match: Wes Varga, 9.1. Two goals from 0.63 xG.<div class="pf"><span>61 / 280 · ✓ 4 claims</span><a class="link" href="#">Copy</a></div></div>
           </section>
         </div>
       </div>
