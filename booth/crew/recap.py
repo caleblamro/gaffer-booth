@@ -6,7 +6,6 @@ report and social posts; the verifier checks them exactly as it does live segmen
 
 from __future__ import annotations
 
-import asyncio
 import json
 import os
 from typing import Any
@@ -17,6 +16,7 @@ from booth.intel.moments import MomentDetector
 from booth.intel.state import MatchState
 from booth.sim.engine import MatchResult
 
+from .llm import run_structured
 from .offline import LANG_NAMES, poss
 from .verify import Evidence, verify
 
@@ -122,9 +122,8 @@ async def make_recap(match: MatchResult, client: Any | None, langs: list[str] | 
                              "language": LANG_NAMES.get((langs or ["en"])[0], "English")})
         for _ in range(2):
             try:
-                resp = await asyncio.wait_for(writer.run(prompt, options={"response_format": RecapOut}),
-                                              float(os.getenv("BOOTH_LLM_TIMEOUT", "8")) * 2)
-                cand = resp.value or RecapOut.model_validate_json(resp.text)
+                cand = await run_structured(writer, prompt, RecapOut,
+                                            float(os.getenv("BOOTH_LLM_TIMEOUT", "8")) * 2)
             except Exception:
                 break
             texts = [cand.report, *cand.social]

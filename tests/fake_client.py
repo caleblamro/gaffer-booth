@@ -3,21 +3,30 @@
 from __future__ import annotations
 
 import json
+import re
 
 from agent_framework import BaseChatClient, ChatResponse, Message
 
 
 class FakeChatClient(BaseChatClient):
-    def __init__(self, hallucinate_first: bool = True):
+    def __init__(self, hallucinate_first: bool = True, reject_schema: bool = False):
         super().__init__()
         self.hallucinate_first = hallucinate_first
+        self.reject_schema = reject_schema  # behave like a model without structured output
         self.calls: list[str] = []
 
     def _inner_get_response(self, *, messages, stream, options, **kwargs):
         schema = options.get("response_format")
-        name = schema.__name__ if schema else "text"
-        self.calls.append(name)
+        if schema and self.reject_schema:
+            raise ValueError("response_format is not supported by this model")
         prompt = messages[-1].text
+        if schema:
+            name = schema.__name__
+        else:
+            titles = re.findall(r'"title": "(\w+Out)"', prompt)
+            name = titles[-1] if titles else "text"
+            prompt = prompt.split("\n\nReply with only a JSON object")[0]
+        self.calls.append(name)
         if name == "DirectorOut":
             cands = json.loads(prompt)["candidates"]
             best = max(cands, key=lambda c: c["priority"])
@@ -42,5 +51,6 @@ class FakeChatClient(BaseChatClient):
             out = {}
 
         async def _resp():
-            return ChatResponse(messages=[Message(role="assistant", contents=[json.dumps(out)])])
+            text = json.dumps(out) if schema else f"Here you go:\n```json\n{json.dumps(out)}\n```"
+            return ChatResponse(messages=[Message(role="assistant", contents=[text])])
         return _resp()

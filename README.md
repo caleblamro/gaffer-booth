@@ -71,15 +71,25 @@ uvicorn booth.server:app --reload
 cd web && npm install && npm run dev   # http://localhost:5173
 ```
 
-With no model configured the crew runs on its fallback tier. To use a model, set one of:
+With no model configured the crew runs on its fallback tier. To use a model, copy `.env.example` to `.env` and fill in one block. Any OpenAI-compatible endpoint works, including free ones:
 
 ```bash
-# Microsoft Foundry project (recommended)
-export FOUNDRY_PROJECT_ENDPOINT=https://<account>.services.ai.azure.com/api/projects/<project>
-export FOUNDRY_MODEL=gpt-4.1-mini
-# or Azure OpenAI
-export AZURE_OPENAI_ENDPOINT=https://<resource>.openai.azure.com AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
+# OpenRouter free models
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_API_KEY=<your key>
+OPENAI_MODEL=<model id ending in :free>
+
+# or GitHub Models (free, rate-limited)
+OPENAI_BASE_URL=https://models.github.ai/inference
+OPENAI_API_KEY=<GitHub token with Models access>
+OPENAI_MODEL=openai/gpt-4.1-mini
+
+# or a Microsoft Foundry project
+FOUNDRY_PROJECT_ENDPOINT=https://<account>.services.ai.azure.com/api/projects/<project>
+FOUNDRY_MODEL=gpt-4.1-mini
 ```
+
+Models that don't support structured output are detected on the first call; the crew then asks for JSON in the prompt instead. Free tiers cap daily requests, and a full match makes many calls, so join a match late (the start minute on the setup screen) for short demos. When a call fails or hits a cap, that segment airs from the template tier.
 
 ## Deploy to Azure
 

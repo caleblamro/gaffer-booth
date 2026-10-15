@@ -58,3 +58,18 @@ def test_graphics_values_come_from_facts_not_the_model():
     facts = {f["key"]: f["value"] for f in seg["moment"]["facts"]}
     for row in seg["overlay"]["rows"]:
         assert row["key"] in facts
+
+
+def test_crew_works_with_models_without_structured_output(monkeypatch):
+    import booth.crew.llm as llm
+
+    monkeypatch.setattr(llm, "_prompt_json", False)
+    fc = FakeChatClient(hallucinate_first=False, reject_schema=True)
+    crew, out = _setup(fc)
+    asyncio.run(crew.produce_next())
+    assert llm._prompt_json
+    assert {"AnalystOut", "GraphicsOut", "CommentaryOut"} <= set(fc.calls)
+    seg = next(m for m in out if m["type"] == "segment")
+    assert seg["verification"]["ok"]
+    statuses = [(m["agent"], m["mode"]) for m in out if m["type"] == "console"]
+    assert ("Analyst", "llm") in statuses
