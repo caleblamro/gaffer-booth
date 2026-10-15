@@ -74,10 +74,11 @@ cd web && npm install && npm run dev   # http://localhost:5173
 With no model configured the crew runs on its fallback tier. To use a model, copy `.env.example` to `.env` and fill in one block. Any OpenAI-compatible endpoint works, including free ones:
 
 ```bash
-# OpenRouter free models
+# OpenRouter free models (OPENROUTER_API_KEY=<your key> alone also works)
 OPENAI_BASE_URL=https://openrouter.ai/api/v1
 OPENAI_API_KEY=<your key>
-OPENAI_MODEL=<model id ending in :free>
+OPENAI_MODEL=nvidia/nemotron-3.5-super-vl:free   # the default on OpenRouter
+BOOTH_LLM_TIMEOUT=15                              # free models answer in ~5-12 s
 
 # or GitHub Models (free, rate-limited)
 OPENAI_BASE_URL=https://models.github.ai/inference
@@ -88,6 +89,8 @@ OPENAI_MODEL=openai/gpt-4.1-mini
 FOUNDRY_PROJECT_ENDPOINT=https://<account>.services.ai.azure.com/api/projects/<project>
 FOUNDRY_MODEL=gpt-4.1-mini
 ```
+
+We ran a short match on every free OpenRouter model in October 2026. `nvidia/nemotron-3.5-super-vl:free` kept all five agents on the model, with every line verified in English, Spanish and French, at about 18 seconds per segment. `liquid/lfm-2.5-2.6b:free` is faster (about 12 seconds) but its copy is looser. Several others timed out, were rate-limited upstream, or are blocked for apps.
 
 Models that don't support structured output are detected on the first call; the crew then asks for JSON in the prompt instead. Free tiers cap daily requests, and a full match makes many calls, so join a match late (the start minute on the setup screen) for short demos. When a call fails or hits a cap, that segment airs from the template tier.
 
