@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Team Sheet · Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Public+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Direction B, "Team Sheet": a daylight, printed look taken from matchday programmes and stadium
+   scoreboards. Ink on white, club colours as flat print blocks, the crew as a numbered team sheet. */
+:root {
+  --paper: #fbfbf9; --sheet: #ffffff; --rule: #d9dbd6; --ink: #121412; --ink-2: #4b504b; --ink-3: #868b85;
+  --turf: #dfe7dc; --turf-2: #d4dfd0; --chalk: #ffffff;
+  --home: #1f4fd8; --away: #0f8a4a;
+  --flag: #e8442e;      /* referee's flag: blocked claims and the live marker */
+  --tick: #0f8a4a;
+  --board: "Big Shoulders Display", "Arial Narrow", sans-serif;
+  --text: "Public Sans", system-ui, sans-serif;
+  --data: "DM Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 400 14px/1.45 var(--text); font-variant-numeric: tabular-nums; overflow: hidden; }
+.app { height: 100vh; display: grid; grid-template-columns: 1fr 380px; grid-template-rows: 116px 1fr; }
+
+/* Scoreboard band */
+.board { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: stretch; border-bottom: 3px solid var(--ink); background: var(--sheet); }
+.club { display: flex; align-items: center; gap: 18px; padding: 0 28px; font: 800 44px/1 var(--board); text-transform: uppercase; letter-spacing: .01em; }
+.club.away { justify-content: flex-end; }
+.club .blk { width: 18px; align-self: stretch; }
+.club small { display: block; font: 500 12px var(--data); color: var(--ink-3); letter-spacing: .04em; text-transform: none; margin-top: 6px; }
+.score { display: flex; align-items: center; gap: 14px; padding: 0 30px; background: var(--ink); color: var(--paper); font: 900 92px/1 var(--board); }
+.score span { width: 64px; text-align: center; }
+.score i { width: 20px; height: 6px; background: var(--paper); display: block; }
+.clock { display: grid; align-content: center; padding: 0 28px; border-left: 1px solid var(--rule); min-width: 190px; }
+.clock b { font: 800 46px/1 var(--board); }
+.clock span { font: 500 12px var(--data); color: var(--flag); letter-spacing: .06em; display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.clock span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--flag); }
+
+/* Main column */
+.main { display: grid; grid-template-rows: minmax(0,1fr) auto auto; gap: 14px; min-height: 0; padding: 20px 24px 20px 28px; min-height: 0; }
+.stage { position: relative; display: grid; grid-template-columns: 1fr 360px; gap: 24px; min-height: 0; }
+.pitchwrap { position: relative; background: var(--turf); min-height: 0; }
+.pitchwrap svg { position: absolute; inset: 14px; width: calc(100% - 28px); height: calc(100% - 28px); }
+.pitchwrap .tag { position: absolute; left: 14px; bottom: 2px; font: 500 11px var(--data); color: var(--ink-3); }
+
+/* On-air page */
+.page { background: var(--sheet); border: 1px solid var(--ink); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.page .kicker { background: var(--home); color: #fff; font: 800 18px/1 var(--board); letter-spacing: .08em; text-transform: uppercase; padding: 10px 16px 8px; display: flex; justify-content: space-between; }
+.page h1 { font: 900 50px/.92 var(--board); text-transform: uppercase; padding: 16px 16px 4px; letter-spacing: -.005em; }
+.page .sub { padding: 0 16px 14px; color: var(--ink-2); font-weight: 500; }
+.figs { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--ink); }
+.figs div { padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+.figs div:nth-child(odd) { border-right: 1px solid var(--rule); }
+.figs b { display: block; font: 800 32px/1 var(--board); }
+.figs span { font: 500 11.5px var(--data); color: var(--ink-3); }
+.page p.insight { padding: 12px 16px; font: 400 14px/1.45 var(--text); }
+.page .stamp { margin-top: auto; border-top: 1px solid var(--ink); padding: 10px 16px; display: flex; justify-content: space-between; font: 500 12px var(--data); }
+.page .stamp b { color: var(--tick); font-weight: 500; }
+
+.caption { display: grid; grid-template-columns: 56px 1fr; border: 1px solid var(--ink); background: var(--sheet); }
+.caption .l { background: var(--ink); color: var(--paper); font: 800 20px var(--board); display: grid; place-items: center; }
+.caption p { padding: 12px 18px; font: 500 19px/1.35 var(--text); }
+.caption + .caption .l { background: var(--sheet); color: var(--ink); border-right: 1px solid var(--rule); }
+.caption + .caption p { color: var(--ink-2); font-size: 16px; }
+.caps { display: grid; gap: 8px; }
+
+/* Team sheet */
+.sheet { background: var(--sheet); border-left: 3px solid var(--ink); display: flex; flex-direction: column; min-height: 0; }
+.sheet h2 { font: 800 22px/1 var(--board); text-transform: uppercase; letter-spacing: .04em; padding: 18px 20px 12px; display: flex; justify-content: space-between; align-items: baseline; }
+.sheet h2 small { font: 500 11px var(--data); color: var(--ink-3); text-transform: none; letter-spacing: 0; }
+.xi { border-top: 1px solid var(--ink); }
+.pl { display: grid; grid-template-columns: 40px 1fr auto; gap: 12px; align-items: start; padding: 11px 20px; border-bottom: 1px solid var(--rule); }
+.pl .no { font: 900 30px/1 var(--board); }
+.pl .nm { font-weight: 700; }
+.pl .nm span { display: block; font-weight: 400; color: var(--ink-2); font-size: 13px; }
+.pl .ok { font: 500 11px var(--data); color: var(--tick); margin-top: 3px; }
+.pl .flag { font: 500 11px var(--data); color: var(--flag); margin-top: 3px; }
+.notebook { padding: 4px 20px 0; display: grid; gap: 8px; }
+.note { font-size: 13.5px; display: grid; grid-template-columns: 18px 1fr; gap: 8px; }
+.note .m { font: 500 13px var(--data); }
+.note.x .m { color: var(--flag); } .note.v .m { color: var(--tick); }
+.note.x s { text-decoration-color: var(--flag); text-decoration-thickness: 2px; }
+.note em { font-style: normal; display: block; color: var(--ink-3); font: 400 11.5px var(--data); }
+.touch { margin-top: auto; border-top: 3px solid var(--ink); padding: 14px 20px 18px; }
+.touch h3 { font: 800 18px/1 var(--board); text-transform: uppercase; letter-spacing: .06em; }
+.touch .q { margin: 10px 0; font-size: 13.5px; color: var(--ink-2); }
+.touch .q b { color: var(--ink); }
+.field { display: flex; border: 1px solid var(--ink); }
+.field span { flex: 1; padding: 10px 12px; color: var(--ink-3); }
+.field b { background: var(--ink); color: var(--paper); padding: 10px 16px; font: 800 16px/1.1 var(--board); letter-spacing: .06em; text-transform: uppercase; }
+
+/* Timeline */
+.line { position: relative; height: 54px; border-top: 1px solid var(--ink); }
+.line .ev { position: absolute; top: 0; transform: translateX(-50%); font: 500 11px var(--data); text-align: center; white-space: nowrap; }
+.line .ev i { display: block; width: 1px; height: 12px; background: var(--ink); margin: 0 auto 4px; }
+.line .ev b { font: 800 15px var(--board); display: block; text-transform: uppercase; }
+.line .ev.h b { color: var(--home); } .line .ev.a b { color: var(--away); }
+.line .ev.now { color: var(--flag); } .line .ev.now i { background: var(--flag); width: 3px; height: 16px; }
+.line .ev.miss { color: var(--ink-3); } .line .ev.miss b { text-decoration: line-through; color: var(--ink-3); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="board">
+    <div class="club"><span class="blk" style="background:var(--home)"></span><div>Harbour City<small>2.13 xG · 13 shots · 51%</small></div></div>
+    <div class="score"><span>2</span><i></i><span>3</span></div>
+    <div class="club away"><div style="text-align:right">Westbridge Rovers<small>1.04 xG · 19 shots · 49%</small></div><span class="blk" style="background:var(--away)"></span></div>
+    <div class="clock"><b>66:18</b><span>LIVE · 20× · EN ES</span></div>
+  </header>
+
+  <main class="main">
+    <div class="stage">
+      <div class="pitchwrap"><svg id="pitch"></svg><span class="tag">Synthetic match · positions at 66:18 · Harbour City attack →</span></div>
+      <article class="page">
+        <div class="kicker"><span>Goal</span><span>65:10</span></div>
+        <h1>Varga<br>pulls one back</h1>
+        <p class="sub">Assisted by Mats Lindqvist</p>
+        <div class="figs">
+          <div><b>0.46</b><span>xG of the chance</span></div>
+          <div><b>6</b><span>passes in the move</span></div>
+          <div><b>2.13</b><span>Harbour City xG</span></div>
+          <div><b>1.04</b><span>Westbridge xG</span></div>
+        </div>
+        <p class="insight">Harbour City have made twice the chances and are still behind. Varga's finish is their reward for 41 entries into the final third against 28.</p>
+        <div class="stamp"><b>✓ 10 of 10 claims checked</b><span>full screen · aired 66:02</span></div>
+      </article>
+    </div>
+    <div class="caps">
+      <div class="caption"><span class="l">EN</span><p>Varga pulls one back! A 0.46 xG chance at the end of a six-pass move, and it's 2–3 with 24 to play.</p></div>
+      <div class="caption"><span class="l">ES</span><p>¡Varga recorta! Una ocasión de 0.46 xG tras seis pases y el Harbour City ya está a uno, 2–3.</p></div>
+    </div>
+    <div class="line">
+      <div class="ev a" style="left:16.7%"><i></i><b>Grieve</b>15'</div>
+      <div class="ev a miss" style="left:22.3%"><i></i><b>Haldane</b>20' · missed</div>
+      <div class="ev h" style="left:28%"><i></i><b>Solberg</b>25'</div>
+      <div class="ev" style="left:50%"><i></i><b>HT</b>1–2</div>
+      <div class="ev a" style="left:61.9%"><i></i><b>Delacroix</b>55'</div>
+      <div class="ev h now" style="left:72.2%"><i></i><b>Varga</b>65' · on air</div>
+      <div class="ev" style="left:99%"><i></i><b>FT</b>90'</div>
+    </div>
+  </main>
+
+  <aside class="sheet">
+    <h2>The crew <small>this segment</small></h2>
+    <div class="xi">
+      <div class="pl"><span class="no">1</span><div class="nm">Director<span>Picked the goal over a Grieve spotlight</span></div><span class="ok">AIRED</span></div>
+      <div class="pl"><span class="no">2</span><div class="nm">Analyst<span>Second draft, called team stats</span></div><span class="ok">PASSED</span></div>
+      <div class="pl"><span class="no">3</span><div class="nm">Verifier<span>Checked every number and name</span></div><span class="flag">1 BLOCKED</span></div>
+      <div class="pl"><span class="no">4</span><div class="nm">Graphics<span>Chose 4 facts; code filled values</span></div><span class="ok">DONE</span></div>
+      <div class="pl"><span class="no">5</span><div class="nm">Commentator<span>English and Spanish lines</span></div><span class="ok">DONE</span></div>
+    </div>
+    <h2>Referee's notebook <small>claims vs data</small></h2>
+    <div class="notebook">
+      <div class="note x"><span class="m">✕</span><div><s>"protect their 3–1 lead"</s><em>score was 1–3 → 2–3 · draft 1 sent back</em></div></div>
+      <div class="note v"><span class="m">✓</span><div>0.46 xG chance<em>shot_xg = 0.46 · event 1184</em></div></div>
+      <div class="note v"><span class="m">✓</span><div>41 final-third entries to 28<em>team_stats · 65:12</em></div></div>
+    </div>
+    <div class="touch">
+      <h3>Touchline · talk to the crew</h3>
+      <p class="q"><b>You, 66:02</b> · Why are Westbridge still ahead on half the xG? <em style="color:var(--flag);font-style:normal">Analyst drafting</em></p>
+      <div class="field"><span>Ask for a stat, a player, an angle…</span><b>Send</b></div>
+    </div>
+  </aside>
+</div>
+<script src="pitch.js"></script>
+<script>drawPitch(document.getElementById("pitch"), { grassA: "#dfe7dc", line: "#ffffff", lw: 0.5, home: "#1f4fd8", away: "#0f8a4a", awayShape: "square", ball: "#121412", r: 1.1 });</script>
+</body>
+</html>

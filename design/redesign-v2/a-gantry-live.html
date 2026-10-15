@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gantry · Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&family=Barlow+Semi+Condensed:wght@400;500;600&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Direction A, "Gantry": the program picture is the product. Graphics are solid, angled plates in
+   club colours like a real TV package; the operator gallery is a narrow rail, not a dashboard. */
+:root {
+  --studio: #0d1522; --rail: #121c2c; --plate: #18243a; --line: #24324b;
+  --fg: #eef2f7; --mute: #8b98ae; --dim: #5b6880;
+  --air: #ffc531;            /* on-air amber: the only accent */
+  --home: #2f6bff; --away: #17a85b;
+  --pass: #3dd68c; --stop: #ff5a4f;
+  --tv: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --ui: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+body { background: var(--studio); color: var(--fg); font: 400 14px/1.4 var(--body); font-variant-numeric: tabular-nums; overflow: hidden; }
+.app { display: grid; grid-template-columns: 1fr 400px; grid-template-rows: 48px 1fr 168px; height: 100vh; }
+
+/* Top bar */
+.top { grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; padding: 0 20px; border-bottom: 1px solid var(--line); }
+.mark { font: 800 italic 20px/1 var(--tv); letter-spacing: .02em; text-transform: uppercase; }
+.mark b { color: var(--air); }
+.fixture { color: var(--mute); font: 500 15px var(--ui); }
+.onair { margin-left: 4px; background: var(--air); color: #111; font: 800 italic 13px/1 var(--tv); padding: 5px 10px 4px; text-transform: uppercase; letter-spacing: .06em; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); }
+.top .sp { flex: 1; }
+.btn { font: 600 13px var(--ui); color: var(--fg); background: var(--plate); border: 1px solid var(--line); padding: 7px 12px; border-radius: 3px; }
+.btn.sel { background: var(--fg); color: var(--studio); }
+.seg { display: flex; }
+.seg .btn { border-radius: 0; margin-left: -1px; }
+.seg .btn:first-child { border-radius: 3px 0 0 3px; } .seg .btn:last-child { border-radius: 0 3px 3px 0; }
+
+/* Program picture */
+.program { position: relative; margin: 16px 0 0 16px; overflow: hidden; background: #0b2a1d; }
+.program svg.pitch { position: absolute; inset: -6% -3%; width: 106%; height: 112%; }
+.vignette { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0,0,0,.45)); pointer-events: none; }
+.bug { position: absolute; top: 22px; left: 22px; display: flex; align-items: stretch; height: 40px; font: 700 italic 24px/40px var(--tv); text-transform: uppercase; filter: drop-shadow(0 6px 14px rgba(0,0,0,.35)); }
+.bug > * { padding: 0 14px; }
+.bug .t { background: #fff; color: #0d1522; display: flex; gap: 10px; align-items: center; }
+.bug .t i { width: 6px; height: 24px; display: block; }
+.bug .s { background: #0d1522; color: #fff; font-weight: 800; letter-spacing: .04em; padding: 0 16px; }
+.bug .clk { background: var(--air); color: #111; clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%); padding-right: 22px; }
+.feedtag { position: absolute; top: 26px; right: 24px; font: 600 12px var(--ui); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+
+/* Goal plate: the main on-air graphic */
+.plate { position: absolute; left: 22px; bottom: 128px; width: 560px; filter: drop-shadow(0 10px 24px rgba(0,0,0,.4)); }
+.plate .kick { display: inline-block; background: var(--home); color: #fff; font: 800 italic 15px/1 var(--tv); letter-spacing: .12em; text-transform: uppercase; padding: 8px 18px 7px 14px; clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+.plate .name { background: #fff; color: #0d1522; font: 800 italic 54px/1 var(--tv); text-transform: uppercase; padding: 12px 18px 8px; letter-spacing: .005em; }
+.plate .name small { font: 600 18px var(--ui); color: #5b6880; font-style: normal; text-transform: none; margin-left: 10px; letter-spacing: 0; }
+.plate .rows { display: grid; grid-template-columns: repeat(3, 1fr); background: #0d1522; }
+.plate .rows div { padding: 10px 18px 12px; border-right: 1px solid #22304a; }
+.plate .rows div:last-child { border-right: 0; }
+.plate .rows b { display: block; font: 700 30px/1 var(--tv); }
+.plate .rows span { font: 500 12px var(--ui); color: #8b98ae; text-transform: uppercase; letter-spacing: .1em; }
+.plate .proof { background: var(--pass); color: #062615; font: 700 12px/1 var(--ui); letter-spacing: .08em; text-transform: uppercase; padding: 7px 18px; display: flex; justify-content: space-between; }
+
+/* Caption */
+.caption { position: absolute; left: 22px; bottom: 26px; width: 74%; display: flex; background: rgba(13,21,34,.92); }
+.caption .lang { background: var(--fg); color: var(--studio); font: 800 13px/1 var(--tv); padding: 14px 10px; letter-spacing: .08em; display: grid; place-items: center; }
+.caption p { padding: 11px 18px; font: 500 20px/1.35 var(--body); }
+
+/* Gallery rail */
+.rail { grid-row: 2 / 4; grid-column: 2; background: var(--rail); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+.rail h2 { font: 700 13px var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.rail section { padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.crewline { display: grid; grid-template-columns: 92px 1fr auto; gap: 10px; align-items: baseline; padding: 7px 0; font: 500 14px var(--ui); }
+.crewline .who { font-weight: 600; }
+.crewline .what { color: var(--mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crewline .st { font: 700 11px var(--ui); letter-spacing: .08em; text-transform: uppercase; }
+.st.ok { color: var(--pass); } .st.no { color: var(--stop); } .st.air { color: var(--air); } .st.run { color: var(--fg); }
+.ledger { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.claim { display: grid; grid-template-columns: 16px 1fr; gap: 10px; font: 400 14px/1.4 var(--body); }
+.claim .dot { width: 10px; height: 10px; margin-top: 5px; }
+.claim.ok .dot { background: var(--pass); } .claim.no .dot { background: var(--stop); }
+.claim em { font-style: normal; color: var(--mute); display: block; font-size: 12.5px; }
+.claim.no s { color: var(--stop); text-decoration-thickness: 1.5px; }
+mark { background: rgba(61,214,140,.16); color: var(--fg); padding: 0 3px; }
+.talk { margin-top: auto; padding: 16px 18px 18px; border-top: 1px solid var(--line); background: #0f1827; }
+.talk .q { font: 500 14px var(--body); color: var(--mute); margin: 10px 0 12px; }
+.talk .q b { color: var(--fg); font-weight: 600; }
+.talk .input { display: flex; gap: 8px; }
+.talk .input div { flex: 1; background: var(--studio); border: 1px solid var(--line); padding: 10px 12px; color: var(--dim); font: 400 14px var(--body); }
+.talk .input .btn { background: var(--air); color: #111; border: 0; font-weight: 700; }
+
+/* Bottom strip: rundown on a 90-minute ruler + momentum */
+.strip { margin: 12px 0 16px 16px; display: grid; grid-template-rows: auto 1fr; gap: 8px; min-height: 0; }
+.strip .hd { display: flex; justify-content: space-between; align-items: baseline; }
+.strip .hd h2 { font: 700 13px var(--ui); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.strip .hd span { font: 500 13px var(--ui); color: var(--mute); }
+.ruler { position: relative; background: var(--rail); border: 1px solid var(--line); }
+.ruler canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mk { position: absolute; top: 10px; transform: translateX(-50%); font: 600 12px/1.2 var(--ui); white-space: nowrap; text-align: center; }
+.mk i { display: block; width: 2px; height: 14px; margin: 0 auto 4px; background: var(--mute); }
+.mk.goal i { background: var(--fg); height: 20px; width: 3px; }
+.mk.now i { background: var(--air); height: 22px; width: 3px; }
+.mk.now { color: var(--air); }
+.mk.drop { color: var(--dim); text-decoration: line-through; }
+.ticks { position: absolute; bottom: 6px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 6px; font: 500 11px var(--ui); color: var(--dim); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <span class="mark">Gaffer<b>/</b>Booth</span>
+    <span class="fixture">Harbour City v Westbridge Rovers · Matchday 9</span>
+    <span class="onair">On air</span>
+    <span class="sp"></span>
+    <div class="seg"><span class="btn sel">Program</span><span class="btn">Quad split</span></div>
+    <div class="seg"><span class="btn">10×</span><span class="btn sel">20×</span><span class="btn">40×</span></div>
+    <div class="seg"><span class="btn sel">EN</span><span class="btn">ES</span></div>
+    <span class="btn">Hold</span>
+  </header>
+
+  <main class="program">
+    <svg class="pitch" id="pitch"></svg>
+    <div class="vignette"></div>
+    <div class="bug">
+      <span class="t"><i style="background:var(--home)"></i>HBC</span>
+      <span class="s">2–3</span>
+      <span class="t">WBR<i style="background:var(--away)"></i></span>
+      <span class="clk">66:18</span>
+    </div>
+    <span class="feedtag">Tactical cam · synthetic match</span>
+    <div class="plate">
+      <span class="kick">Goal · Harbour City · 65'</span>
+      <div class="name">Wes Varga<small>assist Mats Lindqvist</small></div>
+      <div class="rows">
+        <div><b>0.46</b><span>Chance xG</span></div>
+        <div><b>6</b><span>Passes in move</span></div>
+        <div><b>2.13–1.04</b><span>Match xG</span></div>
+      </div>
+      <div class="proof"><span>✓ 10 claims checked against match data</span><span>Verifier</span></div>
+    </div>
+    <div class="caption"><span class="lang">EN</span><p>Varga pulls one back! A 0.46 xG chance at the end of a six-pass move, and it's 2–3 with 24 to play.</p></div>
+  </main>
+
+  <aside class="rail">
+    <section>
+      <h2>Crew on this segment</h2>
+      <div style="margin-top:8px">
+        <div class="crewline"><span class="who">Director</span><span class="what">Cut to goal plate, full screen</span><span class="st air">Aired</span></div>
+        <div class="crewline"><span class="who">Analyst</span><span class="what">Draft 2, used team_stats</span><span class="st ok">Passed</span></div>
+        <div class="crewline"><span class="who">Verifier</span><span class="what">10 of 10 claims matched</span><span class="st ok">Passed</span></div>
+        <div class="crewline"><span class="who">Graphics</span><span class="what">3 facts picked, values from code</span><span class="st ok">Done</span></div>
+        <div class="crewline"><span class="who">Commentator</span><span class="what">EN, ES voiced</span><span class="st ok">Done</span></div>
+      </div>
+    </section>
+    <section>
+      <h2>Why it's safe to air</h2>
+      <div class="ledger">
+        <div class="claim no"><i class="dot"></i><div><s>"…to protect their 3–1 lead"</s><em>Draft 1 blocked. Score at 65:10 was 1–3, then 2–3.</em></div></div>
+        <div class="claim ok"><i class="dot"></i><div><mark>0.46 xG</mark> chance<em>shot_xg · event 1184</em></div></div>
+        <div class="claim ok"><i class="dot"></i><div><mark>6-pass</mark> build-up<em>buildup_passes · possession chain 212</em></div></div>
+        <div class="claim ok"><i class="dot"></i><div><mark>2.13</mark> to <mark>1.04</mark> xG<em>team_stats tool · called 65:12</em></div></div>
+      </div>
+    </section>
+    <section>
+      <h2>Queue</h2>
+      <div style="margin-top:8px">
+        <div class="crewline"><span class="who">70:00</span><span class="what">Harbour City change, lower third</span><span class="st run">Next</span></div>
+        <div class="crewline"><span class="who">66:02</span><span class="what">Talkback answer, stat card</span><span class="st run">Drafting</span></div>
+        <div class="crewline"><span class="who">63:03</span><span class="what">Spotlight: Pele Grieve</span><span class="st ok">Aired</span></div>
+      </div>
+    </section>
+    <div class="talk">
+      <h2>Talkback</h2>
+      <p class="q"><b>You, 66:02:</b> Why are Westbridge still ahead on half the xG? <span class="st run">· Analyst working</span></p>
+      <div class="input"><div>Ask the crew for a stat or an angle…</div><span class="btn">Send</span></div>
+    </div>
+  </aside>
+
+  <section class="strip">
+    <div class="hd"><h2>Rundown and momentum</h2><span>Up next · 70' Harbour City change</span></div>
+    <div class="ruler">
+      <canvas id="mom"></canvas>
+      <div class="mk goal" style="left:16.7%"><i></i>15' Grieve</div>
+      <div class="mk goal" style="left:28%"><i></i>25' Solberg</div>
+      <div class="mk drop" style="left:22.3%; top:44px"><i></i>20' Haldane</div>
+      <div class="mk" style="left:50%"><i></i>HT</div>
+      <div class="mk goal" style="left:61.9%"><i></i>55' Delacroix</div>
+      <div class="mk" style="left:70%; top:44px"><i></i>63' Grieve card</div>
+      <div class="mk now" style="left:72.2%"><i></i>65' Varga · on air</div>
+      <div class="ticks"><span>0'</span><span>15'</span><span>30'</span><span>45'</span><span>60'</span><span>75'</span><span>90'</span></div>
+    </div>
+  </section>
+</div>
+<script src="pitch.js"></script>
+<script>
+drawPitch(document.getElementById("pitch"), { stripes: true, grassA: "#14402b", grassB: "#174a32", line: "rgba(255,255,255,.75)", home: "#2f6bff", away: "#17a85b", ball: "#fff", ring: "#fff", r: 0.62 });
+const cv = document.getElementById("mom"), r = cv.getBoundingClientRect(), d = devicePixelRatio || 1;
+cv.width = r.width * d; cv.height = r.height * d;
+const g = cv.getContext("2d"); g.scale(d, d);
+const m = GB.momentum, mid = r.height * 0.72, w = r.width * 0.735 / (m.length - 1);
+for (const [sign, col] of [[1, "rgba(47,107,255,.55)"], [-1, "rgba(23,168,91,.55)"]]) {
+  g.beginPath(); g.moveTo(0, mid);
+  m.forEach((v, i) => g.lineTo(i * w, mid - Math.max(0, v * sign) * 3.2 * sign));
+  g.lineTo((m.length - 1) * w, mid); g.closePath(); g.fillStyle = col; g.fill();
+}
+g.fillStyle = "rgba(139,152,174,.25)"; g.fillRect(0, mid, r.width, 1);
+</script>
+</body>
+</html>

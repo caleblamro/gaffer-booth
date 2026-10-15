@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Page 302 · Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Silkscreen:wght@400;700&display=swap">
+<style>
+/* Direction C, "Page 302": the crew as a live teletext service. Eight broadcast colours on black,
+   a character grid, mosaic graphics. Data turned into story is what teletext football pages always did. */
+:root {
+  --bk: #000000; --wh: #f4f4f4; --ye: #ffe600; --cy: #20e0ff; --gr: #2bff4f; --rd: #ff3b30; --bl: #2742ff; --mg: #ff40d0;
+  --dim: #8a8a8a;
+  --tt: "VT323", ui-monospace, monospace;
+  --block: "Silkscreen", "VT323", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bk); color: var(--wh); font: 400 26px/1.05 var(--tt); overflow: hidden; }
+body::after { content: ""; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 2px, transparent 2px 4px); }
+.app { height: 100vh; display: grid; grid-template-columns: 1fr 520px; grid-template-rows: auto auto minmax(0,1fr) auto; gap: 0 28px; padding: 18px 28px; }
+
+.hdr { grid-column: 1 / -1; display: flex; gap: 28px; font-size: 28px; padding-bottom: 10px; }
+.hdr .p { color: var(--wh); }
+.hdr .svc { color: var(--ye); }
+.hdr .sp { flex: 1; }
+.hdr .t { color: var(--ye); }
+.band { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr auto; align-items: center; background: var(--bl); padding: 8px 18px; margin-bottom: 18px; }
+.band h1 { font: 700 46px/1 var(--block); color: var(--ye); letter-spacing: .02em; }
+.band .live { background: var(--rd); color: var(--wh); padding: 4px 12px; font-size: 28px; }
+.band .sub { justify-self: center; color: var(--cy); font-size: 28px; }
+
+.left { display: grid; grid-template-rows: auto auto 1fr auto; gap: 16px; min-height: 0; }
+.score { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; font-size: 44px; }
+.score .h { color: var(--cy); } .score .a { color: var(--gr); text-align: right; }
+.score .n { color: var(--ye); font: 700 64px/1 var(--block); }
+.scorers { display: grid; grid-template-columns: 1fr 1fr; font-size: 26px; }
+.scorers div:last-child { text-align: right; }
+.scorers .h { color: var(--cy); } .scorers .a { color: var(--gr); }
+.mosaic { position: relative; min-height: 0; }
+.mosaic canvas { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
+.mosaic .tag { position: absolute; left: 0; bottom: -2px; color: var(--dim); font-size: 22px; background: var(--bk); padding-right: 8px; }
+.capt { border-left: 8px solid var(--ye); padding: 4px 0 4px 16px; font-size: 32px; line-height: 1.1; }
+.capt b { color: var(--ye); font-weight: 400; }
+.capt .es { color: var(--dim); font-size: 26px; display: block; margin-top: 4px; }
+
+.right { display: grid; grid-template-rows: auto auto auto 1fr; gap: 12px; overflow: hidden; min-height: 0; }
+.goal { background: var(--wh); color: var(--bk); padding: 12px 16px 14px; }
+.goal .k { font: 700 22px/1 var(--block); color: var(--rd); }
+.goal h2 { font: 700 30px/1 var(--block); margin: 6px 0 8px; }
+.goal .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.goal .facts div { background: var(--bk); color: var(--ye); padding: 6px 8px 4px; font-size: 22px; }
+.goal .facts b { display: block; font-size: 34px; font-weight: 400; }
+.goal .ok { margin-top: 10px; background: var(--gr); color: var(--bk); padding: 3px 8px; font-size: 24px; display: inline-block; }
+.crew { font-size: 23px; line-height: 1; }
+.crew h3, .ref h3, .tb h3 { color: var(--bk); background: var(--cy); padding: 2px 10px; font: 700 18px/1.4 var(--block); letter-spacing: .04em; margin-bottom: 8px; display: inline-block; }
+.crew .r { display: grid; grid-template-columns: 170px 1fr auto; gap: 10px; }
+.crew .r span:first-child { color: var(--ye); }
+.crew .r span:nth-child(2) { color: var(--wh); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.g { color: var(--gr); } .x { color: var(--rd); } .w { color: var(--mg); }
+.ref { font-size: 22px; line-height: 1; }
+.ref .line { display: grid; grid-template-columns: 26px 1fr; }
+.ref .line em { font-style: normal; color: var(--dim); display: block; font-size: 21px; }
+.tb { border: 2px solid var(--mg); padding: 8px 12px 10px; align-self: end; }
+.tb h3 { background: var(--mg); }
+.tb .q { font-size: 24px; margin-bottom: 8px; }
+.tb .in { display: flex; justify-content: space-between; background: #1a1a1a; padding: 6px 10px; color: var(--dim); font-size: 24px; }
+.tb .in b { color: var(--ye); font-weight: 400; }
+.foot { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 14px; font-size: 26px; }
+.foot span { padding: 4px 12px; color: var(--bk); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr"><span class="p">P302</span><span class="svc">GAFFER BOOTH</span><span>Thu 15 Oct</span><span class="sp"></span><span class="t">66:18</span></div>
+  <div class="band"><h1>FOOTBALL</h1><span class="sub">LIVE · SYNTHETIC MATCH · 20× · EN ES</span><span class="live">ON AIR</span></div>
+
+  <section class="left">
+    <div class="score"><span class="h">HARBOUR CITY</span><span class="n">2-3</span><span class="a">WESTBRIDGE R</span></div>
+    <div class="scorers"><div class="h">Solberg 25 Varga 65</div><div class="a">Grieve 15 Haldane 20<br>Delacroix 55</div></div>
+    <div class="mosaic"><canvas id="mo" width="140" height="68"></canvas><span class="tag">MOSAIC CAM 66:18 · HBC ATTACK →</span></div>
+    <p class="capt"><b>EN</b> Varga pulls one back! A 0.46 xG chance at the end of a six-pass move, and it's 2-3 with 24 to play.<span class="es">ES ¡Varga recorta! Una ocasión de 0.46 xG tras seis pases.</span></p>
+  </section>
+
+  <section class="right">
+    <div class="goal">
+      <span class="k">GOAL 65:10 · HARBOUR CITY</span>
+      <h2>VARGA PULLS ONE BACK</h2>
+      <div class="facts"><div><b>0.46</b>chance xG</div><div><b>6</b>pass move</div><div><b>2.13</b>HBC xG</div></div>
+      <span class="ok">✓ 10/10 CLAIMS CHECKED</span>
+    </div>
+    <div class="crew">
+      <h3>CREW</h3>
+      <div class="r"><span>DIRECTOR</span><span>goal plate, full page</span><span class="g">AIRED</span></div>
+      <div class="r"><span>ANALYST</span><span>draft 2 + team_stats</span><span class="g">PASS</span></div>
+      <div class="r"><span>VERIFIER</span><span>1 claim blocked</span><span class="x">STOP</span></div>
+      <div class="r"><span>GRAPHICS</span><span>3 facts, code values</span><span class="g">DONE</span></div>
+      <div class="r"><span>COMMENTATOR</span><span>EN ES</span><span class="g">DONE</span></div>
+    </div>
+    <div class="ref">
+      <h3>REFEREE CHECK</h3>
+      <div class="line"><span class="x">✕</span><div>"protect their 3-1 lead"<em>score was 1-3 then 2-3</em></div></div>
+      <div class="line"><span class="g">✓</span><div>0.46 xG chance<em>shot_xg · event 1184</em></div></div>
+          </div>
+    <div class="tb">
+      <h3>TALKBACK</h3>
+      <p class="q">YOU 66:02 Why are Westbridge ahead on half the xG? <span class="w">DRAFTING</span></p>
+      <div class="in"><span>Ask the crew…_</span><b>SEND</b></div>
+    </div>
+  </section>
+
+  <div class="foot"><span style="background:var(--rd)">Crew log</span><span style="background:var(--gr)">Stats</span><span style="background:var(--ye)">Rundown</span><span style="background:var(--cy)">Full time</span></div>
+</div>
+<script src="pitch.js"></script>
+<script>
+// Mosaic pitch: one canvas pixel per teletext sixel, scaled up with pixelated rendering.
+const c = document.getElementById("mo"), g = c.getContext("2d"), W = c.width, H = c.height;
+g.fillStyle = "#003c10"; g.fillRect(0, 0, W, H);
+g.fillStyle = "#0a5a1e"; for (let x = 0; x < W; x += 14) g.fillRect(x, 0, 7, H);
+g.fillStyle = "#f4f4f4";
+const hl = (x, y, w) => g.fillRect(x, y, w, 1), vl = (x, y, h) => g.fillRect(x, y, 1, h);
+hl(0, 0, W); hl(0, H - 1, W); vl(0, 0, H); vl(W - 1, 0, H); vl(W / 2, 0, H);
+for (const x of [0, W - 22]) { hl(x, 14, 22); hl(x, H - 15, 22); vl(x === 0 ? 22 : x, 14, H - 28); }
+for (let a = 0; a < 6.28; a += 0.08) g.fillRect(Math.round(W / 2 + 12 * Math.cos(a)), Math.round(H / 2 + 12 * Math.sin(a)), 1, 1);
+const dot = (p, col) => { g.fillStyle = col; g.fillRect(Math.round(p[0] / 100 * W) - 1, Math.round(p[1] / 100 * H) - 1, 3, 3); };
+GB.home.forEach((p) => dot(p, "#20e0ff")); GB.away.forEach((p) => dot(p, "#2bff4f"));
+g.fillStyle = "#ffe600"; g.fillRect(Math.round(GB.ball[0] / 100 * W), Math.round(GB.ball[1] / 100 * H), 2, 2);
+</script>
+</body>
+</html>
