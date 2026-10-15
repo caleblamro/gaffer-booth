@@ -6,6 +6,7 @@ Each moment carries an evidence pack: the only facts the crew may cite about it.
 from __future__ import annotations
 
 import itertools
+import re
 from dataclasses import asdict, dataclass, field
 
 from booth.sim.engine import Event
@@ -37,6 +38,7 @@ class Moment:
     player_id: str | None = None
     player: str | None = None
     event_id: int | None = None
+    request: str | None = None  # producer talkback text (never evidence)
     id: int = field(default_factory=lambda: next(_ids))
 
     def fact_dict(self) -> dict[str, float | int | str]:
@@ -272,3 +274,85 @@ class MomentDetector:
         ]
         return [Moment("spotlight", p.team, self.s.last.clock, m, 0.45,
                        f"Spotlight: {ps['name']}", facts, pid, ps["name"])]
+
+
+TALKBACK_PRIORITY = 0.99
+
+
+def resolve_request(state: MatchState, names: dict[str, str], text: str) -> tuple[str | None, str | None]:
+    """Find the player (id) or team (side) a producer request is about, by name."""
+    low = text.lower()
+    for pid, p in state.players.items():
+        if p.name and re.search(rf"\b{re.escape(p.name.lower())}\b", low):
+            return pid, p.team
+    by_surname: dict[str, list[str]] = {}
+    for pid, p in state.players.items():
+        if p.name:
+            by_surname.setdefault(p.name.split(" ")[-1].lower(), []).append(pid)
+    for surname, pids in by_surname.items():
+        if len(pids) == 1 and re.search(rf"\b{re.escape(surname)}\b", low):
+            return pids[0], state.players[pids[0]].team
+    for side, name in names.items():
+        words = [name.lower(), name.split(" ")[0].lower()]
+        if any(re.search(rf"\b{re.escape(w)}\b", low) for w in words):
+            return None, side
+    return None, None
+
+
+def talkback_moment(state: MatchState, names: dict[str, str], text: str) -> Moment:
+    """Turn a producer request into a moment whose evidence pack is computed in code.
+
+    The request text is kept on the moment for display, never as evidence, so numbers or
+    names typed by the producer are not admissible on air.
+    """
+    sc = state.scoreboard()
+    m = state.minute()
+    base = [
+        Fact("clock", "Match clock", sc["clock"]),
+        Fact("minute", "Minute", int(m)),
+        Fact("score_home", f"{names['home']} goals", sc["home"]),
+        Fact("score_away", f"{names['away']} goals", sc["away"]),
+    ]
+    pid, side = resolve_request(state, names, text)
+    ps = state.player_stats(pid) if pid else None
+    if ps:
+        facts = base + [
+            Fact("player", "Player", ps["name"]),
+            Fact("goals", "Goals today", ps["goals"]),
+            Fact("shots", "Shots today", ps["shots"]),
+            Fact("xg", "xG today", ps["xg"]),
+            Fact("key_passes", "Key passes today", ps["key_passes"]),
+            Fact("dribbles_won", "Dribbles won today", ps["dribbles_won"]),
+            Fact("ball_wins", "Ball wins today", ps["tackles_won"] + ps["interceptions"]),
+            Fact("pass_pct", "Pass accuracy % today", ps["pass_pct"]),
+            Fact("touches", "Touches today", ps["touches"]),
+        ]
+        return Moment("talkback", ps["team"], sc["clock"], m, TALKBACK_PRIORITY,
+                      f"{ps['name']} in numbers", facts, pid, ps["name"], request=text)
+    side = side or "home"
+    o = other(side)
+    ts = state.team_stats()
+    w = state.window_stats(10)
+    n = names
+    facts = base + [
+        Fact("possession", f"{n[side]} possession %", ts[side]["possession_pct"]),
+        Fact("opp_possession", f"{n[o]} possession %", ts[o]["possession_pct"]),
+        Fact("pass_pct", f"{n[side]} pass accuracy %", ts[side]["pass_pct"]),
+        Fact("opp_pass_pct", f"{n[o]} pass accuracy %", ts[o]["pass_pct"]),
+        Fact("team_xg", f"{n[side]} total xG", ts[side]["xg"]),
+        Fact("opp_xg", f"{n[o]} total xG", ts[o]["xg"]),
+        Fact("team_shots", f"{n[side]} shots", ts[side]["shots"]),
+        Fact("opp_shots", f"{n[o]} shots", ts[o]["shots"]),
+        Fact("window_min", "Window (minutes)", 10),
+        Fact("poss_10", f"{n[side]} possession %, last 10 min", w[side]["possession_pct"]),
+        Fact("opp_poss_10", f"{n[o]} possession %, last 10 min", w[o]["possession_pct"]),
+        Fact("fte_10", f"{n[side]} final-third entries, last 10 min", w[side]["final_third_entries"]),
+        Fact("opp_fte_10", f"{n[o]} final-third entries, last 10 min", w[o]["final_third_entries"]),
+        Fact("xg_10", f"{n[side]} xG, last 10 min", w[side]["xg"]),
+        Fact("opp_xg_10", f"{n[o]} xG, last 10 min", w[o]["xg"]),
+    ]
+    for key, s in (("ppda", side), ("opp_ppda", o)):
+        if ts[s]["ppda"] is not None:
+            facts.append(Fact(key, f"{n[s]} PPDA (lower means more pressing)", ts[s]["ppda"]))
+    return Moment("talkback", side, sc["clock"], m, TALKBACK_PRIORITY,
+                  f"{n[side]} v {n[o]} in numbers", facts, request=text)

@@ -16,8 +16,8 @@ def poss(name: str) -> str:
     return name + ("'" if name.endswith("s") else "'s")
 
 
-def plural(n, word: str) -> str:
-    return f"{n} {word}" + ("" if n == 1 else "s")
+def plural(n, word: str, many: str | None = None) -> str:
+    return f"{n} " + (word if n == 1 else many or word + "s")
 
 
 def _f(m: Moment) -> dict:
@@ -69,10 +69,35 @@ def analyst_insight(m: Moment, names: dict[str, str]) -> str:
         return f"{f['player']} is everywhere: " + ", ".join(bits or [f"{f['touches']} touches"]) + "."
     if k == "substitution":
         return f"{f['on']} replaces {f['off']} for {team}."
+    if k == "talkback":
+        return talkback_insight(m, names)
     if k in ("half_time", "full_time"):
         return (f"{names['home']} {f['score_home']}-{f['score_away']} {names['away']}. "
                 f"xG {f['home_xg']} to {f['away_xg']}, shots {f['home_shots']} to {f['away_shots']}.")
     return m.headline
+
+
+def talkback_insight(m: Moment, names: dict[str, str]) -> str:
+    """Deterministic answer to a producer request, from the code-built evidence pack."""
+    f = _f(m)
+    team = names[m.team]
+    opp = names["away" if m.team == "home" else "home"]
+    if "player" in f:
+        parts = []
+        if f["goals"]:
+            parts.append(plural(f["goals"], "goal"))
+        if f["shots"]:
+            parts.append(f"{plural(f['shots'], 'shot')} worth {f['xg']} xG")
+        if f["key_passes"]:
+            parts.append(plural(f["key_passes"], "key pass", "key passes"))
+        if f["ball_wins"]:
+            parts.append(plural(f["ball_wins"], "ball win"))
+        parts.append(f"{f['pass_pct']}% passing from {plural(f['touches'], 'touch', 'touches')}")
+        return f"{f['player']} for {team} so far: " + ", ".join(parts) + "."
+    return (f"{team} have had {f['possession']}% of the ball to {poss(opp)} {f['opp_possession']}%, "
+            f"completing {f['pass_pct']}% of their passes to {f['opp_pass_pct']}%. Over the last "
+            f"10 minutes: {f['poss_10']}% possession and {f['fte_10']} final-third entries to "
+            f"{f['opp_fte_10']}, with {f['xg_10']} xG to {f['opp_xg_10']}.")
 
 
 COMMENTARY = {
@@ -87,6 +112,9 @@ COMMENTARY = {
         "substitution": "{on} comes on for {off}.",
         "half_time": "Half-time: {score}.",
         "full_time": "Full-time: {score}.",
+        "talkback_player": "{player} so far: {pass_pct}% of passes completed from {touches} touches.",
+        "talkback_team": "{team} have {possession}% of the ball, and {fte_10} final-third entries "
+                         "to {opp_fte_10} in the last 10 minutes.",
     },
     "es": {
         "goal": "¡GOL! ¡{scorer} marca para {team}! {score}.",
@@ -99,6 +127,9 @@ COMMENTARY = {
         "substitution": "Entra {on} por {off}.",
         "half_time": "Descanso: {score}.",
         "full_time": "Final del partido: {score}.",
+        "talkback_player": "{player} hasta ahora: {pass_pct}% de pases completados en {touches} toques.",
+        "talkback_team": "{team} tienen el {possession}% del balón y {fte_10} entradas al último "
+                         "tercio por {opp_fte_10} en los últimos 10 minutos.",
     },
     "fr": {
         "goal": "BUT ! {scorer} marque pour {team} ! {score}.",
@@ -111,6 +142,9 @@ COMMENTARY = {
         "substitution": "{on} remplace {off}.",
         "half_time": "Mi-temps : {score}.",
         "full_time": "Fin du match : {score}.",
+        "talkback_player": "{player} jusqu'ici : {pass_pct}% de passes réussies sur {touches} ballons.",
+        "talkback_team": "{team} ont {possession}% de possession, et {fte_10} entrées dans le dernier "
+                         "tiers contre {opp_fte_10} sur les 10 dernières minutes.",
     },
 }
 
@@ -118,12 +152,16 @@ COMMENTARY = {
 def commentary(m: Moment, names: dict[str, str], lang: str) -> str:
     f = _f(m)
     table = COMMENTARY.get(lang, COMMENTARY["en"])
-    tpl = table.get(m.kind)
+    kind = m.kind
+    if kind == "talkback":
+        kind = "talkback_player" if "player" in f else "talkback_team"
+    tpl = table.get(kind)
     if not tpl:
         return m.headline
     score = f"{names['home']} {f['score_home']}-{f['score_away']} {names['away']}"
+    extra = {"opp": names["away" if m.team == "home" else "home"]}
     try:
-        return tpl.format(team=names[m.team], score=score, **f)
+        return tpl.format(team=names[m.team], score=score, **extra, **f)
     except KeyError:
         return m.headline
 
@@ -140,7 +178,9 @@ def director_pick(queue: list[Moment], now_min: float, last_air_min: float) -> t
     return best, slot, f"highest priority ({best.priority:.2f}) fresh moment"
 
 
-def slot_for(kind: str) -> str:
+def slot_for(kind: str, player: str | None = None) -> str:
+    if kind == "talkback":
+        return "player_card" if player else "stat_card"
     return {
         "goal": "full_screen", "half_time": "full_screen", "full_time": "full_screen",
         "momentum": "stat_card", "press_drop": "stat_card", "press_surge": "stat_card",
@@ -161,10 +201,14 @@ DEFAULT_GRAPHIC_KEYS = {
     "substitution": ["on", "off"],
     "half_time": ["home_xg", "home_shots", "home_on_target", "home_possession", "home_pass_pct"],
     "full_time": ["home_xg", "home_shots", "home_on_target", "home_possession", "home_pass_pct"],
+    # Player answers use the player keys, team answers the rest; zeros are skipped.
+    "talkback": ["goals", "shots", "xg", "key_passes", "dribbles_won", "ball_wins", "pass_pct",
+                 "touches", "possession", "poss_10", "fte_10", "team_xg"],
 }
 
 TITLES = {
     "goal": "GOAL", "big_chance": "BIG CHANCE", "red_card": "RED CARD", "momentum": "MOMENTUM",
     "press_drop": "PRESS FADING", "press_surge": "PRESSING SURGE", "spotlight": "IN FOCUS",
     "substitution": "SUBSTITUTION", "half_time": "HALF-TIME", "full_time": "FULL-TIME",
+    "talkback": "BY THE NUMBERS",
 }
