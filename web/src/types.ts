@@ -77,6 +77,8 @@ export interface Moment {
   player?: string | null;
   /** Producer talkback text, when this moment answers a request. */
   request?: string | null;
+  /** Client receive time of the moment message, used to measure moment-to-air. */
+  receivedAt?: number;
 }
 
 export interface OverlayRow {

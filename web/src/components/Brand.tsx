@@ -1,12 +1,14 @@
-export function Wordmark() {
+/** The Gaffer Booth logo tile and name. `onDark` drops the gradient tile for the setup hero. */
+export function Brand({ onDark = false }: { onDark?: boolean }) {
   return (
-    <span className="wordmark">
-      <svg className="mark" viewBox="0 0 22 22" aria-hidden="true">
-        <rect x="1" y="1" width="20" height="20" rx="5" fill="none" stroke="currentColor" strokeWidth="1.6" />
-        <path d="M11 1v20M1 11h4M17 11h4" stroke="currentColor" strokeWidth="1.6" />
-        <circle cx="11" cy="11" r="3.2" fill="var(--tally)" />
-      </svg>
-      Gaffer<span>Booth</span>
+    <span className={`brand${onDark ? " on-dark" : ""}`}>
+      <span className="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 18 L12 4 L20 18 Z" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round" />
+          <circle cx="12" cy="14" r="2.4" fill="#fff" />
+        </svg>
+      </span>
+      Gaffer Booth
     </span>
   );
 }
