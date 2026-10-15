@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gaffer Booth · Full time</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Code+Pro:wght@400;500&display=swap">
+<link rel="stylesheet" href="stripe.css">
+<style>
+.ft { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 18px; min-height: 0; }
+.col { display: grid; gap: 18px; align-content: start; min-width: 0; }
+.scorecard { padding: 22px 24px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; }
+.team b { display: block; font-size: 20px; font-weight: 700; }
+.team span { color: var(--muted); font-size: 13px; }
+.team.a { text-align: right; }
+.big { font-size: 48px; font-weight: 800; letter-spacing: -.03em; }
+.big .w { color: var(--accent); }
+.goals { position: relative; height: 54px; margin: 0 24px 18px; border-top: 2px solid var(--border); }
+.g { position: absolute; top: -7px; transform: translateX(-50%); text-align: center; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.g i { display: block; width: 12px; height: 12px; border-radius: 50%; margin: 0 auto 6px; border: 2px solid var(--surface); }
+.g.h i { background: var(--accent); } .g.a i { background: var(--away); }
+.g b { color: var(--text); font-weight: 500; display: block; }
+.report { padding: 18px 24px 20px; }
+.report h2 { font-size: 22px; line-height: 28px; font-weight: 700; letter-spacing: -.01em; margin: 6px 0 10px; }
+.report p { font-size: 15px; line-height: 24px; color: var(--text-2); max-width: 70ch; }
+.report p mark { background: var(--accent-soft); color: var(--accent); border-radius: 3px; padding: 0 3px; }
+.meta { display: flex; gap: 10px; align-items: center; }
+.stats4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+.stats4 div { padding: 14px 20px; border-right: 1px solid var(--border); }
+.stats4 div:last-child { border-right: 0; }
+.stats4 span { display: block; font-size: 12px; color: var(--muted); }
+.stats4 b { font-size: 20px; font-weight: 700; }
+.stats4 em { font-style: normal; color: var(--muted); font-weight: 500; }
+.ratings td { padding: 8px 18px; }
+.rbar { display: inline-block; height: 6px; border-radius: 3px; background: var(--accent); vertical-align: middle; }
+.rbar.a { background: var(--away); }
+.post { margin: 12px 18px 0; padding: 12px 14px; border-radius: 8px; box-shadow: 0 0 0 1px var(--border); font-size: 13.5px; line-height: 19px; }
+.post .pf { display: flex; justify-content: space-between; margin-top: 8px; color: var(--muted); font-size: 12px; }
+.post .pf a { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M4 18 L12 4 L20 18 Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><circle cx="12" cy="14" r="2.4" fill="#fff"/></svg></span>Gaffer Booth</div>
+    <nav>
+      <a><i>●</i>Live broadcast</a>
+      <a><i>≡</i>Rundown</a>
+      <a><i>✓</i>Verification log</a>
+      <a class="on"><i>◷</i>Full-time recap</a>
+      <a><i>⚙</i>Crew settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="model"><span class="k">Model</span><span>nemotron-3.5-super-vl</span><span class="muted">OpenRouter · free tier</span></div>
+      <span class="testmode">Synthetic data</span>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="bar">
+      <div class="ask"><span class="ico">⌕</span><span class="ph">Ask about this match… “Who made the difference after 60'?”</span><kbd>/</kbd></div>
+      <div class="bar-r">
+        <div class="segctl"><span class="on">EN</span><span>ES</span><span>FR</span></div>
+        <button class="btn">Watch again</button>
+        <button class="btn primary">New broadcast</button>
+      </div>
+    </header>
+    <div class="content">
+      <div class="title-row">
+        <div><div class="crumb">Matchday 9 · Comeback scenario · seed 4127</div><h1>Full-time recap</h1></div>
+        <span class="pill ok">Report verified · 26 claims</span>
+      </div>
+      <div class="ft">
+        <div class="col">
+          <section class="card">
+            <div class="scorecard">
+              <div class="team"><b>Harbour City</b><span>Solberg 25', Varga 65', Novak 74', Varga 90+4'</span></div>
+              <div class="big"><span class="w">4</span> – 3</div>
+              <div class="team a"><b>Westbridge Rovers</b><span>Grieve 15', Haldane 20', Delacroix 55'</span></div>
+            </div>
+            <div class="goals">
+              <div class="g a" style="left:16%"><i></i><b>15'</b>Grieve</div>
+              <div class="g a" style="left:22%"><i></i><b>20'</b>Haldane</div>
+              <div class="g h" style="left:28%"><i></i><b>25'</b>Solberg</div>
+              <div class="g a" style="left:61%"><i></i><b>55'</b>Delacroix</div>
+              <div class="g h" style="left:72%"><i></i><b>65'</b>Varga</div>
+              <div class="g h" style="left:82%"><i></i><b>74'</b>Novak</div>
+              <div class="g h" style="left:97%"><i></i><b>90+4'</b>Varga</div>
+            </div>
+            <div class="stats4" style="border-top:1px solid var(--border)">
+              <div><span>Expected goals</span><b>2.83</b> <em>· 1.06</em></div>
+              <div><span>Shots</span><b>25</b> <em>· 20</em></div>
+              <div><span>Possession</span><b>50%</b> <em>· 50%</em></div>
+              <div><span>Pass accuracy</span><b>79%</b> <em>· 74%</em></div>
+            </div>
+          </section>
+          <section class="card report">
+            <div class="meta"><span class="pill live">Match report</span><span class="muted sm">Recap writer · model · every number checked</span></div>
+            <h2>Harbour City come from two down to beat Westbridge Rovers</h2>
+            <p>Westbridge led through <mark>Pele Grieve</mark> at 15' and <mark>Ivo Haldane</mark> at 20', and were still <mark>3–1</mark> up after <mark>Femi Delacroix</mark> scored at 55'. Harbour City kept coming: <mark>Wes Varga</mark> pulled one back at 65', <mark>Cruz Novak</mark> levelled at 74', and Varga won it at <mark>90+4</mark>. Over the match they created <mark>2.83</mark> xG to <mark>1.06</mark> from <mark>25</mark> shots.</p>
+          </section>
+        </div>
+        <div class="col">
+          <section class="card ratings">
+            <div class="card-h"><h2>Player ratings</h2><span class="muted sm">Computed in code</span></div>
+            <table>
+              <tbody>
+                <tr><td><b>Wes Varga</b> <span class="pill live">POTM</span></td><td class="r mono">2 G · 0.63 xG</td><td class="r"><span class="rbar" style="width:52px"></span> <b>9.1</b></td></tr>
+                <tr><td>Cruz Novak</td><td class="r mono">1 G · 0.48 xG</td><td class="r"><span class="rbar" style="width:50px"></span> <b>8.9</b></td></tr>
+                <tr><td>Kofi Grieve</td><td class="r mono">GK · 0.00</td><td class="r"><span class="rbar a" style="width:49px"></span> <b>8.8</b></td></tr>
+                <tr><td>Mats Lindqvist</td><td class="r mono">4 KP</td><td class="r"><span class="rbar" style="width:44px"></span> <b>8.2</b></td></tr>
+                <tr><td>Pele Grieve</td><td class="r mono">1 G · 0.15 xG</td><td class="r"><span class="rbar a" style="width:44px"></span> <b>8.2</b></td></tr>
+              </tbody>
+            </table>
+          </section>
+          <section class="card" style="padding-bottom:14px">
+            <div class="card-h"><h2>Social posts</h2><span class="muted sm">3 ready</span></div>
+            <div class="post">Harbour City fight back from 3–1 down to beat Westbridge Rovers 4–3. Wes Varga scores twice, including the 90+4 winner.<div class="pf"><span>118 / 280 · ✓ 6 claims</span><a>Copy</a></div></div>
+            <div class="post">Player of the match: Wes Varga, 9.1. Two goals from 0.63 xG.<div class="pf"><span>61 / 280 · ✓ 4 claims</span><a>Copy</a></div></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
