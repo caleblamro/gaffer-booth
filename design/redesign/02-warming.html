@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="gb.css" />
+<title>Warming up</title>
+<style>
+  body { min-height: 100vh; display: flex; flex-direction: column; }
+  .center { flex: 1; display: grid; place-items: center; padding: 24px; }
+  .card { width: min(520px, 100%); }
+  .card h1 { font-size: 44px; margin: 10px 0 6px; }
+  .card > p { margin: 0 0 22px; color: var(--fg-2); }
+  .rows { border: 1px solid var(--line); border-radius: 12px; background: var(--ink-1); }
+  .row { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; }
+  .row + .row { border-top: 1px solid var(--line); }
+  .row .mono { font-size: 11px; color: var(--fg-3); }
+  .row b { font-weight: 600; font-size: 13.5px; }
+  .row small { display: block; color: var(--fg-3); font-size: 12px; }
+  .bar { height: 2px; background: var(--ink-3); border-radius: 1px; margin: 18px 0 10px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 62%; background: var(--fg); }
+  .foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--fg-3); }
+</style>
+</head>
+<body>
+<header class="top"><script src="gb.js"></script><script>document.currentScript.insertAdjacentHTML("beforebegin", wordmark())</script><span class="sep"></span><span class="fixture">Harbour City v Westbridge Rovers</span><span class="tally off">Standby</span></header>
+<div class="center"><div class="card">
+  <span class="eyebrow">Going live at kick-off · 20×</span>
+  <h1 class="d">Warming up the crew</h1>
+  <p>Seeding the comeback storyline and checking each agent can answer inside the broadcast deadline.</p>
+  <div class="rows">
+    <div class="row"><span class="mono">01</span><div><b>Director</b><small>Rules loaded, 7 moment types</small></div><span class="tag pass">Ready</span></div>
+    <div class="row"><span class="mono">02</span><div><b>Analyst</b><small>Foundry model answered in 840 ms</small></div><span class="tag pass">Ready</span></div>
+    <div class="row"><span class="mono">03</span><div><b>Verifier</b><small>Evidence index built</small></div><span class="tag pass">Ready</span></div>
+    <div class="row"><span class="mono">04</span><div><b>Graphics</b><small>Checking model…</small></div><span class="tag idle"><span class="pulse"></span>Connecting</span></div>
+    <div class="row"><span class="mono">05</span><div><b>Commentator</b><small>English, Español</small></div><span class="tag idle">Queued</span></div>
+  </div>
+  <div class="bar"><i></i></div>
+  <div class="foot"><span>If a model misses the deadline, its template tier takes over.</span><button class="btn ghost" style="padding:0">Cancel</button></div>
+</div></div>
+<script>nb("02 Warming up")</script>
+</body>
+</html>

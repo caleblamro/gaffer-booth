@@ -1,0 +1,172 @@
+/* Gaffer Booth design system: "Floodlight".
+   Layout idea: the UI is the dark production gallery; on-air graphics are chalk-white boards
+   laid over a muted pitch, so anything the viewer would see on TV reads as a different material. */
+:root {
+  /* Ink: neutral ramp with a faint pitch-green bias (hue ~160), dark to light. */
+  --ink-0: #0a0d0c;
+  --ink-1: #101513;
+  --ink-2: #161c1a;
+  --ink-3: #1d2522;
+  --ink-4: #27312d;
+  --line: #222b28;
+  --line-strong: #33403b;
+  --fg: #e9eeec;
+  --fg-2: #a3aeaa;
+  --fg-3: #6b7873;
+
+  /* Chalk: the on-air graphic surface. */
+  --chalk: #f3f5f4;
+  --chalk-2: #e2e7e5;
+  --chalk-ink: #0d1211;
+  --chalk-mute: #5b6763;
+
+  /* One accent: the tally light. It means "on air / live / act now" and nothing else. */
+  --tally: #e5484d;
+  --tally-soft: rgba(229, 72, 77, 0.14);
+
+  /* Semantics (separate from the accent). */
+  --pass: #4fb286;
+  --pass-soft: rgba(79, 178, 134, 0.13);
+  --hold: #d4a03c;
+  --hold-soft: rgba(212, 160, 60, 0.14);
+
+  /* Pitch: desaturated so graphics and team colours carry the frame. */
+  --grass-a: #1c3529;
+  --grass-b: #1a3126;
+  --grass-line: rgba(233, 238, 236, 0.5);
+
+  /* Team colours are data, injected per match. */
+  --home: #1e6fd9;
+  --away: #0f9d58;
+
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "Archivo", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Type scale (px): 11 12 13 15 18 22 28 40 64 */
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 12px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--ink-0);
+  color: var(--fg);
+  font: 400 14px/1.45 var(--body);
+  font-variation-settings: "wdth" 100;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Type roles ---------- */
+.d { font-family: var(--display); font-variation-settings: "wdth" 62; font-weight: 800; text-transform: uppercase; letter-spacing: 0.01em; line-height: 0.95; }
+.d-semi { font-family: var(--display); font-variation-settings: "wdth" 72; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; }
+.eyebrow { font: 600 11px/1 var(--body); font-variation-settings: "wdth" 110; text-transform: uppercase; letter-spacing: 0.14em; color: var(--fg-3); }
+.mono { font-family: var(--mono); font-weight: 500; }
+.dim { color: var(--fg-2); }
+.faint { color: var(--fg-3); }
+
+/* ---------- Controls ---------- */
+.btn {
+  font: 500 13px/1 var(--body);
+  color: var(--fg);
+  background: var(--ink-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-2);
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.btn:hover { background: var(--ink-3); }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--fg-2); }
+.btn.primary { background: var(--tally); border-color: var(--tally); color: #fff; font-weight: 600; }
+.seg { display: inline-flex; background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--r-2); padding: 3px; gap: 2px; }
+.seg button { font: 500 13px/1 var(--body); color: var(--fg-2); background: transparent; border: 0; border-radius: 5px; padding: 7px 11px; cursor: pointer; }
+.seg button.on { background: var(--ink-4); color: var(--fg); box-shadow: inset 0 0 0 1px var(--line-strong); }
+.kbd { font: 500 11px var(--mono); color: var(--fg-3); border: 1px solid var(--line-strong); border-radius: 4px; padding: 1px 5px; }
+
+/* ---------- Status vocabulary ---------- */
+.tally { display: inline-flex; align-items: center; gap: 7px; font: 700 12px/1 var(--body); font-variation-settings: "wdth" 110; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 10px 6px 9px; border-radius: var(--r-1); background: var(--tally); color: #fff; }
+.tally::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff; }
+.tally.off { background: var(--ink-3); color: var(--fg-2); }
+.tally.off::before { background: var(--fg-3); }
+.tag { display: inline-flex; align-items: center; gap: 6px; font: 500 11px/1 var(--mono); padding: 4px 7px; border-radius: var(--r-1); white-space: nowrap; }
+.tag.pass { color: var(--pass); background: var(--pass-soft); }
+.tag.hold { color: var(--hold); background: var(--hold-soft); }
+.tag.fail { color: var(--tally); background: var(--tally-soft); }
+.tag.idle { color: var(--fg-3); background: var(--ink-3); }
+.check { width: 12px; height: 12px; }
+
+/* ---------- Surfaces ---------- */
+.panel { background: var(--ink-1); border: 1px solid var(--line); border-radius: var(--r-3); }
+.rule { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+/* ---------- App chrome ---------- */
+.top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 52px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--ink-0);
+}
+.wordmark { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-variation-settings: "wdth" 62; font-weight: 800; font-size: 21px; letter-spacing: 0.03em; text-transform: uppercase; }
+.wordmark .mark { width: 22px; height: 22px; }
+.wordmark span { color: var(--fg-3); }
+.top .sep { width: 1px; height: 22px; background: var(--line); }
+.top .fixture { font-weight: 500; color: var(--fg-2); }
+.top .right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+/* ---------- Pitch monitor ---------- */
+.monitor { position: relative; border-radius: var(--r-3); overflow: hidden; background: var(--grass-a); border: 1px solid var(--line); }
+.monitor svg.pitch { width: 100%; height: 100%; display: block; }
+.monitor .wm { position: absolute; top: 14px; right: 16px; font: 500 10px var(--mono); letter-spacing: 0.14em; color: rgba(233, 238, 236, 0.55); }
+
+/* Score bug: ink plate, chalk score. */
+.bug { position: absolute; top: 14px; left: 14px; display: flex; align-items: stretch; height: 34px; border-radius: 6px; overflow: hidden; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); font-family: var(--display); font-variation-settings: "wdth" 62; font-weight: 800; font-size: 20px; letter-spacing: 0.04em; }
+.bug .t { display: flex; align-items: center; gap: 8px; padding: 0 11px; background: var(--chalk-ink); color: var(--chalk); }
+.bug .t i { width: 4px; height: 18px; border-radius: 1px; background: var(--c); }
+.bug .s { display: flex; align-items: center; padding: 0 12px; background: var(--chalk); color: var(--chalk-ink); font-size: 23px; }
+.bug .s b { font-weight: 800; padding: 0 3px; opacity: 0.35; }
+.bug .c { display: flex; align-items: center; padding: 0 11px; background: #1a2220; color: var(--chalk); font: 500 15px var(--mono); }
+
+/* ---------- On-air graphics (chalk boards) ---------- */
+.gfx { position: absolute; color: var(--chalk-ink); }
+.board { background: var(--chalk); border-radius: 10px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); overflow: hidden; }
+.board .stripe { height: 6px; background: var(--c); }
+.board .kick { display: flex; justify-content: space-between; align-items: center; font: 600 11px/1 var(--body); font-variation-settings: "wdth" 110; letter-spacing: 0.14em; text-transform: uppercase; color: var(--chalk-mute); }
+.board .facts { display: grid; gap: 1px; background: var(--chalk-2); border-top: 1px solid var(--chalk-2); }
+.board .facts > div { background: var(--chalk); padding: 9px 12px; }
+.board .facts dt { font: 600 10.5px/1.2 var(--body); font-variation-settings: "wdth" 110; letter-spacing: 0.08em; text-transform: uppercase; color: var(--chalk-mute); }
+.board .facts dd { margin: 4px 0 0; font-family: var(--display); font-variation-settings: "wdth" 70; font-weight: 800; font-size: 24px; line-height: 1; text-transform: uppercase; }
+.board .say { font-size: 14px; line-height: 1.45; color: #2a3431; }
+.proof { display: inline-flex; align-items: center; gap: 6px; font: 500 11px/1 var(--mono); color: #1f7a52; background: rgba(79, 178, 134, 0.16); border-radius: 4px; padding: 4px 7px; }
+.teamchip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--display); font-variation-settings: "wdth" 62; font-weight: 800; font-size: 17px; letter-spacing: 0.06em; text-transform: uppercase; }
+.teamchip i { width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
+
+/* Captions: ink bar, language code in mono. */
+.caption { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); width: min(760px, 84%); display: flex; gap: 12px; align-items: flex-start; background: rgba(10, 13, 12, 0.86); border-radius: 8px; padding: 10px 14px; color: var(--chalk); font-size: 16px; line-height: 1.4; backdrop-filter: blur(4px); }
+.caption .lang { flex: none; font: 600 11px/1 var(--mono); color: var(--chalk-ink); background: var(--chalk); border-radius: 3px; padding: 4px 5px; margin-top: 2px; }
+
+/* ---------- Agent rows ---------- */
+.agent { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; padding: 9px 12px; }
+.agent .n { font: 500 11px var(--mono); color: var(--fg-3); }
+.agent b { font-weight: 600; font-size: 13.5px; display: block; }
+.agent small { font-size: 12px; color: var(--fg-3); }
+.agent.live .n { color: var(--fg); }
+.pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--fg); display: inline-block; animation: p 1.2s ease-in-out infinite; }
+@keyframes p { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+
+/* Fact token: a claim in running text that maps to evidence. */
+.claim { border-bottom: 1.5px solid var(--pass); padding-bottom: 1px; }
+.claim.bad { border-bottom-color: var(--tally); text-decoration: line-through; text-decoration-color: var(--tally); }
+
+/* ---------- Gallery badge ---------- */
+.nb { position: fixed; right: 12px; bottom: 12px; z-index: 50; font: 500 11px var(--mono); color: var(--fg-2); background: var(--ink-2); border: 1px solid var(--line-strong); border-radius: 6px; padding: 6px 9px; }
