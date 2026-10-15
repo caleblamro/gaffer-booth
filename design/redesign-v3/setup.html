@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gaffer Booth · Setup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Code+Pro:wght@400;500&display=swap">
+<link rel="stylesheet" href="stripe.css">
+<style>
+body { overflow: hidden; background: var(--surface); }
+.hero { position: relative; height: 100vh; overflow: hidden; }
+.wash { position: absolute; left: 0; right: 0; top: -38%; height: 76%; transform: skewY(-6deg); transform-origin: 0; overflow: hidden; }
+.wash canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 22px 64px; color: #fff; }
+.top .brand { padding: 0; color: #fff; }
+.top .brand .logo { background: rgba(255,255,255,.22); }
+.top nav { display: flex; gap: 28px; font-weight: 500; }
+.top nav a { color: #fff; padding: 0; font-weight: 600; text-decoration: none; opacity: .92; } .top nav a:hover { opacity: 1; background: none; }
+.top .btn { background: rgba(255,255,255,.22); color: #fff; box-shadow: none; }
+.body { position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 520px; gap: 64px; padding: 30px 64px 0; align-items: start; }
+.lead h1 { font-size: 50px; line-height: 54px; font-weight: 800; letter-spacing: -.035em; color: var(--navy); mix-blend-mode: color-burn; max-width: 640px; }
+.lead p { margin-top: 84px; font-size: 19px; line-height: 30px; color: var(--text-2); max-width: 540px; }
+.lead .stats { display: flex; gap: 40px; margin-top: 40px; }
+.lead .stats div { border-left: 1px solid var(--accent); padding-left: 14px; }
+.lead .stats b { display: block; font-size: 22px; font-weight: 700; }
+.lead .stats span { color: var(--muted); font-size: 13px; }
+.form { background: var(--surface); border-radius: 12px; box-shadow: var(--shadow-2); padding: 24px; display: grid; gap: 18px; }
+.form h2 { font-size: 17px; }
+.lbl2 { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 8px; }
+.fx { display: grid; gap: 8px; }
+.opt { display: grid; grid-template-columns: 18px 1fr auto; gap: 12px; align-items: center; padding: 11px 14px; border-radius: 8px; box-shadow: 0 0 0 1px var(--border); }
+.opt.on { box-shadow: 0 0 0 2px var(--accent); background: #fafaff; }
+.opt .rd { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border-2); }
+.opt.on .rd { border: 5px solid var(--accent); }
+.opt b { font-weight: 600; } .opt small { display: block; color: var(--muted); font-size: 12.5px; }
+.opt .tag { font-size: 12px; color: var(--muted); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.segctl.full { display: flex; } .segctl.full span { flex: 1; text-align: center; }
+.go { height: 44px; border-radius: 8px; font-size: 15px; font-weight: 600; }
+.fine { font-size: 12.5px; color: var(--muted); text-align: center; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="wash"><canvas id="mesh"></canvas></div>
+  <header class="top">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M4 18 L12 4 L20 18 Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><circle cx="12" cy="14" r="2.4" fill="#fff"/></svg></span>Gaffer Booth</div>
+    <nav><a href="#">How it works</a><a href="#">Verification</a><a href="#">Recap API</a><a href="#">GitHub ›</a></nav>
+  </header>
+  <div class="body">
+    <div class="lead">
+      <h1>An AI broadcast crew that proves every number it puts on air.</h1>
+      <p>Five agents watch a live match, decide what matters, explain it, check each claim against the data and voice it in three languages. Built on Microsoft Agent Framework.</p>
+      <div class="stats">
+        <div><b>100%</b><span>of on-air numbers checked</span></div>
+        <div><b>16 s</b><span>median moment to air</span></div>
+        <div><b>3</b><span>languages at once</span></div>
+      </div>
+    </div>
+    <div class="form">
+      <h2>Start a broadcast</h2>
+      <div>
+        <span class="lbl2">Match</span>
+        <div class="fx">
+          <div class="opt"><span class="rd"></span><div><b>Harbour City v Kingsmoor Athletic</b><small>A tight derby settled late</small></div><span class="tag">Classic</span></div>
+          <div class="opt on"><span class="rd"></span><div><b>Harbour City v Westbridge Rovers</b><small>Two down at the hour, then a comeback</small></div><span class="tag">Comeback</span></div>
+          <div class="opt"><span class="rd"></span><div><b>Ravenshollow FC v Kingsmoor Athletic</b><small>An early red card reshapes the game</small></div><span class="tag">Red card</span></div>
+          <div class="opt"><span class="rd"></span><div><b>Westbridge Rovers v Ravenshollow FC</b><small>A high press that runs out of legs</small></div><span class="tag">Press collapse</span></div>
+        </div>
+      </div>
+      <div class="row2">
+        <div><span class="lbl2">Speed</span><div class="segctl full"><span>10×</span><span class="on">20×</span><span>40×</span></div></div>
+        <div><span class="lbl2">Join from</span><div class="segctl full"><span>Kick-off</span><span class="on">55'</span><span>70'</span></div></div>
+      </div>
+      <div><span class="lbl2">Commentary languages</span><div class="segctl full"><span class="on">English</span><span class="on">Español</span><span>Français</span><span>Português</span></div></div>
+      <button class="btn primary go">Go live</button>
+      <p class="fine">All clubs, players and match data are synthetic.</p>
+    </div>
+  </div>
+</div>
+<script>
+// Stripe-like mesh: a few soft colour blobs blended on a canvas, drawn once.
+const c = document.getElementById("mesh"), r = c.getBoundingClientRect(), d = devicePixelRatio || 1;
+c.width = r.width * d; c.height = r.height * d; const g = c.getContext("2d"); g.scale(d, d);
+g.fillStyle = "#a960ee"; g.fillRect(0, 0, r.width, r.height);
+for (const [x, y, rad, col] of [[.08,.9,.42,"#ff333d"],[.35,.95,.38,"#ff8a4d"],[.62,.95,.4,"#ffcb57"],[.9,.85,.45,"#90e0ff"],[.75,.45,.4,"#a960ee"]]) {
+  const gr = g.createRadialGradient(x*r.width, y*r.height, 0, x*r.width, y*r.height, rad*r.width);
+  gr.addColorStop(0, col); gr.addColorStop(1, col + "00"); g.fillStyle = gr; g.fillRect(0, 0, r.width, r.height);
+}
+</script>
+</body>
+</html>

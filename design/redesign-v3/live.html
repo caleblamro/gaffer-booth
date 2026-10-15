@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gaffer Booth · Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap">
+<link rel="stylesheet" href="stripe.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><span class="logo"><svg viewBox="0 0 24 24"><path d="M4 18 L12 4 L20 18 Z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><circle cx="12" cy="14" r="2.4" fill="#fff"/></svg></span>Gaffer Booth</div>
+    <nav>
+      <a class="on" href="#"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="1.6"/><path d="M5 5a4.2 4.2 0 0 0 0 6M11 5a4.2 4.2 0 0 1 0 6M3 3a7 7 0 0 0 0 10M13 3a7 7 0 0 1 0 10"/></svg>Live broadcast</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M5.5 4h8M5.5 8h8M5.5 12h8"/><circle cx="2.5" cy="4" r=".6"/><circle cx="2.5" cy="8" r=".6"/><circle cx="2.5" cy="12" r=".6"/></svg>Rundown</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M8 1.8 13 3.6v4.1c0 3-2.1 5.4-5 6.5-2.9-1.1-5-3.5-5-6.5V3.6Z"/><path d="m5.6 8 1.7 1.7 3.2-3.4"/></svg>Verification log</a>
+      <a href="#"><svg viewBox="0 0 16 16"><rect x="2.5" y="2" width="11" height="12" rx="1.5"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg>Full-time recap</a>
+      <a href="#"><svg viewBox="0 0 16 16"><path d="M2.5 4.5h7M12.5 4.5h1M2.5 11.5h1M6.5 11.5h7"/><circle cx="11" cy="4.5" r="1.5"/><circle cx="5" cy="11.5" r="1.5"/></svg>Crew settings</a>
+    </nav>
+    <div class="side-foot">
+      <div class="model"><span class="k">Model</span><span>nemotron-3.5-super-vl</span><span class="muted">OpenRouter · free tier</span></div>
+      <span class="testmode">Synthetic data</span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="bar">
+      <div class="ask"><span class="ico">⌕</span><span class="ph">Ask the crew… “Why are Westbridge still ahead?”</span><kbd>/</kbd></div>
+      <div class="bar-r">
+        <div class="segctl"><span>10×</span><span class="on">20×</span><span>40×</span></div>
+        <div class="segctl"><span class="on">EN</span><span>ES</span><span>FR</span></div>
+        <button class="btn">Pause</button>
+        <button class="btn primary">End broadcast</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="title-row">
+        <div>
+          <div class="crumb">Matchday 9 · Comeback scenario · seed 4127</div>
+          <h1>Harbour City <span class="sc">2 – 3</span> Westbridge Rovers</h1>
+        </div>
+        <span class="pill live"><i></i>Live · 66:18</span>
+      </div>
+
+      <div class="grid">
+        <section class="card program">
+          <div class="pic">
+            <svg id="pitch"></svg>
+            <div class="ov-score"><b class="h">HBC</b><span>2–3</span><b class="a">WBR</b><em>66:18</em></div>
+            <div class="ov-card">
+              <div class="ov-kick"><span class="dot h"></span>Goal · Harbour City · 65:10</div>
+              <div class="ov-name">Wes Varga</div>
+              <div class="ov-sub">Assisted by Mats Lindqvist</div>
+              <div class="ov-stats">
+                <div><b>0.46</b><span>Chance xG</span></div>
+                <div><b>6</b><span>Passes in move</span></div>
+                <div><b>2.13–1.04</b><span>Match xG</span></div>
+              </div>
+              <div class="ov-proof">✓ 10 claims verified</div>
+            </div>
+            <div class="ov-cap"><span>EN</span>Varga pulls one back! A 0.46 xG chance at the end of a six-pass move, and it's 2–3 with 24 to play.</div>
+          </div>
+          <div class="cams">
+            <span class="cam on">Main</span><span class="cam">Tactical</span><span class="cam">Behind goal</span><span class="cam">Isolation</span><span class="cam">Radar</span>
+            <span class="muted sm">Director cuts automatically</span>
+          </div>
+        </section>
+
+        <section class="card seg">
+          <div class="card-h"><h2>On air now</h2><span class="pill ok">Verified</span></div>
+          <div class="seg-sum">
+            <div class="kv"><span>Moment</span><b>Goal, Wes Varga</b></div>
+            <div class="kv"><span>Graphic</span><b>Full screen</b></div>
+            <div class="kv"><span>Claims checked</span><b>10 of 10</b></div>
+            <div class="kv"><span>Time to air</span><b>9.9 s</b></div>
+          </div>
+          <h3>Timeline</h3>
+          <ol class="tl">
+            <li><i class="d ok"></i><div><b>Aired as full-screen goal plate</b><span>Director · 66:02</span></div></li>
+            <li><i class="d ok"></i><div><b>Commentary voiced in EN, ES</b><span>Commentator · 4.1 s</span></div></li>
+            <li><i class="d ok"></i><div><b>All 10 claims matched match data</b><span>Verifier · code + model judge</span></div></li>
+            <li><i class="d bad"></i><div><b>Blocked “protect their 3–1 lead”</b><span>Verifier · score at 65:10 was 1–3</span><code>score_home = 1 · score_away = 3</code></div></li>
+            <li><i class="d"></i><div><b>Drafted insight, called team_stats</b><span>Analyst · attempt 1</span></div></li>
+            <li><i class="d"></i><div><b>Goal detected</b><span>Moment detector · 65:10</span></div></li>
+          </ol>
+        </section>
+
+        <section class="card talk">
+          <div class="card-h"><h2>Talkback</h2><span class="pill neutral">1 in progress</span></div>
+          <div class="msg me"><b>You · 66:02</b>Why are Westbridge still ahead on half the xG?</div>
+          <div class="msg crew"><b>Analyst · drafting</b><span class="typing"><i></i><i></i><i></i></span><em>called team_stats, recent_trend(10)</em></div>
+        </section>
+
+        <section class="card metrics">
+          <div class="mt"><span class="lbl">Expected goals</span><div class="vals"><b class="h">2.13</b><b class="a">1.04</b></div><canvas data-s="xg"></canvas></div>
+          <div class="mt"><span class="lbl">Shots</span><div class="vals"><b class="h">13</b><b class="a">19</b></div><canvas data-s="shots"></canvas></div>
+          <div class="mt"><span class="lbl">Possession</span><div class="vals"><b class="h">51%</b><b class="a">49%</b></div><canvas data-s="poss"></canvas></div>
+          <div class="mt"><span class="lbl">Final-third entries</span><div class="vals"><b class="h">41</b><b class="a">28</b></div><canvas data-s="ft"></canvas></div>
+        </section>
+
+        <section class="card rundown">
+          <div class="card-h"><h2>Rundown</h2><span class="muted sm">12 detected · 8 aired · 1 superseded</span></div>
+          <table>
+            <thead><tr><th>Time</th><th>Moment</th><th>Graphic</th><th>Status</th><th class="r">Claims</th><th class="r">To air</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">70:00</td><td>Harbour City substitution</td><td>Lower third</td><td><span class="pill neutral">Queued</span></td><td class="r">–</td><td class="r">–</td></tr>
+              <tr class="hl"><td class="mono">65:10</td><td><b>Goal, Wes Varga</b></td><td>Full screen</td><td><span class="pill live"><i></i>On air</span></td><td class="r">10/10</td><td class="r">9.9 s</td></tr>
+              <tr><td class="mono">55:43</td><td>Goal, Femi Delacroix</td><td>Full screen</td><td><span class="pill warn">Breaking</span></td><td class="r">5/5</td><td class="r">0.4 s</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="pitch.js"></script>
+<script>
+drawPitch(document.getElementById("pitch"), { stripes: true, grassA: "#0a2540", grassB: "#0f2e50", line: "rgba(255,255,255,.28)", lw: 0.25, home: "#8f89ff", away: "#2fd3f0", ball: "#ffffff", ring: "#0a2540", r: 1.15 });
+const series = {
+  xg: [[0,.1,.2,.3,.5,.6,.9,1.0,1.2,1.4,1.5,1.7,1.9,2.13],[0,.1,.2,.3,.4,.5,.6,.7,.8,.8,.9,1.0,1.0,1.04]],
+  shots: [[0,1,2,3,4,5,6,7,8,9,10,11,12,13],[0,2,3,5,7,8,10,11,13,14,15,17,18,19]],
+  poss: [[48,50,47,52,55,51,49,53,50,52,54,51,50,51],[52,50,53,48,45,49,51,47,50,48,46,49,50,49]],
+  ft: [[0,3,6,9,12,15,18,21,25,29,32,35,38,41],[0,3,5,7,9,11,13,15,17,19,22,24,26,28]],
+};
+document.querySelectorAll("canvas[data-s]").forEach((cv) => {
+  const r = cv.getBoundingClientRect(), d = devicePixelRatio || 1; cv.width = r.width * d; cv.height = r.height * d;
+  const g = cv.getContext("2d"); g.scale(d, d);
+  const [h, a] = series[cv.dataset.s], all = h.concat(a), mx = Math.max(...all), mn = Math.min(...all);
+  const y = (v) => r.height - 4 - (v - mn) / (mx - mn || 1) * (r.height - 8), x = (i) => i / (h.length - 1) * r.width;
+  g.strokeStyle = "#e3e8ee"; g.beginPath(); g.moveTo(0, r.height - .5); g.lineTo(r.width, r.height - .5); g.stroke();
+  for (const [s, c, fill] of [[a, "#0ab4d6", false], [h, "#635bff", true]]) {
+    g.beginPath(); s.forEach((v, i) => i ? g.lineTo(x(i), y(v)) : g.moveTo(x(i), y(v)));
+    g.lineWidth = 2; g.strokeStyle = c; g.stroke();
+    if (fill) { g.lineTo(r.width, r.height); g.lineTo(0, r.height); g.closePath(); const gr = g.createLinearGradient(0, 0, 0, r.height); gr.addColorStop(0, "rgba(99,91,255,.18)"); gr.addColorStop(1, "rgba(99,91,255,0)"); g.fillStyle = gr; g.fill(); }
+  }
+});
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { GOALS, MARKINGS, VIEW_H, VIEW_W, projectLine, projectPolygon, projector, type Rig } from "../lib/camera";
 import { blendFrames, type Frame } from "../lib/positions";
+import { inkOn } from "../lib/labels";
 import type { Side } from "../types";
 
 interface Props {
@@ -77,7 +78,7 @@ export const CameraView = memo(function CameraView({ frame, rig, colors, thumb =
         const post = projectLine(P, g.frame);
         return (
           <g key={i}>
-            {net && <polygon points={net} fill="rgba(243,245,244,.12)" />}
+            {net && <polygon points={net} fill="rgba(255,255,255,.14)" />}
             {post && <polyline points={post} fill="none" stroke="var(--chalk)" strokeWidth={thumb ? 5 : 3.2} />}
           </g>
         );
@@ -101,17 +102,17 @@ export const CameraView = memo(function CameraView({ frame, rig, colors, thumb =
               />
             )}
             <rect x={foot![0] - w * 0.36} y={hip![1]} width={w * 0.72} height={foot![1] - hip![1]} rx={w * 0.2} fill="#101614" />
-            <rect x={foot![0] - w / 2} y={head![1] + h * 0.14} width={w} height={hip![1] - head![1] - h * 0.1} rx={w * 0.3} fill={colors[d.side]} />
+            <rect x={foot![0] - w / 2} y={head![1] + h * 0.14} width={w} height={hip![1] - head![1] - h * 0.1} rx={w * 0.3} fill={colors[d.side]} stroke="rgba(11,42,74,.35)" strokeWidth={Math.max(0.5, w * 0.04)} />
             <circle cx={head![0]} cy={head![1] + h * 0.06} r={h * 0.075} fill="#c9a98a" />
             {!thumb && h > 46 && (
-              <text x={foot![0]} y={head![1] + h * 0.42} fill="#fff" textAnchor="middle" className="cam-num" style={{ fontSize: h * 0.2 }}>
+              <text x={foot![0]} y={head![1] + h * 0.42} fill={inkOn(colors[d.side])} textAnchor="middle" className="cam-num" style={{ fontSize: h * 0.2 }}>
                 {d.number}
               </text>
             )}
           </g>
         );
       })}
-      {ball && <circle cx={ball[0]} cy={ball[1]} r={ballR} fill="#fff" stroke="#0a0d0c" strokeWidth="1" />}
+      {ball && <circle cx={ball[0]} cy={ball[1]} r={ballR} fill="#ffd43b" stroke="#0b2a4a" strokeWidth="1" />}
       {!thumb && <rect width={VIEW_W} height={VIEW_H} fill="url(#cam-vignette)" />}
       <defs>
         <radialGradient id="cam-vignette" cx="50%" cy="60%" r="75%">

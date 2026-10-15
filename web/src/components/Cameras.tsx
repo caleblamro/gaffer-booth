@@ -17,8 +17,11 @@ interface ShotProps {
 }
 
 /** One camera's picture of a frame. */
+/** The radar is a data view, so it uses the UI side colours on navy rather than the rendered kits. */
+const RADAR_KITS: Record<Side, string> = { home: "#8f89ff", away: "#2fd3f0" };
+
 export function Shot({ cam, frame, dir, colors, events, speed, thumb }: ShotProps) {
-  if (cam === "radar") return <Pitch frame={frame} events={events} colors={colors} speed={speed} thumb={thumb} />;
+  if (cam === "radar") return <Pitch frame={frame} events={events} colors={RADAR_KITS} speed={speed} thumb={thumb} />;
   return <CameraView frame={frame} rig={rigFor(cam, frame, dir.attack, dir.focus)} colors={colors} thumb={thumb} />;
 }
 
@@ -47,42 +50,52 @@ interface SwitcherProps {
   speed: number;
 }
 
-/** Program/preview switcher under the picture: red tally on program, white outline on preview. */
-export function CameraSwitcher({ frame, dir, colors, events, speed }: SwitcherProps) {
+interface TabsProps {
+  dir: Direction;
+  multi: boolean;
+  setMulti: (v: boolean) => void;
+}
+
+/** Camera tabs under the picture: the program camera is selected, the preview outlined. */
+export function CameraTabs({ dir, multi, setMulti }: TabsProps) {
   return (
-    <div className="panel cams">
-      <div className="cams-h">
-        <span className="eyebrow">Cameras</span>
-        <span className="auto">
-          Cuts
-          {dir.auto ? (
-            <b>Director · auto</b>
-          ) : (
-            <button type="button" className="linkish" onClick={dir.handBack}>
-              Manual · hand back <span className="kbd">A</span>
-            </button>
-          )}
-        </span>
-      </div>
-      <div className="thumbs">
-        {CAMERAS.map((c, i) => {
-          const pgm = c.id === dir.program;
-          const pvw = !pgm && c.id === dir.preview;
-          return (
-            <button type="button" key={c.id} className={`th${pgm ? " pgm" : ""}${pvw ? " pvw" : ""}`} onClick={() => dir.cut(c.id)}>
-              <span className="img">
-                <Shot cam={c.id} frame={frame} dir={dir} colors={colors} events={events} speed={speed} thumb />
-              </span>
-              <span className="lb">
-                <span className="mono">{i + 1}</span>
-                {c.name}
-                {pgm && <em className="pg">PGM</em>}
-                {pvw && <em className="pv">PVW</em>}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+    <div className="cams" role="toolbar" aria-label="Cameras">
+      {CAMERAS.map((c, i) => {
+        const pgm = !multi && c.id === dir.program;
+        const pvw = c.id === dir.preview && c.id !== dir.program;
+        return (
+          <button
+            type="button"
+            key={c.id}
+            className={`cam${pgm ? " on" : ""}${pvw ? " pvw" : ""}`}
+            onClick={() => {
+              setMulti(false);
+              dir.cut(c.id);
+            }}
+            title={`Cut to ${c.name} (${i + 1})${pvw ? " · preview" : ""}`}
+          >
+            {c.name}
+          </button>
+        );
+      })}
+      <span className="cams-sep" />
+      <button type="button" className={`cam${multi ? " on" : ""}`} onClick={() => setMulti(!multi)} aria-pressed={multi}>
+        Multiview
+      </button>
+      <span className="cams-r">
+        {multi && (
+          <button type="button" className="btn sm" onClick={dir.take}>
+            Take preview <kbd>Enter</kbd>
+          </button>
+        )}
+        {dir.auto ? (
+          <span className="muted sm">Director cuts automatically</span>
+        ) : (
+          <button type="button" className="btn sm" onClick={dir.handBack}>
+            Manual · hand back <kbd>A</kbd>
+          </button>
+        )}
+      </span>
     </div>
   );
 }
@@ -96,10 +109,12 @@ export function Multiview({ frame, dir, colors, events, speed }: SwitcherProps) 
       <button type="button" className="tile pgm" onClick={() => dir.cut(dir.program)}>
         <Shot cam={dir.program} frame={frame} dir={dir} colors={colors} events={events} speed={speed} />
         <span className="lab">
-          <span className="mono">{pgmIdx + 1}</span>
+          <kbd>{pgmIdx + 1}</kbd>
           {CAMERAS[pgmIdx].name}
-          <small>{dir.auto ? "Director is cutting" : "Manual"}</small>
-          <em className="pg">PGM</em>
+          <em className="pill live">
+            <i />
+            Program
+          </em>
         </span>
       </button>
       {others.map((c) => {
@@ -108,9 +123,9 @@ export function Multiview({ frame, dir, colors, events, speed }: SwitcherProps) 
           <button type="button" key={c.id} className={`tile${pvw ? " pvw" : ""}`} onClick={() => dir.cut(c.id)}>
             <Shot cam={c.id} frame={frame} dir={dir} colors={colors} events={events} speed={speed} thumb />
             <span className="lab">
-              <span className="mono">{CAMERAS.findIndex((x) => x.id === c.id) + 1}</span>
+              <kbd>{CAMERAS.findIndex((x) => x.id === c.id) + 1}</kbd>
               {c.name}
-              {pvw && <em className="pv">PVW</em>}
+              {pvw && <em className="pill neutral">Preview</em>}
             </span>
           </button>
         );

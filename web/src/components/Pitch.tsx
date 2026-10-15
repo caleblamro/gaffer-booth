@@ -1,3 +1,4 @@
+import { inkOn } from "../lib/labels";
 import type { MatchEvent, Side } from "../types";
 import { PITCH_H as H, PITCH_W as W, type Frame } from "../lib/positions";
 
@@ -18,9 +19,9 @@ export function Pitch({ frame, events, colors, speed, thumb = false }: Props) {
   const [bx, by] = frame.ball;
 
   return (
-    <svg className="pitch" viewBox={`-4 -4 ${W + 8} ${H + 8}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <svg className="pitch radar" viewBox={`-4 -4 ${W + 8} ${H + 8}`} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
       {Array.from({ length: 12 }, (_, i) => (
-        <rect key={i} x={-4 + i * 9.42} y="-4" width="9.42" height={H + 8} fill={i % 2 ? "var(--grass-a)" : "var(--grass-b)"} />
+        <rect key={i} x={-4 + i * 9.42} y="-4" width="9.42" height={H + 8} fill={i % 2 ? "var(--navy)" : "var(--navy-2)"} />
       ))}
       <g className="lines">
         <rect width={W} height={H} />
@@ -53,8 +54,12 @@ export function Pitch({ frame, events, colors, speed, thumb = false }: Props) {
       {frame.dots.map((d) => (
         <g key={d.id} className="dot" style={{ transform: `translate(${d.x}px, ${d.y}px)`, transitionDuration: `${dur}s` }}>
           {d.active && <circle r="3.6" className="halo" />}
-          <circle r="1.85" fill={colors[d.side]} stroke="rgba(243,245,244,.9)" strokeWidth="0.28" />
-          {!thumb && <text y="0.62">{d.number}</text>}
+          <circle r="1.85" fill={colors[d.side]} stroke="#0b2a4a" strokeWidth="0.28" />
+          {!thumb && (
+            <text y="0.62" fill={inkOn(colors[d.side])}>
+              {d.number}
+            </text>
+          )}
         </g>
       ))}
       <g className="ball" style={{ transform: `translate(${bx}px, ${by}px)`, transitionDuration: `${dur}s` }}>
