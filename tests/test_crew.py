@@ -53,6 +53,17 @@ def test_verifier_rejects_hallucination_and_analyst_retries():
     assert fc.calls.count("AnalystOut") == 2
 
 
+def test_verifier_rejects_a_non_answer_and_analyst_retries():
+    fc = FakeChatClient(hallucinate_first=False, non_answer_first=True)
+    crew, out = _setup(fc)
+    asyncio.run(crew.produce_next())
+    rejected = [m["text"] for m in out if m["type"] == "console"
+                and (m["agent"], m["status"]) == ("Verifier", "rejected")]
+    assert rejected and "not an answer" in rejected[0]
+    seg = next(m for m in out if m["type"] == "segment")
+    assert not seg["insight"].startswith("Need") and fc.calls.count("AnalystOut") == 2
+
+
 def test_graphics_values_come_from_facts_not_the_model():
     crew, out = _setup(FakeChatClient(hallucinate_first=False))
     asyncio.run(crew.produce_next())

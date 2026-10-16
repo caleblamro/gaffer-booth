@@ -64,3 +64,16 @@ def test_spotlight_template_numbers_are_all_in_evidence():
         text = analyst_insight(m, names)
         res = verify(text, Evidence.from_facts(m.fact_dict()), roster)
         assert res.ok, (text, res.violations)
+
+
+def test_answer_mode_rejects_non_answers():
+    roster = ["Kofi Grieve", "Pele Grieve"]
+    ev = Evidence.from_facts({"player": "Pele Grieve", "shots": 3, "clock": "54:30"})
+    for text in ("Need Pele Grieve's match stats\u2026",
+                 "I don't have Pele Grieve's numbers yet.",
+                 "Pele Grieve's xG is not in the evidence.",
+                 "Pele Grieve has been busy."):  # names a player but cites nothing
+        assert verify(text, ev, roster).ok, text  # nothing invented...
+        res = verify(text, ev, roster, answer=True)
+        assert not res.ok, text  # ...but it is not an answer either
+    assert verify("Pele Grieve has 3 shots by 54:30.", ev, roster, answer=True).ok

@@ -431,13 +431,14 @@ class Crew:
                                    t0, m, "llm")
                     break
                 ev = self._evidence(m)
-                ver = verify(out.insight, ev, self.roster)
+                ver = verify(out.insight, ev, self.roster, answer=True)
                 await self.log("Analyst", "draft", out.insight, t0, m, "llm", attempt=attempt)
                 t1 = time.perf_counter()
                 if not ver.ok:
                     await self.log("Verifier", "rejected", ver.summary(), t1, m, "code")
                     feedback = ("\n\nYour previous draft was rejected by the verifier: "
-                                f"{ver.summary()}. Rewrite using only evidence numbers.")
+                                f"{ver.summary()}. Rewrite as a direct answer that cites at least one "
+                                "evidence number, using only evidence numbers.")
                     continue
                 # The code verifier passed: voice it while the LLM judge checks the reasoning.
                 voice = asyncio.create_task(self._draft_commentary(m, out.insight)) \
