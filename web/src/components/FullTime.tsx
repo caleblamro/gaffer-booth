@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { sideClass, storyline } from "../lib/labels";
+import { sideClass } from "../lib/labels";
 import type { InitMsg, Side, TeamStats } from "../types";
 import { Check, Pulse } from "./Brand";
 
@@ -79,7 +79,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       type="button"
-      className="linkbtn"
+      className="mini"
       onClick={() =>
         navigator.clipboard.writeText(text).then(
           () => {
@@ -123,32 +123,31 @@ export function Recap({ init, lang, aired }: { init: InitMsg; lang: string; aire
   const a = init.lineups.away;
   const r = recap?.key === key ? recap.data : null;
   const failed = recap?.key === key && recap.failed;
-  const crumb = `${storyline(init.scenario_id)} · seed ${init.seed} · ${aired} segment${aired === 1 ? "" : "s"} aired`;
 
   if (!r) {
     return (
-      <>
-        <div className="title-row">
-          <div>
-            <div className="eyebrow">{crumb}</div>
-            <h1>Full time</h1>
+      <div className="cells">
+        <section className="c notice">
+          <div className="ch hud">
+            <span>Match report</span>
+            <span className="n">{failed ? "Unavailable" : "Working"}</span>
           </div>
-        </div>
-        <section className="panel notice">
-          <h2>{failed ? "Recap unavailable" : "Writing the match report"}</h2>
-          <p className="muted">
-            {failed
-              ? "The recap service didn't answer. The broadcast is over; start a new broadcast or watch this one again."
-              : "The Recap writer drafts the report, the Verifier checks every number and ratings are computed from the match data."}
-          </p>
-          {!failed && (
-            <span className="tag">
-              <Pulse />
-              Working
-            </span>
-          )}
+          <div className="story">
+            <h2>{failed ? "Recap unavailable" : "Writing the match report"}</h2>
+            <p>
+              {failed
+                ? "The recap service didn't answer. The broadcast is over; start a new broadcast or watch this one again."
+                : "The Recap writer drafts the report, the Verifier checks every number and ratings are computed from the match data."}
+            </p>
+            {!failed && (
+              <span className="pill neutral">
+                <Pulse />
+                Working
+              </span>
+            )}
+          </div>
         </section>
-      </>
+      </div>
     );
   }
 
@@ -165,117 +164,123 @@ export function Recap({ init, lang, aired }: { init: InitMsg; lang: string; aire
   const winner = r.score.home > r.score.away ? "home" : r.score.away > r.score.home ? "away" : null;
 
   return (
-    <>
-      <div className="title-row">
-        <div>
-          <div className="eyebrow">{crumb}</div>
-          <h1>Full time</h1>
-        </div>
-        <span className={`pill ${r.verification.ok ? "ok" : "bad"}`}>
-          {r.verification.ok && <Check />}
-          {r.verification.ok ? `Report verified · ${r.verification.checked} claims` : `${r.verification.violations.length} unverified claims`}
-        </span>
-      </div>
-      <div className="ft">
-        <div className="col">
-          <section className="panel board">
-            <div className="scorecard">
-              <div className="team h">
-                <span className="kit h" />
-                <b>{h.name}</b>
-                <span>{scorers("home") || "No goals"}</span>
-              </div>
-              <div className="final">
-                <span className={winner === "home" ? "w" : ""}>{r.score.home}</span>–<span className={winner === "away" ? "w" : ""}>{r.score.away}</span>
-              </div>
-              <div className="team a">
-                <span className="kit a" />
-                <b>{a.name}</b>
-                <span>{scorers("away") || "No goals"}</span>
-              </div>
+    <div className="cells cols-side ft">
+      <div className="stack">
+        <section className="c board">
+          <div className="ch hud">
+            <span>Final score</span>
+            <span className={`pill ${r.verification.ok ? "ok" : "bad"}`}>
+              {r.verification.ok ? <Check /> : <i />}
+              {r.verification.ok ? `Report verified — ${r.verification.checked} claims` : `${r.verification.violations.length} unverified claims`}
+            </span>
+          </div>
+          <div className="scorecard">
+            <div className="team">
+              <span className="k h" />
+              <b>{h.name}</b>
+              <span>{scorers("home") || "No goals"}</span>
             </div>
-            <div className="goals">
-              <span className="ht" style={{ left: `${(45 / end) * 100}%` }} title="Half-time" />
-              {placed.map((g, i) => (
-                <div className={`g ${sideClass(g.side)}${g.low ? " low" : ""}`} key={`${g.clock}${i}`} style={{ left: `${g.left}%` }}>
-                  <i />
-                  <b>{minute(g.clock)}'</b>
-                  {surname(g.scorer)}
-                </div>
-              ))}
+            <div className="final">
+              <span className={winner === "away" ? "l" : ""}>{r.score.home}</span>–<span className={winner === "home" ? "l" : ""}>{r.score.away}</span>
             </div>
-            <div className="stats4">
-              {STAT4.map(([label, f]) => (
-                <div key={label}>
-                  <span>{label}</span>
-                  <b>{f(r.stats.home)}</b> <em>· {f(r.stats.away)}</em>
-                </div>
-              ))}
+            <div className="team a">
+              <span className="k a" />
+              <b>{a.name}</b>
+              <span>{scorers("away") || "No goals"}</span>
             </div>
-          </section>
-          <section className="panel report">
-            <div className="meta">
-              <span className="tag q">Match report</span>
-              <span className="muted sm">
-                Recap writer · {r.mode === "llm" ? "model" : "template tier"} · {r.verification.ok ? "every number checked" : "check failed"}
+          </div>
+          <div className="sub hud">
+            <span>Goals</span>
+            <span>
+              {goals.length} goal{goals.length === 1 ? "" : "s"} — {aired} segment{aired === 1 ? "" : "s"} aired
+            </span>
+          </div>
+          <div className="goals">
+            {[0, 15, 30, 45, 60, 75, 90].map((m) => (
+              <span key={m} className="tick hud" style={{ left: `${(m / end) * 100}%` }}>
+                {m === 45 ? "HT" : m}
               </span>
-            </div>
+            ))}
+            {placed.map((g, i) => (
+              <div className={`gm ${sideClass(g.side)}${g.low ? " low" : ""}`} key={`${g.clock}${i}`} style={{ left: `${g.left}%` }}>
+                <i />
+                <b>{minute(g.clock)}'</b>
+                {surname(g.scorer)}
+              </div>
+            ))}
+          </div>
+          <div className="stats4">
+            {STAT4.map(([label, f]) => (
+              <div key={label}>
+                <span className="hud">{label}</span>
+                <b>{f(r.stats.home)}</b> <em>/ {f(r.stats.away)}</em>
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="c report">
+          <div className="ch hud">
+            <span>Match report</span>
+            <span className="n">
+              Recap writer — {r.mode === "llm" ? "model" : "template tier"} — {r.verification.ok ? "every number checked" : "check failed"}
+            </span>
+          </div>
+          <div className="story">
             <h2>{r.headline}</h2>
             <p>{r.verification.ok ? markClaims(r.report, names) : r.report}</p>
-          </section>
-        </div>
-        <div className="col">
-          <section className="panel">
-            <div className="ph">
-              <h2>Player ratings</h2>
-              <span className="r">Computed in code</span>
-            </div>
-            <table className="tbl ratings">
-              <tbody>
-                {r.ratings.slice(0, 8).map((p, i) => (
-                  <tr key={p.id}>
-                    <td>
-                      {i === 0 ? <b>{p.name}</b> : p.name}
-                      {i === 0 && <span className="tag q">POTM</span>}
-                    </td>
-                    <td className="r mono">
-                      {p.goals > 0 ? `${p.goals} G · ` : p.key_passes > 1 ? `${p.key_passes} KP · ` : ""}
-                      {p.xg.toFixed(2)} xG
-                    </td>
-                    <td className="r rt">
-                      <span className={`rbar ${sideClass(p.team)}`} style={{ width: `${(p.rating / max) * 40}px` }} />
-                      <b>{p.rating.toFixed(1)}</b>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-          <section className="panel posts">
-            <div className="ph">
-              <h2>Social posts</h2>
-              <span className="r">{r.social.length} ready</span>
-            </div>
+          </div>
+        </section>
+      </div>
+      <div className="stack">
+        <section className="c">
+          <div className="ch hud">
+            <span>Player ratings</span>
+            <span className="n">Computed in code</span>
+          </div>
+          <ol className="ratings">
+            {r.ratings.slice(0, 8).map((p, i) => (
+              <li key={p.id}>
+                <span className="t">{String(i + 1).padStart(2, "0")}</span>
+                <span className="who">
+                  <b>{p.name}</b>
+                  {i === 0 && <em className="potm hud">POTM</em>}
+                  <small>
+                    {p.goals > 0 ? `${p.goals} G — ` : p.key_passes > 1 ? `${p.key_passes} KP — ` : ""}
+                    {p.xg.toFixed(2)} xG
+                  </small>
+                </span>
+                <span className={`rbar ${sideClass(p.team)}`} style={{ width: `${(p.rating / max) * 48}px` }} />
+                <b className="rt">{p.rating.toFixed(1)}</b>
+              </li>
+            ))}
+          </ol>
+        </section>
+        <section className="c posts">
+          <div className="ch hud">
+            <span>Social posts</span>
+            <span className="n">{r.social.length} ready</span>
+          </div>
+          <ul>
             {r.social.map((s) => (
-              <div className="post" key={s}>
+              <li className="post" key={s}>
                 {s}
-                <div className="pf">
+                <div className="pf hud">
                   <span>
                     {s.length} / 200
                     {r.verification.ok && (
                       <>
-                        {" · "}
+                        {" — "}
                         <Check /> verified
                       </>
                     )}
                   </span>
                   <CopyButton text={s} />
                 </div>
-              </div>
+              </li>
             ))}
-          </section>
-        </div>
+          </ul>
+        </section>
       </div>
-    </>
+    </div>
   );
 }

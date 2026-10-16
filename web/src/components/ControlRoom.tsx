@@ -72,8 +72,7 @@ const prettyHeadline = (h: string) => h.replace(/^GOAL [^:]+: (.+)$/, "Goal, $1"
 export function StatusPill({ status }: { status: Status }) {
   return (
     <span className={`pill ${status.cls}`}>
-      {status.cls === "live" && <i />}
-      {status.busy && <Pulse />}
+      {status.busy ? <Pulse /> : <i />}
       {status.label}
     </span>
   );
@@ -190,19 +189,19 @@ function PathToAir({ row }: { row: RundownRow }) {
   if (!path) return null;
   const { stages, total } = path;
   return (
-    <div className="sect">
-      <div className="hd">
-        <span className="eyebrow">Path to air</span>
+    <div className="path">
+      <div className="hd hud">
+        <span>{row.moment?.kind === "goal" ? "Goal" : "Moment"} to air</span>
         <b>{fmtMs(total)}</b>
       </div>
       {stages.length > 0 && (
         <>
-          <div className="path" style={{ gridTemplateColumns: stages.map((s) => `${Math.max(s.ms, total * 0.025, 1)}fr`).join(" ") }}>
+          <div className="bars" style={{ gridTemplateColumns: stages.map((s) => `${Math.max(s.ms, total * 0.025, 1)}fr`).join(" ") }}>
             {stages.map((s, i) => (
               <i key={i} className={s.cls} />
             ))}
           </div>
-          <div className="stages" style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}>
+          <div className="legend" style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}>
             {stages.map((s, i) => (
               <div key={i}>
                 <b>{fmtMs(s.ms)}</b>
@@ -216,62 +215,78 @@ function PathToAir({ row }: { row: RundownRow }) {
   );
 }
 
+/** "team_xg_total" → "Team xg total", for fact keys the moment has no label for. */
+const prettyKey = (k: string) => {
+  const t = k.replaceAll("_", " ");
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+
 function Claims({ row, onOpen }: { row: RundownRow; onOpen: (seg: Segment) => void }) {
   const seg = row.seg!;
-  const ok = [...new Set(seg.verification.checked.map((c) => c[0]))];
+  const keyOf = new Map<string, string>();
+  for (const [tok, key] of seg.verification.checked) if (!keyOf.has(tok)) keyOf.set(tok, key);
+  const labelOf = new Map(seg.moment.facts.map((f) => [f.key, f.label]));
   const drafts = row.lines.filter((l) => l.agent === "Verifier" && l.status === "rejected").flatMap((l) => l.text.split("; "));
   const blocked = [...seg.verification.violations, ...drafts];
   const judge = row.lines.find((l) => l.agent === "Verifier" && l.status === "approved")?.mode;
   return (
-    <div className="sect">
-      <div className="hd">
-        <span className="eyebrow">
-          Claims · {ok.length} checked{blocked.length > 0 && `, ${blocked.length} blocked`}
+    <>
+      <div className="sub hud">
+        <span>Claims</span>
+        <span>
+          {keyOf.size} checked{blocked.length > 0 && ` / ${blocked.length} cut`}
+          <button type="button" className="mini" onClick={() => onOpen(seg)} title={judge ? `Checked by ${judge.replace("+", " + ")}` : "Open the fact inspector"}>
+            Evidence
+          </button>
         </span>
-        <button type="button" className="linkbtn" onClick={() => onOpen(seg)} title="Open the fact inspector">
-          {judge ? `${judge.replace("+", " + ")} · ` : ""}evidence
-        </button>
       </div>
-      {ok.length + blocked.length === 0 ? (
-        <p className="muted sm">This segment makes no numeric or named claims.</p>
+      {keyOf.size + blocked.length === 0 ? (
+        <p className="empty">This segment makes no numeric or named claims.</p>
       ) : (
-        <div className="chips">
-          {ok.map((t) => (
-            <span key={t} className="chip ok">
+        <ul className="claims">
+          {[...keyOf].map(([tok, key]) => (
+            <li key={tok} className="y">
+              <span>
+                {labelOf.get(key) ?? prettyKey(key)}
+                {(labelOf.get(key) ?? prettyKey(key)).toLowerCase() !== key.replaceAll("_", " ") && <span className="src">{key}</span>}
+              </span>
+              <b>{tok}</b>
               <Check />
-              <span className="v">{t}</span>
-            </span>
+            </li>
           ))}
           {blocked.map((v, i) => {
             const { token, why } = parseViolation(v);
             return (
-              <span key={`b${i}`} className="chip no" title={v}>
+              <li key={`b${i}`} className="x" title={v}>
+                <span>
+                  <s>{token}</s>
+                  {why && <span className="src">{why}</span>}
+                </span>
+                <b />
                 <Cross />
-                <s>{token}</s>
-                {why && <span className="why-in">{why}</span>}
-              </span>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
-    </div>
+    </>
   );
 }
 
 function RowList({ rows, empty, tag }: { rows: RundownRow[]; empty: string; tag: (r: RundownRow) => ReactNode }) {
-  if (rows.length === 0) return <p className="muted sm">{empty}</p>;
+  if (rows.length === 0) return <p className="empty">{empty}</p>;
   return (
-    <div className="next">
+    <ul className="rows">
       {rows.map((r) => (
-        <div key={r.id}>
+        <li key={r.id}>
           <span className="t">{r.clock || "–"}</span>
           <span className="ell" title={r.head}>
             {r.head}
           </span>
           {tag(r)}
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -288,51 +303,51 @@ export function OnAirCard({ row, rows, live, names, onOpen }: OnAirProps) {
   const upNext = rows.filter((r) => !r.seg && r.status.cls !== "muted").reverse().slice(0, 3);
   const earlier = rows.filter((r) => r.seg && r !== row).slice(0, 4);
   return (
-    <section className="panel onair">
-      <div className="ph">
+    <section className="c onair">
+      <div className="ch hud">
         {live ? (
-          <span className="tally">
+          <span className="live">
             <i />
-            ON AIR
+            On air
           </span>
         ) : (
-          <span className="tally off">{seg ? "LAST ON AIR" : "STANDBY"}</span>
+          <span>{seg ? "Last on air" : "Standby"}</span>
         )}
-        <h2>{seg ? `${SLOT_LABEL[seg.slot]}${seg.breaking ? " · breaking" : ""}` : "Standing by"}</h2>
-        {seg && <span className="r">since {seg.aired_clock}</span>}
+        <span className="n">{seg ? `Since ${seg.aired_clock}` : "Watching the feed"}</span>
       </div>
-      <div className="onair-body">
+      <div className="scroll">
         {!row || !seg ? (
-          <div className="onair-lead">
-            <span className="eyebrow">Nothing aired yet</span>
-            <h3>Watching the feed</h3>
-            <p className="said">The Director takes the first moment to air as soon as the detector flags one.</p>
+          <div className="story">
+            <span className="hud n">Nothing aired yet</span>
+            <h2>
+              Watching the <i className="s">feed.</i>
+            </h2>
+            <p>The Director takes the first moment to air as soon as the detector flags one.</p>
           </div>
         ) : (
           <>
-            <div className="onair-lead">
-              <span className="eyebrow">
-                {seg.moment.kind.replaceAll("_", " ")} · {names[seg.moment.team]} · {seg.moment.clock}
+            <div className="story">
+              <span className="hud n">
+                {SLOT_LABEL[seg.slot]}
+                {seg.breaking ? " — breaking" : ""} — {names[seg.moment.team]} {seg.moment.clock}
               </span>
-              <h3>{row.head}</h3>
-              <p className="said">{highlight(seg.insight, seg.verification.checked.map((x) => x[0]))}</p>
+              <h2>{row.head}</h2>
+              <p>{highlight(seg.insight, seg.verification.checked.map((x) => x[0]))}</p>
             </div>
-            <PathToAir row={row} />
             <Claims row={row} onOpen={onOpen} />
+            <PathToAir row={row} />
           </>
         )}
-        <div className="sect">
-          <div className="hd">
-            <span className="eyebrow">Up next</span>
-          </div>
-          <RowList rows={upNext} empty="Nothing waiting. Detected moments queue here for the Director." tag={(r) => <span className={`tag${r.status.busy ? " q" : ""}`}>{r.status.busy ? "In production" : r.status.label}</span>} />
+        <div className="sub hud">
+          <span>Up next</span>
+          <span>{upNext.length} waiting</span>
         </div>
-        <div className="sect">
-          <div className="hd">
-            <span className="eyebrow">Earlier</span>
-          </div>
-          <RowList rows={earlier} empty="Aired segments collect here." tag={(r) => <span className="tag">{r.seg!.breaking ? "Breaking" : SLOT_LABEL[r.seg!.slot]}</span>} />
+        <RowList rows={upNext} empty="Nothing waiting. Detected moments queue here for the Director." tag={(r) => <em className={`tag hud${r.status.busy ? " busy" : ""}`}>{r.status.busy ? "Drafting" : r.status.label}</em>} />
+        <div className="sub hud">
+          <span>Earlier</span>
+          <span>{rows.filter((r) => r.seg).length} aired</span>
         </div>
+        <RowList rows={earlier} empty="Aired segments collect here." tag={(r) => <em className="tag hud">{r.seg!.breaking ? "Breaking" : SLOT_LABEL[r.seg!.slot]}</em>} />
       </div>
     </section>
   );
@@ -347,31 +362,24 @@ function Reply({ row }: { row: RundownRow }) {
     const team = row.seg.moment.team;
     const n = row.seg.verification.checked.length;
     return (
-      <div className="q1">
-        <span className="av crew">A</span>
-        <div>
-          <div className="who">
-            <b>Analyst</b>on air {row.seg.aired_clock}
-          </div>
-          <p className="clamp">{factChips(row.seg.insight, row.seg.verification.checked, team)}</p>
-          <span className={`status${row.seg.verification.ok ? "" : " bad"}`}>
-            {row.seg.verification.ok ? <Check /> : <Cross />}
-            Aired as {SLOT_LABEL[row.seg.slot].toLowerCase()} · {row.seg.verification.ok ? `${n} claim${n === 1 ? "" : "s"} verified` : "unverified"}
-          </span>
-        </div>
+      <div className="m crew">
+        <span className="w">Analyst</span>
+        <span>
+          <span className="clamp">{factChips(row.seg.insight, row.seg.verification.checked, team)}</span>
+          <small className={row.seg.verification.ok ? "" : "bad"}>
+            Aired {row.seg.aired_clock} as {SLOT_LABEL[row.seg.slot].toLowerCase()} — {row.seg.verification.ok ? `${n} claim${n === 1 ? "" : "s"} verified` : "unverified"}
+          </small>
+        </span>
       </div>
     );
   }
   if (row.status.cls === "muted") {
     return (
-      <div className="q1">
-        <span className="av crew">D</span>
-        <div>
-          <div className="who">
-            <b>Director</b>dropped
-          </div>
-          <span className="status bad">{last?.text ?? "Not aired"}</span>
-        </div>
+      <div className="m crew">
+        <span className="w">Director</span>
+        <span>
+          <small className="bad">Dropped — {last?.text ?? "not aired"}</small>
+        </span>
       </div>
     );
   }
@@ -386,22 +394,14 @@ function Reply({ row }: { row: RundownRow }) {
             ? "Verified, voicing it"
             : `${last.agent} working`;
   return (
-    <div className="q1">
-      <span className="av crew">{(last?.agent ?? "Director")[0]}</span>
-      <div>
-        <div className="who">
-          <b>{last?.agent ?? "Director"}</b>
-          {last ? last.clock : "queued"}
-        </div>
-        <span className="status w">
-          <span className="dots">
-            <i />
-            <i />
-            <i />
-          </span>
-          {last ? doing : "Queued for the Director"}
-        </span>
-      </div>
+    <div className="m crew">
+      <span className="w">{last?.agent ?? "Director"}</span>
+      <span>
+        <small className="busy">
+          <Pulse />
+          {last ? `${doing} — ${last.clock}` : "Queued for the Director"}
+        </small>
+      </span>
     </div>
   );
 }
@@ -459,27 +459,21 @@ export function TalkbackCard({ rows, lines, init, live, onAir, paused, inputRef,
   const a = init.lineups.away.players[9]?.name;
   const ideas = [h && `Give me a stat on ${h}`, "Who has been most dangerous?", a && `How is ${a} playing?`].filter(Boolean) as string[];
   return (
-    <section className="panel talk">
-      <div className="tf">
-        <div className="ph">
-          <h2>Talkback</h2>
-          <span className="r">Answers air only if they pass the checks</span>
+    <div className="bottom">
+      <section className="c talk">
+        <div className="ch hud">
+          <span>Talkback</span>
+          <span className="n">Answers air after checks</span>
         </div>
         <div className="msgs">
-          {asks.length === 0 && <p className="muted sm hint">Ask the crew for a stat or an angle. The answer airs next as a verified graphic.</p>}
+          {asks.length === 0 && <p className="hint">Ask the crew for a stat or an angle. The answer airs next as a verified graphic.</p>}
           {asks.reverse().map((r) => {
             const q = r.lines.find((l) => l.agent === "Producer")!;
             return (
               <div key={r.id} className="thread">
-                <div className="q1">
-                  <span className="av you">You</span>
-                  <div>
-                    <div className="who">
-                      <b>You</b>
-                      {q.clock}
-                    </div>
-                    <p>{q.text}</p>
-                  </div>
+                <div className="m">
+                  <span className="w">You {q.clock}</span>
+                  <span>{q.text}</span>
                 </div>
                 <Reply row={r} />
               </div>
@@ -494,7 +488,7 @@ export function TalkbackCard({ rows, lines, init, live, onAir, paused, inputRef,
           ))}
         </div>
         <form
-          className="compose"
+          className="ask"
           onSubmit={(e) => {
             e.preventDefault();
             send(ask);
@@ -513,35 +507,34 @@ export function TalkbackCard({ rows, lines, init, live, onAir, paused, inputRef,
             disabled={!live}
           />
           <kbd>/</kbd>
-          <button type="submit" className="send" disabled={!live || !ask.trim()}>
+          <button type="submit" className="send hud" disabled={!live || !ask.trim()}>
             Send
           </button>
         </form>
-      </div>
-      <div className="crew">
-        <div className="ph">
-          <h2>Crew</h2>
-          <span className="r" title={provider}>
-            {model} · {provider}
+      </section>
+      <section className="c crew">
+        <div className="ch hud">
+          <span>Crew</span>
+          <span className="n ell" title={provider}>
+            {model}
           </span>
         </div>
-        {AGENT_NAMES.map((name) => {
-          const l = lastByAgent.get(name);
-          const tag = crewTag(name, rows, onAir, paused);
-          const seg = l?.moment_id != null ? (rows.find((r) => r.id === l.moment_id)?.seg ?? null) : null;
-          return (
-            <div className="agent" key={name}>
-              <span className="av ag">{name[0]}</span>
-              <div title={l?.text}>
+        <ul>
+          {AGENT_NAMES.map((name) => {
+            const l = lastByAgent.get(name);
+            const tag = crewTag(name, rows, onAir, paused);
+            const seg = l?.moment_id != null ? (rows.find((r) => r.id === l.moment_id)?.seg ?? null) : null;
+            return (
+              <li key={name} title={l?.text}>
                 <b>{name}</b>
                 <span>{l ? stepOf(l, seg, init.langs).title : AGENTS.find((x) => x.name === name)!.role}</span>
-              </div>
-              <em className={`state ${tag.cls}`}>{tag.label}</em>
-            </div>
-          );
-        })}
-      </div>
-    </section>
+                <em className={`hud ${tag.cls}`}>{tag.label}</em>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    </div>
   );
 }
 
@@ -556,9 +549,9 @@ function factChips(text: string, checked: [string, string][], team: Side) {
     if (!sideOf.has(part)) return part;
     const s = sideOf.get(part);
     return (
-      <span key={i} className={`f${s ? ` ${sideClass(s)}` : ""}`}>
+      <em key={i} className={s ? sideClass(s) : undefined}>
         {part}
-      </span>
+      </em>
     );
   });
 }
@@ -590,43 +583,45 @@ export function CrewCard({ lines, paused, mode }: { lines: ConsoleLine[]; paused
   const lastByAgent = new Map<string, ConsoleLine>();
   for (const l of lines) lastByAgent.set(l.agent, l);
   return (
-    <section className="panel">
-      <div className="ph">
-        <h2>Agents</h2>
-        <span className="pill neutral">{describeMode(mode).join(" · ")}</span>
-      </div>
-      <table className="tbl crew-tbl">
-        <thead>
-          <tr>
-            <th>Agent</th>
-            <th>Last action</th>
-            <th>Mode</th>
-            <th className="r">Took</th>
-            <th className="r">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {AGENTS.map((a) => {
-            const l = lastByAgent.get(a.name);
-            const st: Status = paused ? { label: "Paused", cls: "muted" } : l ? (LINE_STATUS[l.status] ?? { label: l.status, cls: "neutral" }) : { label: "Ready", cls: "neutral" };
-            return (
-              <tr key={a.name}>
-                <td>
-                  <b>{a.name}</b>
-                  <span className="muted sm block">{a.role}</span>
-                </td>
-                <td className="ell wide">{l ? l.text : <span className="muted">Waiting for the first moment</span>}</td>
-                <td className="mono">{l?.mode ?? "–"}</td>
-                <td className="r mono">{l ? `${l.ms} ms` : "–"}</td>
-                <td className="r">
-                  <StatusPill status={st} />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </section>
+    <div className="cells">
+      <section className="c">
+        <div className="ch hud">
+          <span>Agents</span>
+          <span className="n">{describeMode(mode).join(" — ")}</span>
+        </div>
+        <table className="tbl crew-tbl">
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Last action</th>
+              <th>Mode</th>
+              <th className="r">Took</th>
+              <th className="r">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {AGENTS.map((a) => {
+              const l = lastByAgent.get(a.name);
+              const st: Status = paused ? { label: "Paused", cls: "muted" } : l ? (LINE_STATUS[l.status] ?? { label: l.status, cls: "neutral" }) : { label: "Ready", cls: "neutral" };
+              return (
+                <tr key={a.name}>
+                  <td>
+                    <b className="disp">{a.name}</b>
+                    <span className="sub-l">{a.role}</span>
+                  </td>
+                  <td className="ell wide">{l ? l.text : <span className="muted">Waiting for the first moment</span>}</td>
+                  <td className="mono">{l?.mode ?? "–"}</td>
+                  <td className="r mono">{l ? `${l.ms} ms` : "–"}</td>
+                  <td className="r">
+                    <StatusPill status={st} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
+    </div>
   );
 }
 
@@ -637,12 +632,12 @@ export function VerifyLog({ rows, lines, onOpen }: { rows: RundownRow[]; lines: 
   const decisions = lines.filter((l) => l.agent === "Verifier").reverse();
   const checked = aired.reduce((n, r) => n + r.seg!.verification.checked.length, 0);
   return (
-    <div className="two">
-      <section className="panel">
-        <div className="ph">
-          <h2>Aired segments</h2>
-          <span className="muted sm">
-            {aired.length} aired · {checked} claims checked
+    <div className="cells cols-2">
+      <section className="c">
+        <div className="ch hud">
+          <span>Aired segments</span>
+          <span className="n">
+            {aired.length} aired / {checked} claims checked
           </span>
         </div>
         {aired.length === 0 ? (
@@ -666,12 +661,12 @@ export function VerifyLog({ rows, lines, onOpen }: { rows: RundownRow[]; lines: 
                     <td className="mono">{r.seg!.aired_clock}</td>
                     <td className="ell">{r.head}</td>
                     <td>{SLOT_LABEL[r.seg!.slot]}</td>
-                    <td className="r">
+                    <td className="r mono">
                       {c.ok}/{c.total}
                     </td>
                     <td className="r">
                       <span className={`pill ${r.seg!.verification.ok ? "ok" : "bad"}`}>
-                        {r.seg!.verification.ok && <Check />}
+                        {r.seg!.verification.ok ? <Check /> : <Cross />}
                         {r.seg!.verification.ok ? "Verified" : "Violations"}
                       </span>
                     </td>
@@ -682,28 +677,28 @@ export function VerifyLog({ rows, lines, onOpen }: { rows: RundownRow[]; lines: 
           </table>
         )}
       </section>
-      <section className="panel">
-        <div className="ph">
-          <h2>Verifier decisions</h2>
-          <span className="muted sm">
-            {decisions.filter((d) => d.status === "rejected").length} blocked · {decisions.filter((d) => d.status === "approved").length} passed
+      <section className="c">
+        <div className="ch hud">
+          <span>Verifier decisions</span>
+          <span className="n">
+            {decisions.filter((d) => d.status === "rejected").length} blocked / {decisions.filter((d) => d.status === "approved").length} passed
           </span>
         </div>
         {decisions.length === 0 ? (
           <p className="empty">Each draft the Analyst writes is checked against the match data before it can air.</p>
         ) : (
-          <ol className="tl pad">
+          <ol className="log">
             {decisions.map((l) => (
               <li key={l.seq}>
-                <i className={`d ${l.status === "approved" ? "ok" : l.status === "rejected" ? "bad" : ""}`} />
+                <i className={l.status === "approved" ? "ok" : l.status === "rejected" ? "bad" : ""} />
                 <div>
                   <b>{l.status === "approved" ? l.text : l.status === "rejected" ? `Blocked a draft${l.attempt ? ` (attempt ${l.attempt})` : ""}` : l.text}</b>
-                  <span>
-                    {l.clock} · {l.mode} · {l.ms} ms
+                  <span className="hud">
+                    {l.clock} — {l.mode} — {l.ms} ms
                   </span>
                   {l.status === "rejected" &&
                     l.text.split("; ").map((c, i) => (
-                      <code key={i} className="chip bad">
+                      <code key={i} className="code bad">
                         {c}
                       </code>
                     ))}
@@ -723,10 +718,10 @@ export function UpNext({ moments, queueIds, init }: { moments: Moment[]; queueId
   const waiting = new Set(queueIds);
   const queue = moments.filter((m) => waiting.has(m.id)).reverse();
   return (
-    <section className="panel">
-      <div className="ph">
-        <h2>Up next</h2>
-        <span className="muted sm">{queue.length} waiting</span>
+    <section className="c">
+      <div className="ch hud">
+        <span>Up next</span>
+        <span className="n">{queue.length} waiting</span>
       </div>
       {queue.length === 0 ? (
         <p className="empty">Watching the feed. Detected moments wait here until the Director takes them.</p>
@@ -737,7 +732,7 @@ export function UpNext({ moments, queueIds, init }: { moments: Moment[]; queueId
               <span className="mono">{m.clock}</span>
               <i className={`dot ${sideClass(m.team)}`} title={init.lineups[m.team].name} />
               <span>{m.request ? `Talkback: “${m.request}”` : m.headline}</span>
-              <span className="mono muted">p {m.priority.toFixed(2)}</span>
+              <span className="mono">p {m.priority.toFixed(2)}</span>
             </li>
           ))}
         </ul>

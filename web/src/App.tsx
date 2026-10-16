@@ -94,9 +94,9 @@ export default function App() {
 
 function LangSeg({ init, lang, setLang }: { init: InitMsg; lang: string; setLang: (l: string) => void }) {
   return (
-    <div className="seg" role="group" aria-label="Commentary language">
+    <div className="cell hud" role="group" aria-label="Commentary language">
       {init.langs.map((l) => (
-        <button type="button" key={l} className={lang === l ? "on" : ""} onClick={() => setLang(l)}>
+        <button type="button" key={l} className={lang === l ? "on" : ""} aria-pressed={lang === l} onClick={() => setLang(l)}>
           {l.toUpperCase()}
         </button>
       ))}
@@ -104,7 +104,7 @@ function LangSeg({ init, lang, setLang }: { init: InitMsg; lang: string; setLang
   );
 }
 
-const crumbOf = (init: InitMsg) => `${storyline(init.scenario_id)} · seed ${init.seed}`;
+const metaOf = (init: InitMsg) => `Synthetic match — ${storyline(init.scenario_id)} — seed ${init.seed}`;
 
 const median = (xs: number[]) => {
   if (xs.length === 0) return null;
@@ -113,131 +113,102 @@ const median = (xs: number[]) => {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 };
 
-interface BugProps {
+interface TitleProps {
   state: BroadcastState;
   init: InitMsg;
   rows: RundownRow[];
   status: ReactNode;
 }
 
-/** The scorebug strip: tally, teams in side colours, score, clock and a few numbers from the engine. */
-function Bug({ state, init, rows, status }: BugProps) {
+/** The title row: kit squares, the scoreline in Archivo, and the tally with a few numbers from the engine. */
+function Scoreline({ state, init, rows, status }: TitleProps) {
   const st = state.stats;
   const toAir = median(rows.flatMap((r) => (r.toAir === null ? [] : [r.toAir])));
+  const facts = [
+    st && `xG ${st.home.xg.toFixed(2)} to ${st.away.xg.toFixed(2)}`,
+    st && `shots ${st.home.shots} to ${st.away.shots}`,
+    toAir !== null && `median to air ${toAir < 0.1 ? `${Math.round(toAir * 1000)} ms` : `${toAir.toFixed(1)} s`}`,
+  ].filter(Boolean);
   return (
     <>
-      {status}
-      <div className="score">
-        <span className="kit h" />
-        <span className="h">{init.lineups.home.name}</span>
-        <span className="n">
+      <h1>
+        <span className="k h" aria-hidden="true" />
+        {init.lineups.home.name}{" "}
+        <span className="sc">
           {state.score.home}–{state.score.away}
-        </span>
-        <span className="a">{init.lineups.away.name}</span>
-        <span className="kit a" />
-      </div>
-      <span className="clock">{state.score.clock}</span>
+        </span>{" "}
+        {init.lineups.away.name}
+        <span className="k a" aria-hidden="true" />
+      </h1>
       <div className="meta">
-        <span>{crumbOf(init)}</span>
-        {st && (
-          <>
-            <span>
-              xG{" "}
-              <b>
-                {st.home.xg.toFixed(2)} – {st.away.xg.toFixed(2)}
-              </b>
-            </span>
-            <span>
-              Shots{" "}
-              <b>
-                {st.home.shots} – {st.away.shots}
-              </b>
-            </span>
-          </>
-        )}
-        {toAir !== null && (
-          <span>
-            Median to air <b>{toAir < 0.1 ? `${Math.round(toAir * 1000)} ms` : `${toAir.toFixed(1)} s`}</b>
-          </span>
-        )}
+        {status}
+        {facts.length > 0 && <span className="facts">{facts.join(", ")}</span>}
       </div>
     </>
   );
 }
 
-const TITLES: Partial<Record<Page, string>> = { rundown: "Rundown", verify: "Fact check", stats: "Match stats", crew: "Crew" };
-
-/** The rundown, fact-check, stats and crew sections, shared by the live and full-time screens. */
+/** The rundown, checks, stats and crew pages, shared by the live and full-time screens. */
 function Section({ page, state, init, rows, onOpen }: { page: Page; state: BroadcastState; init: InitMsg; rows: RundownRow[]; onOpen: (s: Segment) => void }) {
   const aired = rows.filter((r) => r.seg).length;
-  return (
-    <>
-      <div className="title-row">
-        <div>
-          <div className="eyebrow">
-            {init.lineups.home.name} {state.score.home}–{state.score.away} {init.lineups.away.name} · {state.score.clock}
+  if (page === "rundown")
+    return (
+      <div className="cells cols-side">
+        <section className="c">
+          <div className="ch hud">
+            <span>Rundown</span>
+            <span className="n">
+              {rows.length} in rundown / {aired} aired / {state.queueIds.length} queued
+            </span>
           </div>
-          <h1>{TITLES[page]}</h1>
+          <RundownTable rows={rows} onOpen={onOpen} />
+        </section>
+        <div className="stack">
+          <UpNext moments={state.moments} queueIds={state.queueIds} init={init} />
+          <section className="c">
+            <div className="ch hud">
+              <span>Match feed</span>
+              <span className="n">Latest first</span>
+            </div>
+            <Feed events={state.events} />
+          </section>
         </div>
-        {page === "rundown" && (
-          <span className="muted sm">
-            {rows.length} in rundown · {aired} aired · {state.queueIds.length} queued
-          </span>
-        )}
       </div>
-      {page === "rundown" && (
-        <div className="two wide-l">
-          <section className="panel">
-            <RundownTable rows={rows} onOpen={onOpen} />
-          </section>
-          <div className="col">
-            <UpNext moments={state.moments} queueIds={state.queueIds} init={init} />
-            <section className="panel">
-              <div className="ph">
-                <h2>Match feed</h2>
-              </div>
-              <Feed events={state.events} />
-            </section>
+    );
+  if (page === "verify") return <VerifyLog rows={rows} lines={state.console} onOpen={onOpen} />;
+  if (page === "stats")
+    return (
+      <div className="cells">
+        <section className="c">
+          <div className="ch hud">
+            <span>Momentum</span>
+            <span className="legend">
+              <span>
+                <i className="dot h" />
+                {init.lineups.home.short}
+              </span>
+              <span>
+                <i className="dot a" />
+                {init.lineups.away.short}
+              </span>
+            </span>
           </div>
-        </div>
-      )}
-      {page === "verify" && <VerifyLog rows={rows} lines={state.console} onOpen={onOpen} />}
-      {page === "stats" && (
-        <div className="col">
-          <section className="panel">
-            <div className="ph">
-              <h2>Momentum</h2>
-              <span className="legend">
-                <span>
-                  <i className="dot h" />
-                  {init.lineups.home.name}
-                </span>
-                <span>
-                  <i className="dot a" />
-                  {init.lineups.away.name}
-                </span>
-              </span>
-            </div>
-            <div className="pb">
-              <Momentum series={state.momentum} height={140} />
-            </div>
-          </section>
-          <section className="panel">
-            <div className="ph">
-              <h2>Match stats</h2>
-              <span className="r">
-                {init.lineups.home.short} · {init.lineups.away.short}
-              </span>
-            </div>
-            <div className="pb">
-              <StatBars stats={state.stats} />
-            </div>
-          </section>
-        </div>
-      )}
-      {page === "crew" && <CrewCard lines={state.console} paused={state.paused} mode={init.mode} />}
-    </>
-  );
+          <div className="pb">
+            <Momentum series={state.momentum} height={180} />
+          </div>
+        </section>
+        <section className="c b">
+          <div className="ch hud">
+            <span>Match stats</span>
+            <span className="n">
+              {init.lineups.home.short} / {init.lineups.away.short}
+            </span>
+          </div>
+          <StatBars stats={state.stats} />
+        </section>
+      </div>
+    );
+  return <CrewCard lines={state.console} paused={state.paused} mode={init.mode} />;
 }
 
 const claimCount = (rows: RundownRow[]) => rows.reduce((n, r) => n + (r.seg?.verification.checked.length ?? 0), 0);
@@ -265,15 +236,29 @@ function Ended({ state, init, lang, setLang, onAgain, onNew }: EndedProps) {
       controls={<LangSeg init={init} lang={lang} setLang={setLang} />}
       actions={
         <>
-          <button type="button" className="btn" onClick={onAgain}>
+          <button type="button" className="tb hud" onClick={onAgain}>
             Watch again
           </button>
-          <button type="button" className="btn go" onClick={onNew}>
+          <button type="button" className="tb cta hud" onClick={onNew}>
             New broadcast
           </button>
         </>
       }
-      bug={<Bug state={state} init={init} rows={rows} status={<span className="tally off">FULL TIME</span>} />}
+      title={
+        <Scoreline
+          state={state}
+          init={init}
+          rows={rows}
+          status={
+            <span className="live hud off">
+              <i />
+              Full time {state.score.clock}
+            </span>
+          }
+        />
+      }
+      meta={metaOf(init)}
+      clock={state.score.clock}
     >
       {page === "recap" ? <Recap init={init} lang={lang} aired={state.segments.length} /> : <Section page={page} state={state} init={init} rows={rows} onOpen={setInspect} />}
       {inspect && <FactSheet seg={inspect} onClose={closeInspector} />}
@@ -334,35 +319,40 @@ function Live({ state, init, speed, setSpeed, lang, setLang, togglePause, onTalk
 
   const controls = (
     <>
-      <div className="seg" role="group" aria-label="Match speed">
+      <div className="cell hud" role="group" aria-label="Match speed">
         {SPEEDS.map((v) => (
-          <button type="button" key={v} className={speed === v ? "on" : ""} onClick={() => setSpeed(v)} disabled={!live}>
+          <button type="button" key={v} className={speed === v ? "on" : ""} aria-pressed={speed === v} onClick={() => setSpeed(v)} disabled={!live}>
             {v}×
           </button>
         ))}
       </div>
       <LangSeg init={init} lang={lang} setLang={setLang} />
-      <button type="button" className={`btn${voice ? " on" : ""}`} onClick={() => setVoice((v) => !v)} aria-pressed={voice}>
-        Voice {voice ? "on" : "off"}
-      </button>
+      <div className="cell hud">
+        <button type="button" className={voice ? "on" : ""} onClick={() => setVoice((v) => !v)} aria-pressed={voice}>
+          Voice {voice ? "on" : "off"}
+        </button>
+      </div>
     </>
   );
   const actions = (
     <>
-      <button type="button" className="btn" onClick={togglePause} disabled={!live} title="Space">
+      <button type="button" className="tb hud" onClick={togglePause} disabled={!live} title="Space">
         {state.paused ? "Resume" : "Pause"}
       </button>
-      <button type="button" className="btn stop" onClick={onEnd}>
+      <button type="button" className="tb cta hud" onClick={onEnd}>
         End broadcast
       </button>
     </>
   );
   const status = state.paused ? (
-    <span className="tally off">PAUSED</span>
-  ) : live ? (
-    <span className="tally">
+    <span className="live hud off">
       <i />
-      ON AIR
+      Paused {state.score.clock}
+    </span>
+  ) : live ? (
+    <span className="live hud">
+      <i />
+      On air {state.score.clock}
     </span>
   ) : null;
 
@@ -374,12 +364,17 @@ function Live({ state, init, speed, setSpeed, lang, setLang, togglePause, onTalk
       counts={{ rundown: rows.length, verify: claimCount(rows) }}
       controls={controls}
       actions={actions}
-      bug={<Bug state={state} init={init} rows={rows} status={status} />}
+      title={<Scoreline state={state} init={init} rows={rows} status={status} />}
+      meta={metaOf(init)}
+      clock={state.score.clock}
       fill={page === "live"}
     >
       {page === "live" ? (
         <div className="stage">
-          <section className="panel program">
+          <section className="c program">
+            <div className="ch hud">
+              <CameraTabs dir={dir} multi={multi} setMulti={setMulti} />
+            </div>
             <div className="pic">
               {multi ? (
                 <Multiview frame={frame} dir={dir} colors={PICTURE_KITS} events={state.events} speed={speed} />
@@ -387,7 +382,6 @@ function Live({ state, init, speed, setSpeed, lang, setLang, togglePause, onTalk
                 <Program frame={frame} dir={dir} events={state.events} speed={speed} state={state} lang={lang} voice={voice} onInspect={setInspect} />
               )}
             </div>
-            <CameraTabs dir={dir} multi={multi} setMulti={setMulti} />
           </section>
           <OnAirCard row={onAirRow} rows={rows} live={dir.onAir !== null} names={names} onOpen={setInspect} />
           <TalkbackCard rows={rows} lines={state.console} init={init} live={live} onAir={dir.onAir !== null} paused={state.paused} inputRef={askRef} onSend={onTalkback} />
@@ -421,19 +415,19 @@ function Program({ frame, dir, events, speed, state, lang, voice, onInspect }: P
     <div className={`monitor${captionOn ? " capt" : ""}`}>
       <Shot cam={dir.program} frame={shown} dir={dir} colors={PICTURE_KITS} events={events} speed={speed} />
       {dir.replay ? (
-        <span className="ov-tag">
+        <span className="ov-tag hud">
           <i />
-          Replay · {dir.replay.clock}
+          Replay {dir.replay.clock}
         </span>
       ) : (
-        <span className="wm">SYNTHETIC DATA · RENDERED</span>
+        <span className="wm hud">Synthetic data — rendered</span>
       )}
       {!dir.replay && <OverlayLayer seg={dir.onAir} onInspect={onInspect} />}
       <Captions segments={state.segments} lang={lang} voice={voice} visible={captionOn} />
       {state.paused && (
         <div className="slate">
           <div>
-            <span className="eyebrow">Paused at {state.score.clock}</span>
+            <span className="hud">Paused at {state.score.clock}</span>
             <b>Broadcast on hold</b>
             <span className="muted">The match clock and the crew are frozen. Nothing airs until you resume.</span>
           </div>

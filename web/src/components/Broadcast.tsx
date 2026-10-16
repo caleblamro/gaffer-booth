@@ -1,24 +1,29 @@
 import { useEffect, useState } from "react";
 import { SLOT_LABEL, claimsOf, sideClass } from "../lib/labels";
 import type { MatchEvent, OverlayRow, Segment } from "../types";
-import { Check } from "./Brand";
+import { Check, Cross } from "./Brand";
 
-/** The dark vertical tab on every graphic. Clicking it opens the fact sheet for that segment. */
+/** The ruled foot of every graphic: the claim count with the checked dot. Clicking it opens the fact inspector. */
 function Proof({ seg, onOpen }: { seg: Segment; onOpen: (seg: Segment) => void }) {
   const v = seg.verification;
   const n = v.checked.length;
-  const label = !v.ok ? `${v.violations.length} unverified claim${v.violations.length === 1 ? "" : "s"}` : n === 0 ? "No claims to check" : `${n} claim${n === 1 ? "" : "s"} verified`;
+  const label = !v.ok
+    ? `${v.violations.length} unverified claim${v.violations.length === 1 ? "" : "s"}`
+    : n === 0
+      ? "No claims to check"
+      : `${n} claim${n === 1 ? "" : "s"} checked against match data`;
   return (
-    <button type="button" className={`ck${v.ok ? "" : " bad"}`} onClick={() => onOpen(seg)} title={`${label} · show the evidence`} aria-label={`${label}, show the evidence`}>
-      {v.ok ? "VERIFIED" : "UNVERIFIED"}
+    <button type="button" className={`ok${v.ok ? "" : " bad"}`} onClick={() => onOpen(seg)} title="Show the evidence" aria-label={`${label}, show the evidence`}>
+      <i />
+      {label}
     </button>
   );
 }
 
-function Facts({ rows }: { rows: OverlayRow[] }) {
+function Nums({ rows, cls = "" }: { rows: OverlayRow[]; cls?: string }) {
   if (rows.length === 0) return null;
   return (
-    <dl className="facts">
+    <dl className={`nums${cls}`}>
       {rows.map((r) => (
         <div key={r.label}>
           <dd>{r.value}</dd>
@@ -29,7 +34,7 @@ function Facts({ rows }: { rows: OverlayRow[] }) {
   );
 }
 
-/** On-air graphics: paper cards over the program picture, a side-colour stripe and the verified tab. */
+/** On-air graphics: a light print block over the picture with an Archivo name, ruled stat cells and mono labels. */
 export function OverlayLayer({ seg, onInspect }: { seg: Segment | null; onInspect: (seg: Segment) => void }) {
   if (!seg) return null;
   const o = seg.overlay;
@@ -37,7 +42,8 @@ export function OverlayLayer({ seg, onInspect }: { seg: Segment | null; onInspec
   const side = sideClass(o.team);
   const kick = (
     <div className="k">
-      {o.title} · {o.team_name} · {o.clock}
+      <i className={side} />
+      {o.title} — {o.team_name} {o.clock}
     </div>
   );
 
@@ -45,37 +51,36 @@ export function OverlayLayer({ seg, onInspect }: { seg: Segment | null; onInspec
     const assist = rows.find((r) => r.key === "assist");
     const cells = rows.filter((r) => r !== assist).slice(0, 3);
     return (
-      <div className={`lt full ${side}`} key={o.moment_id}>
-        <span className="side" />
-        <div className="body">
+      <div className="lt full" key={o.moment_id}>
+        <div className="who">
           {kick}
-          <div className="who">{o.player ?? o.subtitle}</div>
-          {assist ? <div className="sub">Assisted by {assist.value}</div> : o.player && <div className="sub">{o.team_name}</div>}
-          {o.compare ? (
-            <table className="compare">
-              <thead>
-                <tr>
-                  <th className="h">{o.compare.home}</th>
-                  <th>
-                    {o.compare.score[0]}–{o.compare.score[1]}
-                  </th>
-                  <th className="a">{o.compare.away}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {o.compare.rows.map((r) => (
-                  <tr key={r.label}>
-                    <td>{r.home}</td>
-                    <td className="lbl">{r.label}</td>
-                    <td>{r.away}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <Facts rows={cells} />
-          )}
+          <div className="nm">{o.player ?? o.subtitle}</div>
+          {assist ? <div className="sb">Assisted by {assist.value}</div> : o.player && <div className="sb">{o.team_name}</div>}
         </div>
+        {o.compare ? (
+          <table className="compare">
+            <thead>
+              <tr>
+                <th className="h">{o.compare.home}</th>
+                <th>
+                  {o.compare.score[0]}–{o.compare.score[1]}
+                </th>
+                <th className="a">{o.compare.away}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {o.compare.rows.map((r) => (
+                <tr key={r.label}>
+                  <td>{r.home}</td>
+                  <td className="lbl">{r.label}</td>
+                  <td>{r.away}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <Nums rows={cells} />
+        )}
         <Proof seg={seg} onOpen={onInspect} />
       </div>
     );
@@ -84,25 +89,23 @@ export function OverlayLayer({ seg, onInspect }: { seg: Segment | null; onInspec
   if (o.slot === "stat_card" || o.slot === "player_card") {
     const player = o.slot === "player_card" && o.player;
     return (
-      <div className={`lt sidecard ${side} ${o.slot === "player_card" ? "left" : "right"}`} key={o.moment_id}>
-        <span className="side" />
-        <div className="body">
+      <div className={`lt card ${o.slot === "player_card" ? "left" : "right"}`} key={o.moment_id}>
+        <div className="who">
           {kick}
-          <div className="who sm">{player ? o.player : o.subtitle}</div>
-          {player && !o.subtitle.includes(o.player ?? "") && <div className="sub">{o.subtitle}</div>}
-          <Facts rows={rows.slice(0, 4)} />
+          <div className="nm sm">{player ? o.player : o.subtitle}</div>
+          {player && !o.subtitle.includes(o.player ?? "") && <div className="sb">{o.subtitle}</div>}
         </div>
+        <Nums rows={rows.slice(0, 4)} cls=" g2" />
         <Proof seg={seg} onOpen={onInspect} />
       </div>
     );
   }
 
   return (
-    <div className={`lt wide ${side}`} key={o.moment_id}>
-      <span className="side" />
-      <div className="body">
+    <div className="lt wide" key={o.moment_id}>
+      <div className="who">
         {kick}
-        <div className="who sm">{o.subtitle}</div>
+        <div className="nm sm">{o.subtitle}</div>
       </div>
       <Proof seg={seg} onOpen={onInspect} />
     </div>
@@ -121,28 +124,36 @@ export function FactSheet({ seg, onClose }: { seg: Segment; onClose: () => void 
   return (
     <div className="sheet-scrim" onClick={onClose}>
       <aside className="sheet" role="dialog" aria-label="Fact inspector" onClick={(e) => e.stopPropagation()}>
-        <div className="sheet-h">
-          <div>
-            <span className="eyebrow">Fact inspector</span>
-            <h2>{seg.moment.headline}</h2>
-            <span className="muted sm">
-              {SLOT_LABEL[seg.slot]} · aired {seg.aired_clock}
-            </span>
-          </div>
-          <button type="button" className="btn" onClick={onClose} aria-label="Close">
+        <div className="ch hud">
+          <span>Fact inspector</span>
+          <button type="button" className="mini" onClick={onClose} aria-label="Close" autoFocus>
             Close <kbd>Esc</kbd>
           </button>
         </div>
         <div className="sheet-body">
-          <div className="sheet-sum">
-            <span className={`pill ${v.ok ? "ok" : "bad"}`}>{v.ok ? "All verified" : "Violations"}</span>
-            <span className="muted sm">
-              {ok} of {total} claim{total === 1 ? "" : "s"} matched the match data
+          <div className="story">
+            <span className="hud n">
+              {SLOT_LABEL[seg.slot]} — aired {seg.aired_clock}
+            </span>
+            <h2>{seg.moment.headline}</h2>
+          </div>
+          <div className="sub hud">
+            <span className={`pill ${v.ok ? "ok" : "bad"}`}>
+              <i />
+              {v.ok ? "All verified" : "Violations"}
+            </span>
+            <span>
+              {ok} of {total} claim{total === 1 ? "" : "s"} matched
             </span>
           </div>
-          <h3>Said on air</h3>
+          <div className="sub hud">
+            <span>Said on air</span>
+          </div>
           <p className="said">{highlight(seg.insight, v.checked.map((c) => c[0]))}</p>
-          <h3>Evidence</h3>
+          <div className="sub hud">
+            <span>Evidence</span>
+            <span>Fact keys</span>
+          </div>
           <table className="tbl">
             <thead>
               <tr>
@@ -154,7 +165,9 @@ export function FactSheet({ seg, onClose }: { seg: Segment; onClose: () => void 
             <tbody>
               {v.checked.map(([tok, key], i) => (
                 <tr key={i}>
-                  <td>{tok}</td>
+                  <td>
+                    <b>{tok}</b>
+                  </td>
                   <td className="mono">{key}</td>
                   <td className="r">
                     <span className="pill ok">
@@ -170,7 +183,10 @@ export function FactSheet({ seg, onClose }: { seg: Segment; onClose: () => void 
                     <code className="code bad">{msg}</code>
                   </td>
                   <td className="r">
-                    <span className="pill bad">Blocked</span>
+                    <span className="pill bad">
+                      <Cross />
+                      Blocked
+                    </span>
                   </td>
                 </tr>
               ))}
@@ -215,10 +231,10 @@ export function Captions({ segments, lang, voice, visible }: { segments: Segment
   if (!latest || !visible) return null;
   return (
     <div className="cap" key={latest.moment.id}>
-      <span className="q">
-        <span className="lang">{lang.toUpperCase()}</span>
+      <p>
+        <b>{lang.toUpperCase()}</b>
         {text}
-      </span>
+      </p>
     </div>
   );
 }
