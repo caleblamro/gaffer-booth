@@ -147,7 +147,7 @@ function reduce(s: BroadcastState, msg: any, seq: React.MutableRefObject<number>
       return { ...s, queueIds: msg.ids };
     case "console":
       seq.current += 1;
-      return { ...s, console: [...s.console.slice(-200), { ...msg, seq: seq.current }] };
+      return { ...s, console: [...s.console.slice(-200), { ...msg, seq: seq.current, receivedAt: Date.now() }] };
     case "segment":
       return { ...s, segments: [...s.segments, { ...msg, receivedAt: Date.now() }] };
     case "end":

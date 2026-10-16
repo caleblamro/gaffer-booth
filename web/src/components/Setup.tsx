@@ -1,7 +1,6 @@
-import { useEffect, useRef } from "react";
 import { storyline } from "../lib/labels";
 import type { Scenario } from "../types";
-import { Brand, Pulse } from "./Brand";
+import { Brand, Pulse, ThemeToggle } from "./Brand";
 
 export const LANGS: { id: string; label: string }[] = [
   { id: "en", label: "English" },
@@ -20,64 +19,41 @@ const CREW = [
   ["Commentator", "Voices it live"],
 ];
 
-/** A Stripe-like gradient mesh: soft colour blobs blended on a canvas, redrawn on resize. */
-function Mesh() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const c = ref.current;
-    if (!c) return;
-    const draw = () => {
-      const r = c.getBoundingClientRect();
-      const d = window.devicePixelRatio || 1;
-      c.width = r.width * d;
-      c.height = r.height * d;
-      const g = c.getContext("2d");
-      if (!g) return;
-      g.scale(d, d);
-      g.fillStyle = "#a960ee";
-      g.fillRect(0, 0, r.width, r.height);
-      const blobs: [number, number, number, string][] = [
-        [0.08, 0.9, 0.42, "#ff333d"],
-        [0.35, 0.95, 0.38, "#ff8a4d"],
-        [0.62, 0.95, 0.4, "#ffcb57"],
-        [0.9, 0.85, 0.45, "#90e0ff"],
-        [0.75, 0.45, 0.4, "#a960ee"],
-      ];
-      for (const [x, y, rad, col] of blobs) {
-        const gr = g.createRadialGradient(x * r.width, y * r.height, 0, x * r.width, y * r.height, rad * r.width);
-        gr.addColorStop(0, col);
-        gr.addColorStop(1, `${col}00`);
-        g.fillStyle = gr;
-        g.fillRect(0, 0, r.width, r.height);
-      }
-    };
-    draw();
-    window.addEventListener("resize", draw);
-    return () => window.removeEventListener("resize", draw);
-  }, []);
+/** Touchline markings drawn faintly behind the hero copy. */
+function PitchLines() {
   return (
-    <div className="wash" aria-hidden="true">
-      <canvas ref={ref} />
-    </div>
+    <svg className="hero-lines" viewBox="0 0 105 68" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <rect x="1" y="1" width="103" height="66" />
+      <line x1="52.5" y1="1" x2="52.5" y2="67" />
+      <circle cx="52.5" cy="34" r="9.15" />
+      <rect x="1" y="13.84" width="16.5" height="40.32" />
+      <rect x="1" y="24.84" width="5.5" height="18.32" />
+      <path d="M17.5 26.7 A9.15 9.15 0 0 1 17.5 41.3" />
+      <rect x="87.5" y="13.84" width="16.5" height="40.32" />
+      <rect x="98.5" y="24.84" width="5.5" height="18.32" />
+      <path d="M87.5 26.7 A9.15 9.15 0 0 0 87.5 41.3" />
+    </svg>
   );
 }
 
 function Hero({ children, nav = true }: { children: React.ReactNode; nav?: boolean }) {
   return (
     <div className="hero">
-      <Mesh />
       <header className="hero-top">
-        <Brand onDark />
-        {nav && (
-          <nav className="hero-nav">
-            <a href="/docs" target="_blank" rel="noreferrer">
-              API docs
-            </a>
-            <a href="https://github.com/caleblamro/gaffer-booth" target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-          </nav>
-        )}
+        <Brand />
+        <nav className="hero-nav">
+          {nav && (
+            <>
+              <a href="/docs" target="_blank" rel="noreferrer">
+                API docs
+              </a>
+              <a href="https://github.com/caleblamro/gaffer-booth" target="_blank" rel="noreferrer">
+                GitHub
+              </a>
+            </>
+          )}
+          <ThemeToggle />
+        </nav>
       </header>
       {children}
     </div>
@@ -104,7 +80,11 @@ export function Setup(p: SetupProps) {
     <Hero>
       <div className="hero-body">
         <div className="lead">
-          <h1>An AI broadcast crew that proves every number it puts on air.</h1>
+          <PitchLines />
+          <span className="eyebrow">Live gallery · synthetic match data</span>
+          <h1>
+            An AI broadcast crew that <em>proves</em> every number it puts on air.
+          </h1>
           <p>
             Five agents watch a live match, decide what matters, explain it, check each claim against the data and voice it in up to three languages.
             Built on Microsoft Agent Framework.
@@ -131,7 +111,10 @@ export function Setup(p: SetupProps) {
             p.onGo();
           }}
         >
-          <h2>Start a broadcast</h2>
+          <div>
+            <span className="eyebrow">Run sheet</span>
+            <h2>Start a broadcast</h2>
+          </div>
           <div>
             <span className="lbl">Match</span>
             <div className="opts" role="radiogroup" aria-label="Match">
@@ -160,7 +143,7 @@ export function Setup(p: SetupProps) {
           <div className="row2">
             <div>
               <span className="lbl">Speed</span>
-              <div className="segctl full">
+              <div className="seg full">
                 {SPEEDS.map((v) => (
                   <button type="button" key={v} className={p.speed === v ? "on" : ""} onClick={() => p.setSpeed(v)}>
                     {v}×
@@ -170,7 +153,7 @@ export function Setup(p: SetupProps) {
             </div>
             <div>
               <span className="lbl">Join from</span>
-              <div className="segctl full">
+              <div className="seg full">
                 {STARTS.map((v) => (
                   <button type="button" key={v} className={p.startMin === v ? "on" : ""} onClick={() => p.setStartMin(v)}>
                     {v === 0 ? "Kick-off" : `${v}'`}
@@ -183,7 +166,7 @@ export function Setup(p: SetupProps) {
             <span className="lbl">
               Commentary languages <em>up to 3</em>
             </span>
-            <div className="segctl full">
+            <div className="seg full">
               {LANGS.map((l) => (
                 <button type="button" key={l.id} className={p.langs.includes(l.id) ? "on" : ""} onClick={() => p.toggleLang(l.id)} aria-pressed={p.langs.includes(l.id)}>
                   {l.label}
@@ -192,7 +175,7 @@ export function Setup(p: SetupProps) {
             </div>
           </div>
           {p.error && <p className="err">Couldn't reach the broadcast server. Check the API is running on port 8000, then try again.</p>}
-          <button type="submit" className="btn primary go" disabled={p.scenarios.length === 0}>
+          <button type="submit" className="btn go big" disabled={p.scenarios.length === 0}>
             Go live
           </button>
           <p className="fine">
@@ -223,7 +206,7 @@ export function Warming({ fixture, speed, startMin, onCancel }: { fixture: strin
                   <b>{n}</b>
                   <small>{r}</small>
                 </span>
-                <span className="pill neutral">
+                <span className="tag">
                   <Pulse />
                   Connecting
                 </span>

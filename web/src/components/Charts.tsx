@@ -24,13 +24,13 @@ export function Momentum({ series, height = 58 }: { series: [number, number][]; 
           </clipPath>
         </defs>
         {[15, 30, 60, 75].map((m) => (
-          <line key={m} x1={x(m)} x2={x(m)} y1="0" y2={H} stroke="var(--border)" />
+          <line key={m} x1={x(m)} x2={x(m)} y1="0" y2={H} stroke="var(--line)" />
         ))}
-        <line x1={x(45)} x2={x(45)} y1="0" y2={H} stroke="var(--border-2)" strokeDasharray="2 3" />
-        <path d={area} fill="var(--accent)" clipPath="url(#mom-top)" opacity="0.85" />
+        <line x1={x(45)} x2={x(45)} y1="0" y2={H} stroke="var(--line-2)" strokeDasharray="2 3" />
+        <path d={area} fill="var(--home)" clipPath="url(#mom-top)" opacity="0.85" />
         <path d={area} fill="var(--away)" clipPath="url(#mom-bottom)" opacity="0.85" />
         <line x1="0" x2={W} y1={mid} y2={mid} stroke="var(--faint)" strokeWidth="0.6" />
-        {now !== null && <line x1={x(now)} x2={x(now)} y1="2" y2={H - 2} stroke="var(--text)" strokeWidth="1.2" />}
+        {now !== null && <line x1={x(now)} x2={x(now)} y1="2" y2={H - 2} stroke="var(--ink)" strokeWidth="1.2" />}
       </svg>
       <div className="ticks">
         {TICKS.map((m) => (
@@ -69,7 +69,7 @@ export function StatBars({ stats }: { stats: Record<Side, TeamStats> | null }) {
             <div>
               <span>{r.label}</span>
               <i>
-                <em style={{ width: `${(h / tot) * 100}%`, background: "var(--accent)" }} />
+                <em style={{ width: `${(h / tot) * 100}%`, background: "var(--home)" }} />
                 <em style={{ width: `${(a / tot) * 100}%`, background: "var(--away)" }} />
               </i>
             </div>

@@ -103,7 +103,7 @@ const STAT4: [string, (s: TeamStats) => string][] = [
 ];
 
 /** Post-match: verified report, ratings computed in code and social copy, from GET /api/recap. */
-export function Recap({ init, lang }: { init: InitMsg; lang: string }) {
+export function Recap({ init, lang, aired }: { init: InitMsg; lang: string; aired: number }) {
   const [recap, setRecap] = useState<{ key: string; data: Recap | null; failed: boolean } | null>(null);
   const key = `${init.scenario_id}:${init.seed}:${lang}`;
 
@@ -123,18 +123,18 @@ export function Recap({ init, lang }: { init: InitMsg; lang: string }) {
   const a = init.lineups.away;
   const r = recap?.key === key ? recap.data : null;
   const failed = recap?.key === key && recap.failed;
-  const crumb = `${storyline(init.scenario_id)} scenario · seed ${init.seed}`;
+  const crumb = `${storyline(init.scenario_id)} · seed ${init.seed} · ${aired} segment${aired === 1 ? "" : "s"} aired`;
 
   if (!r) {
     return (
       <>
         <div className="title-row">
           <div>
-            <div className="crumb">{crumb}</div>
-            <h1>Full-time recap</h1>
+            <div className="eyebrow">{crumb}</div>
+            <h1>Full time</h1>
           </div>
         </div>
-        <section className="card notice">
+        <section className="panel notice">
           <h2>{failed ? "Recap unavailable" : "Writing the match report"}</h2>
           <p className="muted">
             {failed
@@ -142,7 +142,7 @@ export function Recap({ init, lang }: { init: InitMsg; lang: string }) {
               : "The Recap writer drafts the report, the Verifier checks every number and ratings are computed from the match data."}
           </p>
           {!failed && (
-            <span className="pill neutral">
+            <span className="tag">
               <Pulse />
               Working
             </span>
@@ -168,25 +168,28 @@ export function Recap({ init, lang }: { init: InitMsg; lang: string }) {
     <>
       <div className="title-row">
         <div>
-          <div className="crumb">{crumb}</div>
-          <h1>Full-time recap</h1>
+          <div className="eyebrow">{crumb}</div>
+          <h1>Full time</h1>
         </div>
         <span className={`pill ${r.verification.ok ? "ok" : "bad"}`}>
+          {r.verification.ok && <Check />}
           {r.verification.ok ? `Report verified · ${r.verification.checked} claims` : `${r.verification.violations.length} unverified claims`}
         </span>
       </div>
       <div className="ft">
         <div className="col">
-          <section className="card">
+          <section className="panel board">
             <div className="scorecard">
-              <div className="team">
+              <div className="team h">
+                <span className="kit h" />
                 <b>{h.name}</b>
                 <span>{scorers("home") || "No goals"}</span>
               </div>
-              <div className="big">
-                <span className={winner === "home" ? "w" : ""}>{r.score.home}</span> – <span className={winner === "away" ? "w a" : ""}>{r.score.away}</span>
+              <div className="final">
+                <span className={winner === "home" ? "w" : ""}>{r.score.home}</span>–<span className={winner === "away" ? "w" : ""}>{r.score.away}</span>
               </div>
               <div className="team a">
+                <span className="kit a" />
                 <b>{a.name}</b>
                 <span>{scorers("away") || "No goals"}</span>
               </div>
@@ -210,9 +213,9 @@ export function Recap({ init, lang }: { init: InitMsg; lang: string }) {
               ))}
             </div>
           </section>
-          <section className="card report">
+          <section className="panel report">
             <div className="meta">
-              <span className="pill live">Match report</span>
+              <span className="tag q">Match report</span>
               <span className="muted sm">
                 Recap writer · {r.mode === "llm" ? "model" : "template tier"} · {r.verification.ok ? "every number checked" : "check failed"}
               </span>
@@ -222,10 +225,10 @@ export function Recap({ init, lang }: { init: InitMsg; lang: string }) {
           </section>
         </div>
         <div className="col">
-          <section className="card">
-            <div className="card-h">
+          <section className="panel">
+            <div className="ph">
               <h2>Player ratings</h2>
-              <span className="muted sm">Computed in code</span>
+              <span className="r">Computed in code</span>
             </div>
             <table className="tbl ratings">
               <tbody>
@@ -233,7 +236,7 @@ export function Recap({ init, lang }: { init: InitMsg; lang: string }) {
                   <tr key={p.id}>
                     <td>
                       {i === 0 ? <b>{p.name}</b> : p.name}
-                      {i === 0 && <span className="pill live">POTM</span>}
+                      {i === 0 && <span className="tag q">POTM</span>}
                     </td>
                     <td className="r mono">
                       {p.goals > 0 ? `${p.goals} G · ` : p.key_passes > 1 ? `${p.key_passes} KP · ` : ""}
@@ -248,10 +251,10 @@ export function Recap({ init, lang }: { init: InitMsg; lang: string }) {
               </tbody>
             </table>
           </section>
-          <section className="card posts">
-            <div className="card-h">
+          <section className="panel posts">
+            <div className="ph">
               <h2>Social posts</h2>
-              <span className="muted sm">{r.social.length} ready</span>
+              <span className="r">{r.social.length} ready</span>
             </div>
             {r.social.map((s) => (
               <div className="post" key={s}>

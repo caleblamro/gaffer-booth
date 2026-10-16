@@ -17,11 +17,8 @@ interface ShotProps {
 }
 
 /** One camera's picture of a frame. */
-/** The radar is a data view, so it uses the UI side colours on navy rather than the rendered kits. */
-const RADAR_KITS: Record<Side, string> = { home: "#8f89ff", away: "#2fd3f0" };
-
 export function Shot({ cam, frame, dir, colors, events, speed, thumb }: ShotProps) {
-  if (cam === "radar") return <Pitch frame={frame} events={events} colors={RADAR_KITS} speed={speed} thumb={thumb} />;
+  if (cam === "radar") return <Pitch frame={frame} events={events} colors={colors} speed={speed} thumb={thumb} />;
   return <CameraView frame={frame} rig={rigFor(cam, frame, dir.attack, dir.focus)} colors={colors} thumb={thumb} />;
 }
 
@@ -111,7 +108,7 @@ export function Multiview({ frame, dir, colors, events, speed }: SwitcherProps) 
         <span className="lab">
           <kbd>{pgmIdx + 1}</kbd>
           {CAMERAS[pgmIdx].name}
-          <em className="pill live">
+          <em className="tally sm">
             <i />
             Program
           </em>
