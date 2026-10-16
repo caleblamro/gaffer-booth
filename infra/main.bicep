@@ -9,6 +9,14 @@ param environmentName string
 @description('Azure region for all resources.')
 param location string
 
+@description('on: deploy a Foundry project + model for the crew (pay per token). off: free tier, the crew uses OpenRouter.')
+@allowed(['on', 'off'])
+param foundry string = 'off'
+
+@secure()
+@description('OpenRouter key for the free-tier crew (used when foundry is off). Empty runs the template tier.')
+param openRouterApiKey string = ''
+
 @description('Model deployed to the Foundry project for the crew.')
 param modelName string = 'gpt-4.1-mini'
 param modelVersion string = '2025-04-14'
@@ -32,6 +40,8 @@ module resources 'resources.bicep' = {
     modelName: modelName
     modelVersion: modelVersion
     modelCapacity: modelCapacity
+    useFoundry: foundry == 'on'
+    openRouterApiKey: openRouterApiKey
   }
 }
 

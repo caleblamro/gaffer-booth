@@ -4,6 +4,9 @@ param environmentName string
 param modelName string
 param modelVersion string
 param modelCapacity int
+param useFoundry bool
+@secure()
+param openRouterApiKey string
 
 var token = toLower(uniqueString(subscription().id, resourceGroup().id, environmentName))
 var aiName = 'ai-${token}'
@@ -44,8 +47,9 @@ resource acrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-// Microsoft Foundry: AI Services account + project + model deployment.
-resource ai 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
+// Microsoft Foundry: AI Services account + project + model deployment (only with foundry=on;
+// these are billed per token, everything else here fits the free allowances).
+resource ai 'Microsoft.CognitiveServices/accounts@2025-06-01' = if (useFoundry) {
   name: aiName
   location: location
   tags: tags
@@ -60,7 +64,7 @@ resource ai 'Microsoft.CognitiveServices/accounts@2025-06-01' = {
   }
 }
 
-resource project 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = {
+resource project 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = if (useFoundry) {
   parent: ai
   name: projectName
   location: location
@@ -71,7 +75,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-06-01' = {
   }
 }
 
-resource model 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = {
+resource model 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = if (useFoundry) {
   parent: ai
   name: modelName
   sku: {
@@ -88,7 +92,7 @@ resource model 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = {
 }
 
 // Azure AI User on the Foundry account for the app identity (keyless auth).
-resource aiUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource aiUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (useFoundry) {
   scope: ai
   name: guid(ai.id, identity.id, 'azure-ai-user')
   properties: {
@@ -113,7 +117,16 @@ resource env 'Microsoft.App/managedEnvironments@2024-03-01' = {
   }
 }
 
-var projectEndpoint = 'https://${aiName}.services.ai.azure.com/api/projects/${projectName}'
+var projectEndpoint = useFoundry ? 'https://${aiName}.services.ai.azure.com/api/projects/${projectName}' : ''
+var crewEnv = useFoundry ? [
+  { name: 'FOUNDRY_PROJECT_ENDPOINT', value: projectEndpoint }
+  { name: 'FOUNDRY_MODEL', value: modelName }
+  { name: 'AZURE_CLIENT_ID', value: identity.properties.clientId }
+] : empty(openRouterApiKey) ? [] : [
+  { name: 'OPENROUTER_API_KEY', secretRef: 'openrouter-api-key' }
+  // The free model needs longer than the default per-call budget.
+  { name: 'BOOTH_LLM_TIMEOUT', value: '15' }
+]
 
 resource web 'Microsoft.App/containerApps@2024-03-01' = {
   name: 'ca-web-${token}'
@@ -132,6 +145,9 @@ resource web 'Microsoft.App/containerApps@2024-03-01' = {
         targetPort: 8000
         transport: 'auto'
       }
+      secrets: useFoundry || empty(openRouterApiKey) ? [] : [
+        { name: 'openrouter-api-key', value: openRouterApiKey }
+      ]
       registries: [
         {
           server: registry.properties.loginServer
@@ -144,15 +160,17 @@ resource web 'Microsoft.App/containerApps@2024-03-01' = {
         {
           name: 'web'
           image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
-          resources: { cpu: json('1.0'), memory: '2Gi' }
-          env: [
-            { name: 'FOUNDRY_PROJECT_ENDPOINT', value: projectEndpoint }
-            { name: 'FOUNDRY_MODEL', value: modelName }
-            { name: 'AZURE_CLIENT_ID', value: identity.properties.clientId }
-          ]
+          resources: { cpu: json('0.5'), memory: '1Gi' }
+          env: crewEnv
         }
       ]
-      scale: { minReplicas: 1, maxReplicas: 3 }
+      // Scale to zero between demos so idle time is free. One replica at most: each
+      // broadcast lives in the process that holds its WebSocket.
+      scale: {
+        minReplicas: 0
+        maxReplicas: 1
+        rules: [{ name: 'http', http: { metadata: { concurrentRequests: '50' } } }]
+      }
     }
   }
 }
