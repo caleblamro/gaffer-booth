@@ -53,47 +53,50 @@ interface TabsProps {
   setMulti: (v: boolean) => void;
 }
 
-/** Camera tabs under the picture: the program camera is selected, the preview outlined. */
+/** Program header: the Director's state on the left, camera tabs on the right with the program inverted and the preview outlined. */
 export function CameraTabs({ dir, multi, setMulti }: TabsProps) {
   return (
-    <div className="cams" role="toolbar" aria-label="Cameras">
-      {CAMERAS.map((c, i) => {
-        const pgm = !multi && c.id === dir.program;
-        const pvw = c.id === dir.preview && c.id !== dir.program;
-        return (
-          <button
-            type="button"
-            key={c.id}
-            className={`cam${pgm ? " on" : ""}${pvw ? " pvw" : ""}`}
-            onClick={() => {
-              setMulti(false);
-              dir.cut(c.id);
-            }}
-            title={`Cut to ${c.name} (${i + 1})${pvw ? " · preview" : ""}`}
-          >
-            {c.name}
-          </button>
-        );
-      })}
-      <span className="cams-sep" />
-      <button type="button" className={`cam${multi ? " on" : ""}`} onClick={() => setMulti(!multi)} aria-pressed={multi}>
-        Multiview
-      </button>
-      <span className="cams-r">
-        {multi && (
-          <button type="button" className="btn sm" onClick={dir.take}>
-            Take preview <kbd>Enter</kbd>
+    <>
+      <span className="ch-l">
+        Program
+        {dir.auto ? (
+          <span className="n auto">Director cuts</span>
+        ) : (
+          <button type="button" className="mini" onClick={dir.handBack} title="Hand the cameras back to the Director (A)">
+            Manual — hand back <kbd>A</kbd>
           </button>
         )}
-        {dir.auto ? (
-          <span className="muted sm">Director cuts automatically</span>
-        ) : (
-          <button type="button" className="btn sm" onClick={dir.handBack}>
-            Manual · hand back <kbd>A</kbd>
+        {multi && (
+          <button type="button" className="mini" onClick={dir.take} title="Take the preview to program (Enter)">
+            Take <kbd>Enter</kbd>
           </button>
         )}
       </span>
-    </div>
+      <div className="tabs" role="toolbar" aria-label="Cameras">
+        {CAMERAS.map((c, i) => {
+          const pgm = !multi && c.id === dir.program;
+          const pvw = c.id === dir.preview && c.id !== dir.program;
+          return (
+            <button
+              type="button"
+              key={c.id}
+              className={`${pgm ? "on" : ""}${pvw ? " pvw" : ""}`}
+              aria-pressed={pgm}
+              onClick={() => {
+                setMulti(false);
+                dir.cut(c.id);
+              }}
+              title={`Cut to ${c.name} (${i + 1})${pvw ? " · preview" : ""}`}
+            >
+              {c.name}
+            </button>
+          );
+        })}
+        <button type="button" className={multi ? "on" : ""} onClick={() => setMulti(!multi)} aria-pressed={multi}>
+          Multiview
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -105,10 +108,10 @@ export function Multiview({ frame, dir, colors, events, speed }: SwitcherProps) 
     <div className="mv">
       <button type="button" className="tile pgm" onClick={() => dir.cut(dir.program)}>
         <Shot cam={dir.program} frame={frame} dir={dir} colors={colors} events={events} speed={speed} />
-        <span className="lab">
+        <span className="lab hud">
           <kbd>{pgmIdx + 1}</kbd>
           {CAMERAS[pgmIdx].name}
-          <em className="tally sm">
+          <em className="pg">
             <i />
             Program
           </em>
@@ -119,10 +122,10 @@ export function Multiview({ frame, dir, colors, events, speed }: SwitcherProps) 
         return (
           <button type="button" key={c.id} className={`tile${pvw ? " pvw" : ""}`} onClick={() => dir.cut(c.id)}>
             <Shot cam={c.id} frame={frame} dir={dir} colors={colors} events={events} speed={speed} thumb />
-            <span className="lab">
+            <span className="lab hud">
               <kbd>{CAMERAS.findIndex((x) => x.id === c.id) + 1}</kbd>
               {c.name}
-              {pvw && <em className="pill neutral">Preview</em>}
+              {pvw && <em className="pv">Preview</em>}
             </span>
           </button>
         );

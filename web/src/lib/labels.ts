@@ -10,7 +10,7 @@ export const SLOT_LABEL: Record<Segment["slot"], string> = {
 /** Scenario titles are just the fixture, so the storyline label comes from the id. */
 export const storyline = (id: string) => (id === "classic" ? "Open game" : id.charAt(0).toUpperCase() + id.slice(1).replaceAll("_", " "));
 
-/** The UI palette is side-based: home is cobalt (--home), away tangerine (--away). */
+/** The UI palette is side-based: home is the blue (--home), away the orange (--away). */
 export const sideClass = (s: Side) => (s === "home" ? "h" : "a");
 
 export const other = (s: Side): Side => (s === "home" ? "away" : "home");

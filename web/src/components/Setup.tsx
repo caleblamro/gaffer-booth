@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
 import { storyline } from "../lib/labels";
 import type { Scenario } from "../types";
-import { Brand, Pulse, ThemeToggle } from "./Brand";
+import { Pulse, ThemeToggle } from "./Brand";
+import { Frame, TopBar } from "./Shell";
 
 export const LANGS: { id: string; label: string }[] = [
   { id: "en", label: "English" },
@@ -10,6 +12,7 @@ export const LANGS: { id: string; label: string }[] = [
 ];
 export const SPEEDS = [10, 20, 40, 80];
 const STARTS = [0, 30, 55, 70];
+const MAX_LANGS = 3;
 
 const CREW = [
   ["Director", "Decides what airs"],
@@ -19,43 +22,63 @@ const CREW = [
   ["Commentator", "Voices it live"],
 ];
 
-/** Touchline markings drawn faintly behind the hero copy. */
-function PitchLines() {
+const RINGS = [130, 215, 300, 395, 500, 620, 760];
+
+/** The pitch's centre circle, drawn as Artcraft-style concentric rings with ticks, behind the hero. */
+function Rings() {
+  const ticks = (r: number, n: number, len: number) =>
+    Array.from({ length: n }, (_, i) => {
+      const t = (i / n) * Math.PI * 2;
+      const c = Math.cos(t);
+      const s = Math.sin(t);
+      return <line key={`${r}-${i}`} x1={c * r} y1={s * r} x2={c * (r + len)} y2={s * (r + len)} />;
+    });
   return (
-    <svg className="hero-lines" viewBox="0 0 105 68" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <rect x="1" y="1" width="103" height="66" />
-      <line x1="52.5" y1="1" x2="52.5" y2="67" />
-      <circle cx="52.5" cy="34" r="9.15" />
-      <rect x="1" y="13.84" width="16.5" height="40.32" />
-      <rect x="1" y="24.84" width="5.5" height="18.32" />
-      <path d="M17.5 26.7 A9.15 9.15 0 0 1 17.5 41.3" />
-      <rect x="87.5" y="13.84" width="16.5" height="40.32" />
-      <rect x="98.5" y="24.84" width="5.5" height="18.32" />
-      <path d="M87.5 26.7 A9.15 9.15 0 0 0 87.5 41.3" />
+    <svg className="rings" viewBox="-800 -420 1600 840" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g className="faint">
+        <line x1="0" y1="-420" x2="0" y2="420" />
+        <rect x="-780" y="-200" width="165" height="400" />
+        <rect x="-780" y="-92" width="55" height="184" />
+        <rect x="615" y="-200" width="165" height="400" />
+        <rect x="725" y="-92" width="55" height="184" />
+        <circle r="215" strokeDasharray="3 7" />
+      </g>
+      {RINGS.map((r) => (
+        <circle key={r} r={r} />
+      ))}
+      <g>{ticks(300, 72, 8)}</g>
+      <g>{ticks(500, 96, 10)}</g>
+      <path className="arc" d={`M ${395 * Math.cos(2.4)} ${395 * Math.sin(2.4)} A 395 395 0 0 1 ${395 * Math.cos(4.3)} ${395 * Math.sin(4.3)}`} />
+      <path className="arc" d={`M ${620 * Math.cos(-0.9)} ${620 * Math.sin(-0.9)} A 620 620 0 0 1 ${620 * Math.cos(0.5)} ${620 * Math.sin(0.5)}`} />
     </svg>
   );
 }
 
-function Hero({ children, nav = true }: { children: React.ReactNode; nav?: boolean }) {
+function SetupShell({ children, now, label, right }: { children: ReactNode; now: number | null; label?: string; right: ReactNode }) {
   return (
-    <div className="hero">
-      <header className="hero-top">
-        <Brand />
-        <nav className="hero-nav">
-          {nav && (
-            <>
-              <a href="/docs" target="_blank" rel="noreferrer">
-                API docs
-              </a>
-              <a href="https://github.com/caleblamro/gaffer-booth" target="_blank" rel="noreferrer">
-                GitHub
-              </a>
-            </>
-          )}
-          <ThemeToggle />
-        </nav>
-      </header>
-      {children}
+    <div className="app">
+      <TopBar
+        nav={
+          <>
+            <span className="on">Broadcast</span>
+            <a href="/docs" target="_blank" rel="noreferrer">
+              API docs
+            </a>
+            <a href="https://github.com/caleblamro/gaffer-booth" target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+          </>
+        }
+        right={
+          <>
+            <ThemeToggle />
+            {right}
+          </>
+        }
+      />
+      <Frame now={now} label={label}>
+        {children}
+      </Frame>
     </div>
   );
 }
@@ -76,49 +99,68 @@ interface SetupProps {
 
 export function Setup(p: SetupProps) {
   const minutes = (90 * 60) / p.speed / 60;
+  const runtime = minutes >= 2 ? `${Math.round(minutes * 2) / 2} min` : `${Math.round(minutes * 60)} s`;
+  const fixture = p.scenarios.find((s) => s.id === p.scenario);
+  const ready = p.scenarios.length > 0;
   return (
-    <Hero>
-      <div className="hero-body">
-        <div className="lead">
-          <PitchLines />
-          <span className="eyebrow">Live gallery · synthetic match data</span>
-          <h1>
-            An AI broadcast crew that <em>proves</em> every number it puts on air.
-          </h1>
+    <SetupShell
+      now={p.startMin}
+      label={p.startMin === 0 ? "KO" : `${p.startMin}'`}
+      right={
+        <button type="submit" form="run-sheet" className="tb cta hud" disabled={!ready}>
+          Go live
+        </button>
+      }
+    >
+      <section className="hero">
+        <Rings />
+        <div className="hero-in">
+          <h1 className="wordmark">Gaffer Booth</h1>
+          <h2>
+            Every number on air, <i className="s">checked.</i>
+          </h2>
           <p>
-            Five agents watch a live match, decide what matters, explain it, check each claim against the data and voice it in up to three languages.
-            Built on Microsoft Agent Framework.
+            Five agents watch a live match, decide what matters, explain it, check each claim against the match data and voice it in up to three
+            languages.
           </p>
-          <div className="proof-stats">
-            <div>
-              <b>100%</b>
-              <span>of on-air numbers checked</span>
-            </div>
-            <div>
-              <b>5</b>
-              <span>agents on the crew</span>
-            </div>
-            <div>
-              <b>3</b>
-              <span>languages at once</span>
-            </div>
+          <div className="ctas">
+            <button type="submit" form="run-sheet" className="btn go lg hud" disabled={!ready}>
+              <svg viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M3 2 L10 6 L3 10 Z" fill="currentColor" />
+              </svg>
+              Start broadcast
+            </button>
+            <a className="btn lg hud" href="#run-sheet">
+              Run sheet
+            </a>
           </div>
+          <p className="meta hud">
+            Synthetic match data <span>·</span> {CREW.length} agents <span>·</span> Up to {MAX_LANGS} languages <span>·</span> Microsoft Agent Framework
+          </p>
         </div>
-        <form
-          className="start"
-          onSubmit={(e) => {
-            e.preventDefault();
-            p.onGo();
-          }}
-        >
-          <div>
-            <span className="eyebrow">Run sheet</span>
-            <h2>Start a broadcast</h2>
-          </div>
-          <div>
-            <span className="lbl">Match</span>
+      </section>
+      <form
+        id="run-sheet"
+        className="run"
+        onSubmit={(e) => {
+          e.preventDefault();
+          p.onGo();
+        }}
+      >
+        <div className="strip hud">
+          <span>01 / Run sheet</span>
+          <span className="ell">
+            {fixture ? `${fixture.home} v ${fixture.away}` : "Loading fixtures"} — {p.speed}× — {p.startMin === 0 ? "from kick-off" : `from ${p.startMin}'`}
+          </span>
+        </div>
+        <div className="cells run-grid">
+          <section className="c">
+            <div className="ch hud">
+              <span>Match</span>
+              <span className="n">{String(p.scenarios.length).padStart(2, "0")}</span>
+            </div>
             <div className="opts" role="radiogroup" aria-label="Match">
-              {p.scenarios.length === 0 && <p className="empty">Loading fixtures from the match engine…</p>}
+              {!ready && <p className="empty">Loading fixtures from the match engine…</p>}
               {p.scenarios.map((s) => (
                 <button
                   type="button"
@@ -135,95 +177,120 @@ export function Setup(p: SetupProps) {
                     </b>
                     <small>{s.blurb}</small>
                   </span>
-                  <span className="tag">{storyline(s.id)}</span>
+                  <em className="hud">{storyline(s.id)}</em>
                 </button>
               ))}
             </div>
-          </div>
-          <div className="row2">
-            <div>
-              <span className="lbl">Speed</span>
-              <div className="seg full">
-                {SPEEDS.map((v) => (
-                  <button type="button" key={v} className={p.speed === v ? "on" : ""} onClick={() => p.setSpeed(v)}>
-                    {v}×
-                  </button>
-                ))}
-              </div>
+          </section>
+          <section className="c">
+            <div className="ch hud">
+              <span>Speed</span>
+              <span className="n">90' in {runtime}</span>
             </div>
-            <div>
-              <span className="lbl">Join from</span>
-              <div className="seg full">
-                {STARTS.map((v) => (
-                  <button type="button" key={v} className={p.startMin === v ? "on" : ""} onClick={() => p.setStartMin(v)}>
-                    {v === 0 ? "Kick-off" : `${v}'`}
-                  </button>
-                ))}
-              </div>
+            <div className="seg hud" role="group" aria-label="Speed">
+              {SPEEDS.map((v) => (
+                <button type="button" key={v} className={p.speed === v ? "on" : ""} aria-pressed={p.speed === v} onClick={() => p.setSpeed(v)}>
+                  {v}×
+                </button>
+              ))}
             </div>
-          </div>
-          <div>
-            <span className="lbl">
-              Commentary languages <em>up to 3</em>
-            </span>
-            <div className="seg full">
+            <div className="ch hud b">
+              <span>Join from</span>
+              <span className="n">Match clock</span>
+            </div>
+            <div className="seg hud" role="group" aria-label="Join from">
+              {STARTS.map((v) => (
+                <button type="button" key={v} className={p.startMin === v ? "on" : ""} aria-pressed={p.startMin === v} onClick={() => p.setStartMin(v)}>
+                  {v === 0 ? "Kick-off" : `${v}'`}
+                </button>
+              ))}
+            </div>
+            <div className="ch hud b">
+              <span>Commentary</span>
+              <span className="n">Up to {MAX_LANGS}</span>
+            </div>
+            <div className="seg hud" role="group" aria-label="Commentary languages">
               {LANGS.map((l) => (
-                <button type="button" key={l.id} className={p.langs.includes(l.id) ? "on" : ""} onClick={() => p.toggleLang(l.id)} aria-pressed={p.langs.includes(l.id)}>
-                  {l.label}
+                <button type="button" key={l.id} className={p.langs.includes(l.id) ? "on" : ""} onClick={() => p.toggleLang(l.id)} aria-pressed={p.langs.includes(l.id)} aria-label={l.label} title={l.label}>
+                  {l.id}
                 </button>
               ))}
             </div>
-          </div>
-          {p.error && <p className="err">Couldn't reach the broadcast server. Check the API is running on port 8000, then try again.</p>}
-          <button type="submit" className="btn go big" disabled={p.scenarios.length === 0}>
-            Go live
-          </button>
-          <p className="fine">
-            90 minutes in about {minutes >= 2 ? `${Math.round(minutes * 2) / 2} min` : `${Math.round(minutes * 60)} s`}. All clubs, players and match data are synthetic.
-          </p>
-        </form>
-      </div>
-    </Hero>
+          </section>
+          <section className="c go-cell">
+            <div className="ch hud">
+              <span>Crew</span>
+              <span className="n">{String(CREW.length).padStart(2, "0")}</span>
+            </div>
+            <ul className="crew-list">
+              {CREW.map(([n, r]) => (
+                <li key={n}>
+                  <b>{n}</b>
+                  <span>{r}</span>
+                </li>
+              ))}
+            </ul>
+            {p.error && <p className="err">Couldn't reach the broadcast server. Check the API is running on port 8000, then try again.</p>}
+            <button type="submit" className="btn go block hud" disabled={!ready}>
+              Go live
+            </button>
+            <p className="fine">All clubs, players and match data are synthetic.</p>
+          </section>
+        </div>
+      </form>
+    </SetupShell>
   );
 }
 
 export function Warming({ fixture, speed, startMin, onCancel }: { fixture: string; speed: number; startMin: number; onCancel: () => void }) {
   return (
-    <Hero nav={false}>
-      <div className="warm">
-        <div className="start">
-          <div>
-            <span className="lbl">
-              {fixture} · {startMin === 0 ? "from kick-off" : `from ${startMin}'`} · {speed}×
+    <SetupShell
+      now={startMin}
+      label={startMin === 0 ? "KO" : `${startMin}'`}
+      right={
+        <button type="button" className="tb cta hud" onClick={onCancel}>
+          Cancel
+        </button>
+      }
+    >
+      <section className="hero warm">
+        <Rings />
+        <div className="c warm-card">
+          <div className="ch hud">
+            <span>Warming up</span>
+            <span className="n">
+              {fixture} — {startMin === 0 ? "from kick-off" : `from ${startMin}'`} — {speed}×
             </span>
-            <h2>Warming up the crew</h2>
-            <p className="muted">Seeding the storyline and connecting each agent. If a model misses the broadcast deadline, its template tier takes over.</p>
           </div>
-          <div className="crew-rows">
+          <div className="story">
+            <h2>
+              Warming up the <i className="s">crew.</i>
+            </h2>
+            <p>Seeding the storyline and connecting each agent. If a model misses the broadcast deadline, its template tier takes over.</p>
+          </div>
+          <ul className="crew-list">
             {CREW.map(([n, r]) => (
-              <div key={n}>
-                <span>
-                  <b>{n}</b>
-                  <small>{r}</small>
-                </span>
-                <span className="tag">
+              <li key={n}>
+                <b>{n}</b>
+                <span>{r}</span>
+                <em className="hud">
                   <Pulse />
                   Connecting
-                </span>
-              </div>
+                </em>
+              </li>
             ))}
-          </div>
+          </ul>
           <div className="progress">
             <i />
           </div>
           <div className="warm-foot">
-            <span className="muted sm">The match starts as soon as the engine sends the line-ups.</span>
-            <button type="button" className="btn" onClick={onCancel}>
+            <span>The match starts as soon as the engine sends the line-ups.</span>
+            <button type="button" className="btn hud" onClick={onCancel}>
               Cancel
             </button>
           </div>
         </div>
-      </div>
-    </Hero>
+      </section>
+    </SetupShell>
   );
 }

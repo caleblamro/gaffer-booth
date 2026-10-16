@@ -8,7 +8,7 @@ interface Props {
   frame: Frame;
   rig: Rig;
   colors: Record<Side, string>;
-  /** Thumbnails skip shirt numbers and the vignette. */
+  /** Thumbnails skip shirt numbers. */
   thumb?: boolean;
 }
 
@@ -113,13 +113,6 @@ export const CameraView = memo(function CameraView({ frame, rig, colors, thumb =
         );
       })}
       {ball && <circle cx={ball[0]} cy={ball[1]} r={ballR} fill="var(--ball)" stroke="var(--ball-edge)" strokeWidth="1" />}
-      {!thumb && <rect width={VIEW_W} height={VIEW_H} fill="url(#cam-vignette)" />}
-      <defs>
-        <radialGradient id="cam-vignette" cx="50%" cy="60%" r="75%">
-          <stop offset="60%" stopColor="var(--vignette)" stopOpacity="0" />
-          <stop offset="100%" stopColor="var(--vignette)" stopOpacity="0.45" />
-        </radialGradient>
-      </defs>
     </svg>
   );
 });
@@ -132,10 +125,12 @@ export function useTweenedFrame(target: Frame, ms: number): Frame {
 
   useEffect(() => {
     from.current = latest.current;
+    // With reduced motion the cameras cut instead of panning.
+    const dur = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : ms;
     const start = performance.now();
     let raf = 0;
     const step = (now: number) => {
-      const t = Math.min(1, (now - start) / ms);
+      const t = dur === 0 ? 1 : Math.min(1, (now - start) / dur);
       const eased = 1 - (1 - t) ** 3;
       const f = blendFrames(from.current, target, eased);
       latest.current = f;
