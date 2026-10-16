@@ -1,4 +1,5 @@
-# Azure Developer CLI: `azd up` provisions Foundry + Container Apps and deploys the app.
+# Azure Developer CLI: `azd up` provisions Container Apps (and Foundry with GAFFER_FOUNDRY=on)
+# and deploys the app. See "Deploy to Azure" in the README.
 name: gaffer-booth
 metadata:
   template: gaffer-booth@0.1.0
