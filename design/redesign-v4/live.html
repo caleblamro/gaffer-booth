@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gaffer Booth · Live</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif&display=swap">
+<link rel="stylesheet" href="touchline.css">
+<script>document.documentElement.dataset.theme = new URLSearchParams(location.search).get("theme") || "light";</script>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><span class="mark"><svg viewBox="0 0 24 24"><path d="M4 18 L12 4 L20 18 Z" fill="none" stroke="#15171b" stroke-width="2.6" stroke-linejoin="round"/><circle cx="12" cy="14" r="2.4" fill="#15171b"/></svg></span>Gaffer Booth</div>
+    <nav class="tabs">
+      <a class="on" href="#">Gallery</a>
+      <a href="#">Rundown <span class="n">12</span></a>
+      <a href="#">Fact check <span class="n">31</span></a>
+      <a href="#">Stats</a>
+      <a href="#">Crew</a>
+      <a href="#">Full time</a>
+    </nav>
+    <div class="top-r">
+      <div class="seg"><span>10×</span><span class="on">20×</span><span>40×</span></div>
+      <div class="seg"><span class="on">EN</span><span>ES</span></div>
+      <button class="icon-btn" title="Theme"><svg viewBox="0 0 16 16"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z"/></svg></button>
+      <button class="btn">Pause</button>
+      <button class="btn stop">End broadcast</button>
+    </div>
+  </header>
+
+  <div class="bug">
+    <span class="tally"><i></i>ON AIR</span>
+    <div class="score"><span class="kit h"></span><span class="h">Harbour City</span><span class="n">2–3</span><span class="a">Westbridge Rovers</span><span class="kit a"></span></div>
+    <span class="clock">66:18</span>
+    <div class="meta"><span>Comeback · seed 4127</span><span>xG <b>2.13 – 1.04</b></span><span>Shots <b>13 – 19</b></span><span>Median to air <b>9.4 s</b></span></div>
+  </div>
+
+  <main class="stage">
+    <section class="panel program">
+      <div class="pic">
+        <svg id="pitch" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="cap"><span class="q"><span class="lang">EN</span>&nbsp; Varga pulls one back! A 0.46 xG chance at the end of a six-pass move, and it's 2–3 with 24 to play.</span></div>
+        <div class="lt">
+          <span class="side"></span>
+          <div class="body">
+            <div class="k">Goal · Harbour City · 65:10</div>
+            <div class="who">Wes Varga</div>
+            <div class="facts"><div><b>0.46</b><span>chance xG</span></div><div><b>6</b><span>passes in move</span></div><div><b>2.13 – 1.04</b><span>match xG</span></div></div>
+          </div>
+          <span class="ck">VERIFIED</span>
+        </div>
+      </div>
+      <div class="cams">
+        <span class="cam on">Main</span><span class="cam pv">Behind goal</span><span class="cam">Tactical</span><span class="cam">Isolation</span><span class="cam">Reverse</span><span class="cam">Radar</span><span class="cam">Multiview</span>
+        <span class="r"><i></i>Director cuts automatically</span>
+      </div>
+    </section>
+
+    <section class="panel onair">
+      <div class="ph"><span class="tally"><i></i>ON AIR</span><h2>Full-screen goal plate</h2><span class="r">since 66:02</span></div>
+      <div class="lead">
+        <span class="eyebrow">Goal · 65:10</span>
+        <h3>Varga pulls one back</h3>
+        <p class="said">Harbour City's <b>sixth pass</b> finds Varga, and a <b>0.46 xG</b> chance makes it <b>2–3</b>. They now lead the xG count <b>2.13 to 1.04</b>.</p>
+      </div>
+      <div class="sect">
+        <div class="hd"><span class="eyebrow">Path to air</span><b>9.9 s</b></div>
+        <div class="path"><i class="d"></i><i class="a"></i><i class="v"></i><i class="g"></i><i class="o"></i></div>
+        <div class="stages">
+          <div><b>0.4 s</b>Detected</div><div><b>5.8 s</b>Analyst</div><div><b>2.1 s</b>Verified</div><div><b>0.3 s</b>Graphic</div><div><b>1.3 s</b>Voiced</div>
+        </div>
+      </div>
+      <div class="sect">
+        <div class="hd"><span class="eyebrow">Claims · 10 checked, 1 blocked</span><b>code + judge</b></div>
+        <div class="chips">
+          <span class="chip ok"><svg viewBox="0 0 14 14"><path d="m3 7.5 2.5 2.5L11 4.5"/></svg><span class="v">0.46</span> xG</span>
+          <span class="chip ok"><svg viewBox="0 0 14 14"><path d="m3 7.5 2.5 2.5L11 4.5"/></svg><span class="v">6</span> passes</span>
+          <span class="chip ok"><svg viewBox="0 0 14 14"><path d="m3 7.5 2.5 2.5L11 4.5"/></svg>score <span class="v">2–3</span></span>
+          <span class="chip ok"><svg viewBox="0 0 14 14"><path d="m3 7.5 2.5 2.5L11 4.5"/></svg><span class="v">2.13 – 1.04</span> xG</span>
+          <span class="chip ok"><svg viewBox="0 0 14 14"><path d="m3 7.5 2.5 2.5L11 4.5"/></svg>Wes Varga</span>
+          <span class="chip ok"><svg viewBox="0 0 14 14"><path d="m3 7.5 2.5 2.5L11 4.5"/></svg>65:10</span>
+          <span class="chip no"><svg viewBox="0 0 14 14"><path d="m4 4 6 6M10 4l-6 6"/></svg><s>“protect their 3–1 lead”</s></span>
+        </div>
+        <div class="why"><span>Blocked: at 65:10 the data says</span><code>score 1–3</code></div>
+      </div>
+      <div class="sect">
+        <div class="hd"><span class="eyebrow">Up next</span></div>
+        <div class="next">
+          <div><span class="t">70:00</span><span>Harbour City substitution</span><span class="tag q">Lower third</span></div>
+          <div><span class="t">—</span><span>Your question on xG</span><span class="tag">Drafting</span></div>
+        </div>
+      </div>
+      <div class="sect">
+        <div class="hd"><span class="eyebrow">Earlier</span></div>
+        <div class="next">
+          <div><span class="t">63:03</span><span>Spotlight: Pele Grieve</span><span class="tag">Player card</span></div>
+          <div><span class="t">60:06</span><span>Change for Westbridge</span><span class="tag">Lower third</span></div>
+          <div><span class="t">55:43</span><span>Goal, Femi Delacroix</span><span class="tag">Breaking</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel talk">
+      <div class="feed">
+        <div class="ph"><h2>Talkback</h2><span class="r">Answers air only if they pass the checks</span></div>
+        <div class="msgs">
+          <div class="q1"><span class="av you">CL</span><div><div class="who"><b>You</b>66:02</div><p>Why are Westbridge still ahead on half the xG?</p></div></div>
+          <div class="q1"><span class="av crew">A</span><div><div class="who"><b>Analyst</b>called team_stats, recent_trend(10)</div><p>Westbridge scored 3 from <span class="f a">1.04</span> xG, while Harbour City have <span class="f">2.13</span> but only 2 goals…</p><span class="status w"><span class="dots"><i></i><i></i><i></i></span>Verifying 4 claims</span></div></div>
+        </div>
+        <div class="sugg"><span>Who has been most dangerous?</span><span>How has the press changed?</span><span>Stat on Delacroix</span></div>
+        <div class="compose"><span>Ask the crew…</span><kbd>/</kbd><button class="send">Send</button></div>
+      </div>
+      <div class="crew">
+        <div class="ph"><h2>Crew</h2><span class="r">nemotron-3.5 · OpenRouter</span></div>
+        <div class="agent"><span class="av a1">D</span><div><b>Director</b><span>Holding the goal plate, cut to behind goal next</span></div><em class="st on">Live</em></div>
+        <div class="agent"><span class="av a2">A</span><div><b>Analyst</b><span>Answering your xG question</span></div><em class="st busy">Drafting</em></div>
+        <div class="agent"><span class="av a3">V</span><div><b>Verifier</b><span>10 of 10 checked, 1 line blocked</span></div><em class="st">Idle</em></div>
+        <div class="agent"><span class="av a4">G</span><div><b>Graphics</b><span>Lower third ready for 70:00</span></div><em class="st">Idle</em></div>
+        <div class="agent"><span class="av a5">C</span><div><b>Commentator</b><span>Voiced in EN and ES</span></div><em class="st">Idle</em></div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="pitch.js"></script>
+<script>
+const css = getComputedStyle(document.documentElement), v = (n) => css.getPropertyValue(n).trim();
+const dark = document.documentElement.dataset.theme === "dark";
+drawPitch(document.getElementById("pitch"), { stripes: true, grassA: v("--pitch-a"), grassB: v("--pitch-b"), line: v("--pitch-line"), lw: 0.25,
+  home: dark ? "#8da0ff" : "#5b76ff", away: "#ff9442", ball: "#ffffff", ring: "rgba(0,0,0,.35)", r: 1.05 });
+</script>
+</body>
+</html>
