@@ -73,7 +73,35 @@ def _matches(token: str, value: float) -> bool:
     return False
 
 
-def verify(text: str, ev: Evidence, roster: list[str]) -> VerifyResult:
+# Drafts that talk about the data instead of giving it ("Need Pele Grieve's match stats…").
+NON_ANSWER_RE = re.compile(
+    r"^\W*(?:i\s+|we\s+)?(?:need|needs|let me|let's check|i'll|i will|checking|fetching|looking up|"
+    r"calling|waiting|pending|awaiting)\b"
+    r"|\b(?:i|we)\s+(?:don't|do not|can't|cannot|couldn't|could not)\s+(?:have|see|find|access|get)\b"
+    r"|\bno (?:data|stats|statistics|information|numbers)\b"
+    r"|\b(?:not|isn't|aren't) (?:available|provided|included|given) in the (?:evidence|data)\b"
+    r"|\b(?:not|isn't|aren't) in the (?:evidence|data)\b"
+    r"|\b(?:unable to|insufficient (?:data|evidence)|would need|tool call|evidence (?:pack|keys?))\b",
+    re.IGNORECASE,
+)
+
+
+def on_air_issue(text: str, res: VerifyResult) -> str | None:
+    """Why an Analyst draft that passed the number check still can't air, or None.
+
+    The number check only proves the draft invents nothing; a non-answer like "Need Pele
+    Grieve's match stats" invents nothing too. An insight must say something, so it has to
+    read as an answer and cite at least one number, score or clock from the evidence."""
+    if NON_ANSWER_RE.search(text):
+        return "draft is a request for data, not an answer"
+    if not any(key != "player" for _, key in res.checked):
+        return "draft cites no number from the evidence"
+    return None
+
+
+def verify(text: str, ev: Evidence, roster: list[str], answer: bool = False) -> VerifyResult:
+    """Check every number, clock, score and player in text against the evidence. With
+    answer=True (Analyst drafts) the text must also be a real, evidence-backed answer."""
     res = VerifyResult(ok=True)
     scrub = text
     # Clocks that appear in evidence are fine as a unit.
@@ -129,5 +157,7 @@ def verify(text: str, ev: Evidence, roster: list[str]) -> VerifyResult:
             res.checked.extend((n, "player") for n in hits)
         else:
             res.violations.append(f"player '{surname}' not in evidence")
+    if answer and not res.violations and (issue := on_air_issue(text, res)):
+        res.violations.append(issue)
     res.ok = not res.violations
     return res

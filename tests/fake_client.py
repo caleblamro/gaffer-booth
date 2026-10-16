@@ -11,12 +11,14 @@ from agent_framework import BaseChatClient, ChatResponse, Message
 
 class FakeChatClient(BaseChatClient):
     def __init__(self, hallucinate_first: bool = True, reject_schema: bool = False,
-                 delay: float = 0.0, judge_reject_first: bool = False):
+                 delay: float = 0.0, judge_reject_first: bool = False,
+                 non_answer_first: bool = False):
         super().__init__()
         self.hallucinate_first = hallucinate_first
         self.reject_schema = reject_schema  # behave like a model without structured output
         self.delay = delay  # seconds each call takes, to exercise concurrency
         self.judge_reject_first = judge_reject_first
+        self.non_answer_first = non_answer_first  # first draft asks for data instead of answering
         self.calls: list[str] = []
         self.prompts: list[str] = []
 
@@ -41,7 +43,9 @@ class FakeChatClient(BaseChatClient):
             n = self.calls.count("AnalystOut")
             data = json.loads(prompt.split("\n\n")[0])
             ev = {f["key"]: f["value"] for f in data["evidence"]}
-            if self.hallucinate_first and n % 2 == 1:
+            if self.non_answer_first and n % 2 == 1:
+                out = {"insight": f"Need {data['team']}'s match stats to answer this."}
+            elif self.hallucinate_first and n % 2 == 1:
                 out = {"insight": f"{data['team']} have had 99 shots in this spell."}
             else:
                 out = {"insight": f"{data['team']} lead the story at minute {ev['minute']}."}
