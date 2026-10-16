@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
-import { SLOT_LABEL, claimsOf, sideClass } from "../lib/labels";
-import type { ConsoleLine, InitMsg, Moment, Segment } from "../types";
-import { Check, Pulse } from "./Brand";
+import { useState, type ReactNode, type RefObject } from "react";
+import { SLOT_LABEL, claimsOf, parseViolation, sideClass, sideOfKey } from "../lib/labels";
+import type { ConsoleLine, InitMsg, Moment, Segment, Side } from "../types";
+import { Check, Cross, Pulse } from "./Brand";
 import { highlight } from "./Broadcast";
+import { describeMode } from "./Shell";
 
 /* ---------- Rundown model: one row per moment the crew has touched ---------- */
 
@@ -123,198 +124,443 @@ export function RundownTable({ rows, onOpen, limit }: { rows: RundownRow[]; onOp
   );
 }
 
-/* ---------- On air now: summary and the segment's console timeline ---------- */
+/* ---------- Agent activity, in plain words ---------- */
 
 interface Step {
   dot: "ok" | "bad" | "warn" | "";
-  title: ReactNode;
-  sub: string;
-  codes?: string[];
-  keys?: string[];
+  title: string;
 }
 
 function stepOf(l: ConsoleLine, seg: Segment | null, langs: string[]): Step {
-  const meta = (extra?: string) => [l.agent, l.clock, extra ?? `${l.ms} ms`].filter(Boolean).join(" · ");
   const attempt = l.attempt ? ` (attempt ${l.attempt})` : "";
   switch (`${l.agent}:${l.status}`) {
-    case "Director:air": {
-      const reason = l.text.split(": ").slice(1).join(": ");
-      return { dot: "ok", title: seg ? `Aired as ${SLOT_LABEL[seg.slot].toLowerCase()}` : "Took it to air", sub: meta(reason || l.mode) };
-    }
+    case "Director:air":
+      return { dot: "ok", title: seg ? `Aired ${prettyHeadline(seg.moment.headline)} as ${SLOT_LABEL[seg.slot].toLowerCase()}` : l.text.split(": ")[0].replace(/^AIR /, "Took ") };
     case "Analyst:draft":
-      return { dot: "", title: `Drafted the insight${attempt}`, sub: meta(`${l.mode} · ${l.ms} ms`) };
+      return { dot: "", title: `Drafted${attempt}: “${l.text}”` };
     case "Verifier:approved":
-      return {
-        dot: "ok",
-        title: l.checked && l.checked.length > 0 ? `All ${l.checked.length} claims matched match data` : "Nothing to check",
-        sub: meta(`${l.mode} · ${l.ms} ms`),
-        keys: l.checked?.map((c) => c[1]),
-      };
+      return { dot: "ok", title: l.checked && l.checked.length > 0 ? `${l.checked.length} of ${l.checked.length} claims matched the data` : "Nothing to check" };
     case "Verifier:rejected":
-      return { dot: "bad", title: `Blocked the draft${attempt}`, sub: meta(`${l.mode} · ${l.ms} ms`), codes: l.text.split("; ") };
+      return { dot: "bad", title: `Blocked a draft${attempt}: ${l.text}` };
     case "Graphics:ok": {
       const [slot, ...rest] = l.text.split(": ");
       const label = SLOT_LABEL[slot as Segment["slot"]] ?? slot;
-      return { dot: "ok", title: `Built the ${label.toLowerCase()} “${rest.join(": ").split(" | ")[0]}”`, sub: meta(`${l.mode} · ${l.ms} ms`) };
+      return { dot: "ok", title: `Built the ${label.toLowerCase()} “${rest.join(": ").split(" | ")[0]}”` };
     }
     case "Commentator:ok":
-      return { dot: "ok", title: `Commentary voiced in ${langs.map((x) => x.toUpperCase()).join(", ")}`, sub: meta(`${l.mode} · ${l.ms} ms`) };
-    case "Producer:request":
-      return { dot: "", title: `Talkback: “${l.text}”`, sub: meta("you") };
+      return { dot: "ok", title: `Voiced in ${langs.map((x) => x.toUpperCase()).join(" and ")}` };
     default:
-      return { dot: l.status === "fallback" || l.status === "drop" || l.status === "discarded" ? "warn" : "", title: l.text, sub: meta(`${l.status} · ${l.mode}`) };
+      return { dot: l.status === "fallback" || l.status === "drop" || l.status === "discarded" ? "warn" : "", title: l.text };
   }
 }
 
-export function Timeline({ row, langs }: { row: RundownRow; langs: string[] }) {
-  const steps = row.lines.map((l) => ({ key: l.seq, ...stepOf(l, row.seg, langs) })).reverse();
+/* ---------- On air now ---------- */
+
+const STAGES: Partial<Record<ConsoleLine["agent"], { label: string; cls: string }>> = {
+  Director: { label: "Picked", cls: "d" },
+  Analyst: { label: "Drafted", cls: "a" },
+  Verifier: { label: "Verified", cls: "v" },
+  Graphics: { label: "Graphic", cls: "g" },
+  Commentator: { label: "Voiced", cls: "o" },
+};
+
+const fmtMs = (ms: number) => (ms < 95 ? `${Math.round(ms)} ms` : `${(ms / 1000).toFixed(1)} s`);
+
+/**
+ * Time to air split by when each agent's last console line reached this browser. Stages can overlap
+ * on the server (Graphics runs alongside the Analyst), so each step is the wait since the previous one.
+ */
+function pathToAir(row: RundownRow) {
+  const start = row.moment?.receivedAt;
+  if (!row.seg || !start) return null;
+  const last = new Map<string, number>();
+  for (const l of row.lines) if (STAGES[l.agent] && l.receivedAt) last.set(l.agent, l.receivedAt);
+  const marks = [...last].sort((x, y) => x[1] - y[1]);
+  let prev = start;
+  const stages = marks.map(([agent, t]) => {
+    const ms = Math.max(0, t - prev);
+    prev = Math.max(prev, t);
+    return { ...STAGES[agent as ConsoleLine["agent"]]!, ms };
+  });
+  return { stages, total: Math.max(0, row.seg.receivedAt - start) };
+}
+
+function PathToAir({ row }: { row: RundownRow }) {
+  const path = pathToAir(row);
+  if (!path) return null;
+  const { stages, total } = path;
   return (
-    <ol className="tl">
-      {steps.map((s) => (
-        <li key={s.key}>
-          <i className={`d ${s.dot}`} />
-          <div>
-            <b>{s.title}</b>
-            <span>{s.sub}</span>
-            {s.codes?.map((c, i) => (
-              <code key={i} className="chip bad">
-                {c}
-              </code>
+    <div className="sect">
+      <div className="hd">
+        <span className="eyebrow">Path to air</span>
+        <b>{fmtMs(total)}</b>
+      </div>
+      {stages.length > 0 && (
+        <>
+          <div className="path" style={{ gridTemplateColumns: stages.map((s) => `${Math.max(s.ms, total * 0.025, 1)}fr`).join(" ") }}>
+            {stages.map((s, i) => (
+              <i key={i} className={s.cls} />
             ))}
-            {s.keys && s.keys.length > 0 && (
-              <span className="keys">
-                {[...new Set(s.keys)].slice(0, 6).map((k) => (
-                  <code key={k} className="chip">
-                    {k}
-                  </code>
-                ))}
-              </span>
-            )}
           </div>
-        </li>
-      ))}
-      {row.moment && (
-        <li>
-          <i className="d" />
-          <div>
-            <b>{row.moment.kind === "talkback" ? "Talkback request queued" : "Moment detected"}</b>
-            <span>
-              Moment detector · {row.moment.clock} · priority {row.moment.priority.toFixed(2)}
-            </span>
+          <div className="stages" style={{ gridTemplateColumns: `repeat(${stages.length}, minmax(0, 1fr))` }}>
+            {stages.map((s, i) => (
+              <div key={i}>
+                <b>{fmtMs(s.ms)}</b>
+                {s.label}
+              </div>
+            ))}
           </div>
-        </li>
+        </>
       )}
-    </ol>
+    </div>
   );
 }
 
-export function OnAirCard({ row, live, langs, onOpen }: { row: RundownRow | null; live: boolean; langs: string[]; onOpen: (seg: Segment) => void }) {
-  const seg = row?.seg ?? null;
-  const c = seg ? claimsOf(seg) : null;
+function Claims({ row, onOpen }: { row: RundownRow; onOpen: (seg: Segment) => void }) {
+  const seg = row.seg!;
+  const ok = [...new Set(seg.verification.checked.map((c) => c[0]))];
+  const drafts = row.lines.filter((l) => l.agent === "Verifier" && l.status === "rejected").flatMap((l) => l.text.split("; "));
+  const blocked = [...seg.verification.violations, ...drafts];
+  const judge = row.lines.find((l) => l.agent === "Verifier" && l.status === "approved")?.mode;
   return (
-    <section className="card seg">
-      <div className="card-h">
-        <h2>{live ? "On air now" : "Last on air"}</h2>
-        {seg &&
-          (seg.verification.ok ? (
-            <button type="button" className="pill ok" onClick={() => onOpen(seg)} title="Open the fact inspector">
-              Verified
-            </button>
-          ) : (
-            <button type="button" className="pill bad" onClick={() => onOpen(seg)}>
-              Unverified
-            </button>
-          ))}
+    <div className="sect">
+      <div className="hd">
+        <span className="eyebrow">
+          Claims · {ok.length} checked{blocked.length > 0 && `, ${blocked.length} blocked`}
+        </span>
+        <button type="button" className="linkbtn" onClick={() => onOpen(seg)} title="Open the fact inspector">
+          {judge ? `${judge.replace("+", " + ")} · ` : ""}evidence
+        </button>
       </div>
-      {!row || !seg ? (
-        <p className="empty">Nothing has aired yet. The Director takes the first moment as soon as the detector flags one.</p>
+      {ok.length + blocked.length === 0 ? (
+        <p className="muted sm">This segment makes no numeric or named claims.</p>
       ) : (
-        <div className="seg-body">
-          <div className="seg-sum">
-            <div className="kv">
-              <span>Moment</span>
-              <b title={row.head}>{row.head}</b>
-            </div>
-            <div className="kv">
-              <span>Graphic</span>
-              <b>
-                {SLOT_LABEL[seg.slot]}
-                {seg.breaking ? " · breaking" : ""}
-              </b>
-            </div>
-            <div className="kv">
-              <span>Claims checked</span>
-              <b>{c!.total === 0 ? "None to check" : `${c!.ok} of ${c!.total}`}</b>
-            </div>
-            <div className="kv">
-              <span>Time to air</span>
-              <b>{fmtSecs(row.toAir)}</b>
-            </div>
-          </div>
-          <p className="said">{highlight(seg.insight, seg.verification.checked.map((x) => x[0]))}</p>
-          <h3>Timeline</h3>
-          <Timeline row={row} langs={langs} />
+        <div className="chips">
+          {ok.map((t) => (
+            <span key={t} className="chip ok">
+              <Check />
+              <span className="v">{t}</span>
+            </span>
+          ))}
+          {blocked.map((v, i) => {
+            const { token, why } = parseViolation(v);
+            return (
+              <span key={`b${i}`} className="chip no" title={v}>
+                <Cross />
+                <s>{token}</s>
+                {why && <span className="why-in">{why}</span>}
+              </span>
+            );
+          })}
         </div>
       )}
+    </div>
+  );
+}
+
+function RowList({ rows, empty, tag }: { rows: RundownRow[]; empty: string; tag: (r: RundownRow) => ReactNode }) {
+  if (rows.length === 0) return <p className="muted sm">{empty}</p>;
+  return (
+    <div className="next">
+      {rows.map((r) => (
+        <div key={r.id}>
+          <span className="t">{r.clock || "–"}</span>
+          <span className="ell" title={r.head}>
+            {r.head}
+          </span>
+          {tag(r)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface OnAirProps {
+  row: RundownRow | null;
+  rows: RundownRow[];
+  live: boolean;
+  names: Record<Side, string>;
+  onOpen: (seg: Segment) => void;
+}
+
+export function OnAirCard({ row, rows, live, names, onOpen }: OnAirProps) {
+  const seg = row?.seg ?? null;
+  const upNext = rows.filter((r) => !r.seg && r.status.cls !== "muted").reverse().slice(0, 3);
+  const earlier = rows.filter((r) => r.seg && r !== row).slice(0, 4);
+  return (
+    <section className="panel onair">
+      <div className="ph">
+        {live ? (
+          <span className="tally">
+            <i />
+            ON AIR
+          </span>
+        ) : (
+          <span className="tally off">{seg ? "LAST ON AIR" : "STANDBY"}</span>
+        )}
+        <h2>{seg ? `${SLOT_LABEL[seg.slot]}${seg.breaking ? " · breaking" : ""}` : "Standing by"}</h2>
+        {seg && <span className="r">since {seg.aired_clock}</span>}
+      </div>
+      <div className="onair-body">
+        {!row || !seg ? (
+          <div className="onair-lead">
+            <span className="eyebrow">Nothing aired yet</span>
+            <h3>Watching the feed</h3>
+            <p className="said">The Director takes the first moment to air as soon as the detector flags one.</p>
+          </div>
+        ) : (
+          <>
+            <div className="onair-lead">
+              <span className="eyebrow">
+                {seg.moment.kind.replaceAll("_", " ")} · {names[seg.moment.team]} · {seg.moment.clock}
+              </span>
+              <h3>{row.head}</h3>
+              <p className="said">{highlight(seg.insight, seg.verification.checked.map((x) => x[0]))}</p>
+            </div>
+            <PathToAir row={row} />
+            <Claims row={row} onOpen={onOpen} />
+          </>
+        )}
+        <div className="sect">
+          <div className="hd">
+            <span className="eyebrow">Up next</span>
+          </div>
+          <RowList rows={upNext} empty="Nothing waiting. Detected moments queue here for the Director." tag={(r) => <span className={`tag${r.status.busy ? " q" : ""}`}>{r.status.busy ? "In production" : r.status.label}</span>} />
+        </div>
+        <div className="sect">
+          <div className="hd">
+            <span className="eyebrow">Earlier</span>
+          </div>
+          <RowList rows={earlier} empty="Aired segments collect here." tag={(r) => <span className="tag">{r.seg!.breaking ? "Breaking" : SLOT_LABEL[r.seg!.slot]}</span>} />
+        </div>
+      </div>
     </section>
   );
 }
 
-/* ---------- Talkback: producer requests and the crew's answers ---------- */
+/* ---------- Talkback and crew: the producer's intercom ---------- */
 
-export function TalkbackCard({ rows }: { rows: RundownRow[] }) {
-  const asks = rows.filter((r) => r.lines.some((l) => l.agent === "Producer" && l.status === "request"));
-  const pending = asks.filter((r) => !r.seg && r.status.cls !== "muted").length;
-  return (
-    <section className="card talk">
-      <div className="card-h">
-        <h2>Talkback</h2>
-        {pending > 0 ? <span className="pill neutral">{pending} in progress</span> : <span className="muted sm">Press / to ask</span>}
+function Reply({ row }: { row: RundownRow }) {
+  const work = row.lines.filter((l) => l.agent !== "Producer");
+  const last = work[work.length - 1];
+  if (row.seg) {
+    const team = row.seg.moment.team;
+    const n = row.seg.verification.checked.length;
+    return (
+      <div className="q1">
+        <span className="av crew">A</span>
+        <div>
+          <div className="who">
+            <b>Analyst</b>on air {row.seg.aired_clock}
+          </div>
+          <p className="clamp">{factChips(row.seg.insight, row.seg.verification.checked, team)}</p>
+          <span className={`status${row.seg.verification.ok ? "" : " bad"}`}>
+            {row.seg.verification.ok ? <Check /> : <Cross />}
+            Aired as {SLOT_LABEL[row.seg.slot].toLowerCase()} · {row.seg.verification.ok ? `${n} claim${n === 1 ? "" : "s"} verified` : "unverified"}
+          </span>
+        </div>
       </div>
-      <div className="talk-body">
-        {asks.length === 0 && <p className="empty">Ask the crew from the bar above. The answer airs next as a verified graphic.</p>}
-        {asks
-          .slice()
-          .reverse()
-          .map((r) => {
-            const ask = r.lines.find((l) => l.agent === "Producer")!;
-            const work = r.lines.filter((l) => l.agent !== "Producer");
-            const last = work[work.length - 1];
+    );
+  }
+  if (row.status.cls === "muted") {
+    return (
+      <div className="q1">
+        <span className="av crew">D</span>
+        <div>
+          <div className="who">
+            <b>Director</b>dropped
+          </div>
+          <span className="status bad">{last?.text ?? "Not aired"}</span>
+        </div>
+      </div>
+    );
+  }
+  const doing =
+    !last || last.agent === "Director"
+      ? "Analyst drafting"
+      : last.agent === "Analyst"
+        ? "Verifying the draft"
+        : last.agent === "Verifier" && last.status === "rejected"
+          ? "Blocked, redrafting"
+          : last.agent === "Verifier"
+            ? "Verified, voicing it"
+            : `${last.agent} working`;
+  return (
+    <div className="q1">
+      <span className="av crew">{(last?.agent ?? "Director")[0]}</span>
+      <div>
+        <div className="who">
+          <b>{last?.agent ?? "Director"}</b>
+          {last ? last.clock : "queued"}
+        </div>
+        <span className="status w">
+          <span className="dots">
+            <i />
+            <i />
+            <i />
+          </span>
+          {last ? doing : "Queued for the Director"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+const AGENT_NAMES: ConsoleLine["agent"][] = ["Director", "Analyst", "Verifier", "Graphics", "Commentator"];
+
+interface Tag {
+  label: string;
+  cls: "on" | "busy" | "";
+}
+
+/** Live for the Director while a graphic holds; agents with work left on the segment in production are busy. */
+function crewTag(agent: ConsoleLine["agent"], rows: RundownRow[], onAir: boolean, paused: boolean): Tag {
+  if (paused) return { label: "Paused", cls: "" };
+  if (agent === "Director") return onAir ? { label: "Live", cls: "on" } : { label: "Idle", cls: "" };
+  const busy = rows.find((r) => r.status.busy);
+  if (!busy) return { label: "Idle", cls: "" };
+  const ls = busy.lines;
+  const lastIdx = (pred: (l: ConsoleLine) => boolean) => ls.reduce((n, l, i) => (pred(l) ? i : n), -1);
+  const draft = lastIdx((l) => l.agent === "Analyst" && l.status === "draft");
+  const verdict = lastIdx((l) => l.agent === "Verifier");
+  const approved = lastIdx((l) => l.agent === "Verifier" && l.status === "approved");
+  const done = (a: string) => ls.some((l) => l.agent === a);
+  if (agent === "Analyst" && (draft < 0 || (verdict > draft && approved < 0))) return { label: "Drafting", cls: "busy" };
+  if (agent === "Verifier" && draft >= 0 && draft > verdict) return { label: "Checking", cls: "busy" };
+  if (agent === "Graphics" && !done("Graphics")) return { label: "Building", cls: "busy" };
+  if (agent === "Commentator" && approved >= 0 && !done("Commentator")) return { label: "Voicing", cls: "busy" };
+  return { label: "Idle", cls: "" };
+}
+
+interface TalkbackProps {
+  rows: RundownRow[];
+  lines: ConsoleLine[];
+  init: InitMsg;
+  live: boolean;
+  onAir: boolean;
+  paused: boolean;
+  inputRef: RefObject<HTMLInputElement | null>;
+  onSend: (text: string) => void;
+}
+
+export function TalkbackCard({ rows, lines, init, live, onAir, paused, inputRef, onSend }: TalkbackProps) {
+  const [ask, setAsk] = useState("");
+  const asks = rows.filter((r) => r.lines.some((l) => l.agent === "Producer" && l.status === "request"));
+  const lastByAgent = new Map<string, ConsoleLine>();
+  for (const l of lines) lastByAgent.set(l.agent, l);
+  const [model, provider] = describeMode(init.mode);
+  const send = (text: string) => {
+    const t = text.trim();
+    if (!t || !live) return;
+    onSend(t);
+    setAsk("");
+  };
+  const h = init.lineups.home.players[9]?.name;
+  const a = init.lineups.away.players[9]?.name;
+  const ideas = [h && `Give me a stat on ${h}`, "Who has been most dangerous?", a && `How is ${a} playing?`].filter(Boolean) as string[];
+  return (
+    <section className="panel talk">
+      <div className="tf">
+        <div className="ph">
+          <h2>Talkback</h2>
+          <span className="r">Answers air only if they pass the checks</span>
+        </div>
+        <div className="msgs">
+          {asks.length === 0 && <p className="muted sm hint">Ask the crew for a stat or an angle. The answer airs next as a verified graphic.</p>}
+          {asks.reverse().map((r) => {
+            const q = r.lines.find((l) => l.agent === "Producer")!;
             return (
               <div key={r.id} className="thread">
-                <div className="msg me">
-                  <b>You · {ask.clock}</b>
-                  {ask.text}
+                <div className="q1">
+                  <span className="av you">You</span>
+                  <div>
+                    <div className="who">
+                      <b>You</b>
+                      {q.clock}
+                    </div>
+                    <p>{q.text}</p>
+                  </div>
                 </div>
-                {r.seg ? (
-                  <div className="msg crew">
-                    <b>
-                      Crew · on air {r.seg.aired_clock} · {SLOT_LABEL[r.seg.slot].toLowerCase()}
-                    </b>
-                    <span className="clamp">{highlight(r.seg.insight, r.seg.verification.checked.map((x) => x[0]))}</span>
-                  </div>
-                ) : r.status.cls === "muted" ? (
-                  <div className="msg crew">
-                    <b>Director · dropped</b>
-                    {last?.text}
-                  </div>
-                ) : (
-                  <div className="msg crew">
-                    <b>{last ? `${last.agent} · working` : "Director · queued"}</b>
-                    <span className="typing">
-                      <i />
-                      <i />
-                      <i />
-                    </span>
-                    {last && <em>{last.text}</em>}
-                  </div>
-                )}
+                <Reply row={r} />
               </div>
             );
           })}
+        </div>
+        <div className="sugg">
+          {ideas.map((t) => (
+            <button type="button" key={t} onClick={() => send(t)} disabled={!live}>
+              {t}
+            </button>
+          ))}
+        </div>
+        <form
+          className="compose"
+          onSubmit={(e) => {
+            e.preventDefault();
+            send(ask);
+            inputRef.current?.blur();
+          }}
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            value={ask}
+            onChange={(e) => setAsk(e.target.value)}
+            onKeyDown={(e) => e.key === "Escape" && e.currentTarget.blur()}
+            placeholder="Ask the crew…"
+            aria-label="Talkback to the crew"
+            maxLength={200}
+            disabled={!live}
+          />
+          <kbd>/</kbd>
+          <button type="submit" className="send" disabled={!live || !ask.trim()}>
+            Send
+          </button>
+        </form>
+      </div>
+      <div className="crew">
+        <div className="ph">
+          <h2>Crew</h2>
+          <span className="r" title={provider}>
+            {model} · {provider}
+          </span>
+        </div>
+        {AGENT_NAMES.map((name) => {
+          const l = lastByAgent.get(name);
+          const tag = crewTag(name, rows, onAir, paused);
+          const seg = l?.moment_id != null ? (rows.find((r) => r.id === l.moment_id)?.seg ?? null) : null;
+          return (
+            <div className="agent" key={name}>
+              <span className="av ag">{name[0]}</span>
+              <div title={l?.text}>
+                <b>{name}</b>
+                <span>{l ? stepOf(l, seg, init.langs).title : AGENTS.find((x) => x.name === name)!.role}</span>
+              </div>
+              <em className={`state ${tag.cls}`}>{tag.label}</em>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
+}
+
+/** The insight with each verified token as a mono chip, coloured by side when its fact key names one. */
+function factChips(text: string, checked: [string, string][], team: Side) {
+  const sideOf = new Map<string, Side | null>();
+  for (const [tok, key] of checked) if (tok && !sideOf.get(tok)) sideOf.set(tok, sideOfKey(key, team));
+  const toks = [...sideOf.keys()].sort((x, y) => y.length - x.length);
+  if (toks.length === 0) return text;
+  const re = new RegExp(`(${toks.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "g");
+  return text.split(re).map((part, i) => {
+    if (!sideOf.has(part)) return part;
+    const s = sideOf.get(part);
+    return (
+      <span key={i} className={`f${s ? ` ${sideClass(s)}` : ""}`}>
+        {part}
+      </span>
+    );
+  });
 }
 
 /* ---------- Crew ---------- */
@@ -344,10 +590,10 @@ export function CrewCard({ lines, paused, mode }: { lines: ConsoleLine[]; paused
   const lastByAgent = new Map<string, ConsoleLine>();
   for (const l of lines) lastByAgent.set(l.agent, l);
   return (
-    <section className="card">
-      <div className="card-h">
-        <h2>Crew</h2>
-        <span className={`pill ${mode === "offline" ? "warn" : "neutral"}`}>{mode === "offline" ? "Template tier" : mode}</span>
+    <section className="panel">
+      <div className="ph">
+        <h2>Agents</h2>
+        <span className="pill neutral">{describeMode(mode).join(" · ")}</span>
       </div>
       <table className="tbl crew-tbl">
         <thead>
@@ -392,8 +638,8 @@ export function VerifyLog({ rows, lines, onOpen }: { rows: RundownRow[]; lines: 
   const checked = aired.reduce((n, r) => n + r.seg!.verification.checked.length, 0);
   return (
     <div className="two">
-      <section className="card">
-        <div className="card-h">
+      <section className="panel">
+        <div className="ph">
           <h2>Aired segments</h2>
           <span className="muted sm">
             {aired.length} aired · {checked} claims checked
@@ -436,8 +682,8 @@ export function VerifyLog({ rows, lines, onOpen }: { rows: RundownRow[]; lines: 
           </table>
         )}
       </section>
-      <section className="card">
-        <div className="card-h">
+      <section className="panel">
+        <div className="ph">
           <h2>Verifier decisions</h2>
           <span className="muted sm">
             {decisions.filter((d) => d.status === "rejected").length} blocked · {decisions.filter((d) => d.status === "approved").length} passed
@@ -477,8 +723,8 @@ export function UpNext({ moments, queueIds, init }: { moments: Moment[]; queueId
   const waiting = new Set(queueIds);
   const queue = moments.filter((m) => waiting.has(m.id)).reverse();
   return (
-    <section className="card">
-      <div className="card-h">
+    <section className="panel">
+      <div className="ph">
         <h2>Up next</h2>
         <span className="muted sm">{queue.length} waiting</span>
       </div>

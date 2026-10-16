@@ -137,6 +137,8 @@ export interface ConsoleLine {
   attempt?: number;
   checked?: [string, string][];
   seq: number;
+  /** Client receive time, used to split time-to-air by stage. */
+  receivedAt: number;
 }
 
 export interface Scenario {

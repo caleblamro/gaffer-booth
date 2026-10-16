@@ -10,21 +10,33 @@ export const SLOT_LABEL: Record<Segment["slot"], string> = {
 /** Scenario titles are just the fixture, so the storyline label comes from the id. */
 export const storyline = (id: string) => (id === "classic" ? "Open game" : id.charAt(0).toUpperCase() + id.slice(1).replaceAll("_", " "));
 
-/** The UI palette is side-based: home is the accent, away the teal. */
+/** The UI palette is side-based: home is cobalt (--home), away tangerine (--away). */
 export const sideClass = (s: Side) => (s === "home" ? "h" : "a");
 
-/** Kit colours for the rendered picture: home in white, away in dark navy. */
-export const PICTURE_KITS: Record<Side, string> = { home: "#ffffff", away: "#0b2a4a" };
+export const other = (s: Side): Side => (s === "home" ? "away" : "home");
 
-/** Dark or light ink for a number printed on a shirt of this colour. */
-export function inkOn(hex: string): string {
-  const n = parseInt(hex.replace("#", ""), 16);
-  if (Number.isNaN(n)) return "#fff";
-  const lum = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
-  return lum > 0.6 ? "#0b2a4a" : "#ffffff";
-}
+/** Kit colours for the rendered picture and the radar, as theme tokens. */
+export const PICTURE_KITS: Record<Side, string> = { home: "var(--kit-home)", away: "var(--kit-away)" };
+
+/** Shirt-number ink for each side's kit. */
+export const KIT_INK: Record<Side, string> = { home: "var(--kit-home-ink)", away: "var(--kit-away-ink)" };
 
 export const claimsOf = (seg: Segment) => {
   const ok = seg.verification.checked.length;
   return { ok, total: ok + seg.verification.violations.length };
 };
+
+/** Which side a verified fact key belongs to, when the key says so; otherwise null. */
+export function sideOfKey(key: string, team: Side): Side | null {
+  if (/(^|_)home(_|$)/.test(key)) return "home";
+  if (/(^|_)away(_|$)/.test(key)) return "away";
+  if (key.startsWith("opp_")) return other(team);
+  if (key.startsWith("team_")) return team;
+  return null;
+}
+
+/** "number '0.83' not in evidence" → the blocked token and why. */
+export function parseViolation(v: string): { token: string; why: string } {
+  const m = v.match(/^\w+ '(.+)' (.+)$/);
+  return m ? { token: m[1], why: m[2] } : { token: v, why: "" };
+}

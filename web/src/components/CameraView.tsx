@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { GOALS, MARKINGS, VIEW_H, VIEW_W, projectLine, projectPolygon, projector, type Rig } from "../lib/camera";
 import { blendFrames, type Frame } from "../lib/positions";
-import { inkOn } from "../lib/labels";
+import { KIT_INK } from "../lib/labels";
 import type { Side } from "../types";
 
 interface Props {
@@ -66,8 +66,8 @@ export const CameraView = memo(function CameraView({ frame, rig, colors, thumb =
       <rect width={VIEW_W} height={VIEW_H} fill="var(--stand-0)" />
       {bowl && <polygon points={bowl} fill="var(--stand-2)" />}
       {stands.map((s, i) => s && <polygon key={i} points={s} fill="var(--stand-1)" />)}
-      {ground.map((g, i) => g && <polygon key={i} points={g} fill={i % 2 ? "var(--grass-a)" : "var(--grass-b)"} />)}
-      <g fill="none" stroke="var(--grass-line)" strokeWidth={thumb ? 4 : 2.2} strokeLinejoin="round">
+      {ground.map((g, i) => g && <polygon key={i} points={g} fill={i % 2 ? "var(--pitch-a)" : "var(--pitch-b)"} />)}
+      <g fill="none" stroke="var(--pitch-line)" strokeWidth={thumb ? 4 : 2.2} strokeLinejoin="round">
         {MARKINGS.map((m, i) => {
           const pts = projectLine(P, m);
           return pts && <polyline key={i} points={pts} />;
@@ -78,7 +78,7 @@ export const CameraView = memo(function CameraView({ frame, rig, colors, thumb =
         const post = projectLine(P, g.frame);
         return (
           <g key={i}>
-            {net && <polygon points={net} fill="rgba(255,255,255,.14)" />}
+            {net && <polygon points={net} fill="var(--net)" />}
             {post && <polyline points={post} fill="none" stroke="var(--chalk)" strokeWidth={thumb ? 5 : 3.2} />}
           </g>
         );
@@ -88,7 +88,7 @@ export const CameraView = memo(function CameraView({ frame, rig, colors, thumb =
         const w = Math.max(3, h * 0.3);
         return (
           <g key={d.id}>
-            <ellipse cx={foot![0]} cy={foot![1]} rx={w * 0.8} ry={w * 0.22} fill="rgba(0,0,0,.35)" />
+            <ellipse cx={foot![0]} cy={foot![1]} rx={w * 0.8} ry={w * 0.22} fill="var(--shade)" />
             {d.active && (
               <ellipse
                 cx={foot![0]}
@@ -101,23 +101,23 @@ export const CameraView = memo(function CameraView({ frame, rig, colors, thumb =
                 strokeDasharray={`${w * 0.25} ${w * 0.18}`}
               />
             )}
-            <rect x={foot![0] - w * 0.36} y={hip![1]} width={w * 0.72} height={foot![1] - hip![1]} rx={w * 0.2} fill="#101614" />
-            <rect x={foot![0] - w / 2} y={head![1] + h * 0.14} width={w} height={hip![1] - head![1] - h * 0.1} rx={w * 0.3} fill={colors[d.side]} stroke="rgba(11,42,74,.35)" strokeWidth={Math.max(0.5, w * 0.04)} />
-            <circle cx={head![0]} cy={head![1] + h * 0.06} r={h * 0.075} fill="#c9a98a" />
+            <rect x={foot![0] - w * 0.36} y={hip![1]} width={w * 0.72} height={foot![1] - hip![1]} rx={w * 0.2} fill="var(--shorts)" />
+            <rect x={foot![0] - w / 2} y={head![1] + h * 0.14} width={w} height={hip![1] - head![1] - h * 0.1} rx={w * 0.3} fill={colors[d.side]} stroke="var(--kit-edge)" strokeWidth={Math.max(0.5, w * 0.04)} />
+            <circle cx={head![0]} cy={head![1] + h * 0.06} r={h * 0.075} fill="var(--skin)" />
             {!thumb && h > 46 && (
-              <text x={foot![0]} y={head![1] + h * 0.42} fill={inkOn(colors[d.side])} textAnchor="middle" className="cam-num" style={{ fontSize: h * 0.2 }}>
+              <text x={foot![0]} y={head![1] + h * 0.42} fill={KIT_INK[d.side]} textAnchor="middle" className="cam-num" style={{ fontSize: h * 0.2 }}>
                 {d.number}
               </text>
             )}
           </g>
         );
       })}
-      {ball && <circle cx={ball[0]} cy={ball[1]} r={ballR} fill="#ffd43b" stroke="#0b2a4a" strokeWidth="1" />}
+      {ball && <circle cx={ball[0]} cy={ball[1]} r={ballR} fill="var(--ball)" stroke="var(--ball-edge)" strokeWidth="1" />}
       {!thumb && <rect width={VIEW_W} height={VIEW_H} fill="url(#cam-vignette)" />}
       <defs>
         <radialGradient id="cam-vignette" cx="50%" cy="60%" r="75%">
-          <stop offset="60%" stopColor="#000" stopOpacity="0" />
-          <stop offset="100%" stopColor="#000" stopOpacity="0.45" />
+          <stop offset="60%" stopColor="var(--vignette)" stopOpacity="0" />
+          <stop offset="100%" stopColor="var(--vignette)" stopOpacity="0.45" />
         </radialGradient>
       </defs>
     </svg>
