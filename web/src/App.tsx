@@ -297,9 +297,13 @@ function Live({ state, init, speed, setSpeed, lang, setLang, togglePause, onTalk
         togglePause();
       } else if (e.key === "/") {
         e.preventDefault();
-        setPage("live");
-        // The composer mounts with the live page, so focus after it renders.
-        requestAnimationFrame(() => askRef.current?.focus());
+        // Focus at once when the composer is already mounted, so the next keystrokes land in it;
+        // from another page it mounts with the live page, so focus after that render.
+        if (askRef.current) askRef.current.focus();
+        else {
+          setPage("live");
+          requestAnimationFrame(() => askRef.current?.focus());
+        }
       }
     };
     window.addEventListener("keydown", onKey);
