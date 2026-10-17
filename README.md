@@ -110,7 +110,7 @@ azd env set OPENROUTER_API_KEY "<your key>"   # optional; without it the crew ai
 azd up                                         # pick a subscription and region when asked
 ```
 
-`azd up` builds the container and pushes it to a Basic Azure Container Registry, then provisions the Container Apps environment and the app (0.5 vCPU, 1 GiB, 0 to 1 replica). The key is stored as a Container Apps secret. Only one replica runs, because each broadcast lives in the process holding its WebSocket. The first visit after an idle spell takes a few seconds while a replica starts.
+`azd up` builds the container in a Basic Azure Container Registry (no local Docker needed), then provisions the Container Apps environment and the app (0.5 vCPU, 1 GiB, 0 to 1 replica). The key is stored as a Container Apps secret. Only one replica runs, because each broadcast lives in the process holding its WebSocket. The first visit after an idle spell takes a few seconds while a replica starts.
 
 To run the crew on Microsoft Foundry instead (billed per token):
 
