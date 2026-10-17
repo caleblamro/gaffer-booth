@@ -10,3 +10,6 @@ services:
     host: containerapp
     docker:
       path: Dockerfile
+      # Build in Azure Container Registry, so deploying needs no local Docker (and no
+      # amd64 cross-build on Apple silicon).
+      remoteBuild: true
