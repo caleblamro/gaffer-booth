@@ -4,6 +4,8 @@
 
 Built for the Microsoft × Premier League **Inside the Game: Developer Hackathon**. All clubs, players and match data are synthetic.
 
+**Live demo:** https://ca-web-y3k3xiuoaq7zk.graymushroom-7d648f85.eastus.azurecontainerapps.io (free, no sign-in; the first visit after an idle spell takes a few seconds to wake up)
+
 ![Gaffer Booth live broadcast](docs/screenshot-live.png)
 
 ## What it does
@@ -59,7 +61,7 @@ Each scenario has a storyline (a comeback, a red card, a pressing collapse). The
 ## Microsoft technologies
 
 - **Microsoft Agent Framework**: every crew member is an `agent_framework.Agent` with structured outputs, and the Analyst uses function tools.
-- **Microsoft Foundry**: the model behind the crew, called through `FoundryChatClient` with keyless Entra ID auth.
+- **Microsoft Foundry**: the production model path, called through `FoundryChatClient` with keyless Entra ID auth (`azd env set GAFFER_FOUNDRY on`). The free live demo runs the same agents on a free OpenRouter model through the Agent Framework's OpenAI-compatible client.
 - **Azure Container Apps**: hosts the FastAPI and WebSocket app, provisioned with Bicep through `azd`.
 - **Azure Container Registry, Managed Identity, Log Analytics**.
 - **GitHub Copilot** was used while building.
